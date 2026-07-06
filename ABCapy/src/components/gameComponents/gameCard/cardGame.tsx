@@ -6,7 +6,7 @@ import {
   ImageSourcePropType,
 } from "react-native";
 import React from "react";
-import { styles } from "../gameComponents/cardGameStyle";
+import { styles } from "../../gameComponents/gameCard/cardGameStyle";
 
 type Props = {
   text: string;

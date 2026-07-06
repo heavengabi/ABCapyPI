@@ -7,7 +7,7 @@ import jogo1 from "../src/assets/images/gameImages/jogo1.png";
 import jogo2 from "../src/assets/images/gameImages/jogo2.png";
 import jogo3 from "../src/assets/images/gameImages/jogo3.png";
 import Capy1 from "../src/assets/images/gameImages/Capy1.png";
-import CardGame from "@/src/components/gameComponents/cardGame";
+import CardGame from "@/src/components/gameComponents/gameCard/cardGame";
 import Header from "@/src/components/Header/Header";
 
 const GamePages = () => {
