@@ -1,8 +1,8 @@
 import { Button } from "@/src/components/button";
 import React from "react";
-import { ImageBackground, SafeAreaView, View , Image, TextInput, Text} from "react-native";
+import { ImageBackground, View , Image,TextInput,  Text} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import logoImage from "../src/assets/images/small-logo.png";
-
 import BackgroundImage from "../src/assets/images/bg-login.png";
 import { router } from "expo-router";
 export default function Cadastro() {
@@ -12,13 +12,13 @@ export default function Cadastro() {
         <View style={{ flex: 1, justifyContent: "center", alignItems: "center",  }}>
           <Image source={logoImage} width={100} height={100}/>
           <View style={{ flexDirection: "column", gap: 20, marginTop: 20}}>
-            <Text style={{fontSize: 24, fontWeight: "bold", textAlign: "center"}}>Cadastro</Text>
-            <Text style={{textAlign: "center"}}>Junte-se à aventura com a Capy</Text>
-            <TextInput placeholder="Nome do responsável" />
-            <TextInput placeholder="Email" />
-            <TextInput placeholder="Senha" secureTextEntry />
-            <TextInput  placeholder="confirmar senha"/>
-            <Button title="Continuar" onPress={() => router.push("/")} />
+            <Text style={{fontSize: 24, fontWeight: "800", textAlign: "center"}}>CADASTRO</Text>
+            <Text style={{textAlign: "center", fontSize:12, fontWeight: "800"}}>Junte-se à aventura com a Capy</Text>
+            <TextInput placeholder="Nome do responsável" style={{height: 48, backgroundColor: "white", borderRadius: 15, padding: 12}}/>
+            <TextInput placeholder="Email" style={{height: 48, backgroundColor: "white", borderRadius: 15, padding: 12}}/>
+            <TextInput placeholder="Senha" secureTextEntry style={{height: 48, backgroundColor: "white", borderRadius: 15, padding: 12}}/>
+            <TextInput  placeholder="confirmar senha" style={{height: 48, backgroundColor: "white", borderRadius: 15, padding: 12}}/>
+            <Button title="Continuar" onPress={() => router.push("/escolhaCapivara")} />
             <Text style={{textAlign: "center"}}>Já tem uma conta? Entre</Text>
           </View>
         </View>
