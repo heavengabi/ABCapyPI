@@ -16,29 +16,37 @@ const DificultyPages = () => {
         style={styles.container}
         resizeMode="cover"
       >
-        <Header />
+        <Header
+          text="<"
+          onPress={() => { }}
+          headerStyle={{ backgroundColor: "#A8DAFF" }}
+          buttonStyle={{ backgroundColor: "#69B9F7" }}
+        />
+
+
         <View style={styles.containerImg}>
           <Text style={styles.textStyle}>O que vamos jogar?</Text>
           <Image source={Capy2} style={styles.imgStyle} />
         </View>
+
         <CardDificulty
           text="Fácil"
           image={dific1}
-          onPress={() => {}}
+          onPress={() => { }}
           style={{ backgroundColor: "#A8E6A3" }}
         />
 
         <CardDificulty
           text="Médio"
           image={dific2}
-          onPress={() => {}}
+          onPress={() => { }}
           style={{ backgroundColor: "#FFD97D" }}
         />
 
         <CardDificulty
           text="Difícil"
           image={dific3}
-          onPress={() => {}}
+          onPress={() => { }}
           style={{ backgroundColor: "#FF9E9E" }}
         />
       </ImageBackground>
