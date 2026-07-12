@@ -18,7 +18,12 @@ const GamePages = () => {
         style={styles.container}
         resizeMode="cover"
       >
-        <Header />
+        <Header
+          text="<"
+          onPress={() => { }}
+          headerStyle={{ backgroundColor: "#A8DAFF" }}
+          buttonStyle={{ backgroundColor: "#69B9F7" }}
+        />
 
         <View style={styles.containerImg}>
           <Text style={styles.textStyle}>O que vamos jogar?</Text>
