@@ -9,6 +9,7 @@ import {
   ViewStyle,
 } from "react-native";
 import React from "react";
+
 type Props = {
   text: string;
   image: ImageSourcePropType;

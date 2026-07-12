@@ -1,7 +1,7 @@
 import { View, Text, Image, ImageBackground, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import React from "react";
-import wallpaper from "../src/assets/images/gameImages/wallpaper.png";
+import wallpaper2 from "../src/assets/images/gameImages/wallpaper2.png";
 import Header from "@/src/components/Header/Header";
 import Capy2 from "../src/assets/images/gameImages/Capy2.png.png";
 import CardDificulty from "@/src/components/gameComponents/gameDificulty/cardDificulty";
@@ -12,7 +12,7 @@ const DificultyPages = () => {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ImageBackground
-        source={wallpaper}
+        source={wallpaper2}
         style={styles.container}
         resizeMode="cover"
       >

@@ -2,7 +2,7 @@ import { View, Image, Text, ImageBackground } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import React from "react";
 import { styles } from "../src/styles/gameStyles/gameStyles";
-import wallpaper from "../src/assets/images/gameImages/wallpaper.png";
+import wallpaper2 from "../src/assets/images/gameImages/wallpaper2.png";
 import jogo1 from "../src/assets/images/gameImages/jogo1.png";
 import jogo2 from "../src/assets/images/gameImages/jogo2.png";
 import jogo3 from "../src/assets/images/gameImages/jogo3.png";
@@ -14,7 +14,7 @@ const GamePages = () => {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ImageBackground
-        source={wallpaper}
+        source={wallpaper2}
         style={styles.container}
         resizeMode="cover"
       >

@@ -1,8 +1,7 @@
 
-import DificultyPages from "./dificultyPages";
-import GamePages from "./gamePages";
 
+import EqualityGame from "./equalityGame";
 
 export default function Index() {
-  return <GamePages />;
+  return <EqualityGame/>;
 }

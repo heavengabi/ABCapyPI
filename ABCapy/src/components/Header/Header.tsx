@@ -1,15 +1,28 @@
 import React from "react";
-import { View, Pressable, Text, StyleSheet, ViewStyle, StyleProp } from "react-native";
-
+import {
+  View,
+  Pressable,
+  Text,
+  StyleSheet,
+  ViewStyle,
+  StyleProp,
+} from "react-native";
 
 type Props = {
+  title?: string;
   text: string;
   onPress: () => void;
   headerStyle?: StyleProp<ViewStyle>;
   buttonStyle?: StyleProp<ViewStyle>;
 };
 
-const Header = ({ text, onPress, headerStyle, buttonStyle }: Props) => {
+const Header = ({
+  title,
+  text,
+  onPress,
+  headerStyle,
+  buttonStyle,
+}: Props) => {
   return (
     <View style={[styles.header, headerStyle]}>
       <Pressable
@@ -18,6 +31,8 @@ const Header = ({ text, onPress, headerStyle, buttonStyle }: Props) => {
       >
         <Text style={styles.btnText}>{text}</Text>
       </Pressable>
+
+      <Text style={styles.title}>{title}</Text>
     </View>
   );
 };
@@ -27,8 +42,8 @@ export default Header;
 const styles = StyleSheet.create({
   header: {
     height: 70,
-    justifyContent: "center",
-    alignItems: "flex-start",
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 20,
   },
 
@@ -41,9 +56,17 @@ const styles = StyleSheet.create({
   },
 
   btnText: {
-    color: "white",
-    fontSize: 22,
+    color: "#FFF",
+    fontSize: 25,
     fontWeight: "bold",
-    marginRight: 2,
+    transform: [{ translateY: -1 }], // sobe 1px
+  },
+
+  title: {
+    marginLeft: 60,
+    color: "#FFF",
+    textTransform: "uppercase",
+    fontSize: 20,
+    fontWeight: "bold",
   },
 });
