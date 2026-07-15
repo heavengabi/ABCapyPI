@@ -8,6 +8,7 @@ import CardDificulty from "@/src/components/gameComponents/gameDificulty/cardDif
 import dific1 from "../src/assets/images/gameImages/dific1.png";
 import dific2 from "../src/assets/images/gameImages/dific2.png";
 import dific3 from "../src/assets/images/gameImages/dific3.png";
+
 const DificultyPages = () => {
   return (
     <SafeAreaView style={{ flex: 1 }}>

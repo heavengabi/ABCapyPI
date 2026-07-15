@@ -1,7 +1,4 @@
-
-
-import EqualityGame from "./equalityGame";
-
+import HomePage from "./homePage";
 export default function Index() {
-  return <EqualityGame/>;
+  return <HomePage />;
 }
