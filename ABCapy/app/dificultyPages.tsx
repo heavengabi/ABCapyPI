@@ -17,22 +17,21 @@ const DificultyPages = () => {
     let pathname = "";
 
     switch (game) {
-      case "equality":
+      case "equalityGame":
         pathname = "/equalityGame";
         break;
 
-      case "memory":
+      case "memoryGame":
         pathname = "/memoryGame";
         break;
 
-      case "sequencing":
+      case "sequencingGame":
         pathname = "/sequencingGame";
         break;
 
       default:
         pathname = "/equalityGame";
     }
-
     router.push({
       pathname: pathname as any,
       params: {
@@ -50,7 +49,7 @@ const DificultyPages = () => {
       >
         <Header
           text="<"
-          onPress={() => {}}
+          onPress={() => { }}
           headerStyle={{ backgroundColor: "#A8DAFF" }}
           buttonStyle={{ backgroundColor: "#69B9F7" }}
         />
