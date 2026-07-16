@@ -8,7 +8,39 @@ import CardDificulty from "@/src/components/gameComponents/gameDificulty/cardDif
 import dific1 from "../src/assets/images/gameImages/dific1.png";
 import dific2 from "../src/assets/images/gameImages/dific2.png";
 import dific3 from "../src/assets/images/gameImages/dific3.png";
+import { router, useLocalSearchParams } from "expo-router";
+
 const DificultyPages = () => {
+  const { game } = useLocalSearchParams();
+
+  const goToGame = (difficulty: "facil" | "medio" | "dificil") => {
+    let pathname = "";
+
+    switch (game) {
+      case "equality":
+        pathname = "/equalityGame";
+        break;
+
+      case "memory":
+        pathname = "/memoryGame";
+        break;
+
+      case "sequencing":
+        pathname = "/sequencingGame";
+        break;
+
+      default:
+        pathname = "/equalityGame";
+    }
+
+    router.push({
+      pathname: pathname as any,
+      params: {
+        difficulty,
+      },
+    });
+  };
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ImageBackground
@@ -18,35 +50,34 @@ const DificultyPages = () => {
       >
         <Header
           text="<"
-          onPress={() => { }}
+          onPress={() => {}}
           headerStyle={{ backgroundColor: "#A8DAFF" }}
           buttonStyle={{ backgroundColor: "#69B9F7" }}
         />
 
-
         <View style={styles.containerImg}>
-          <Text style={styles.textStyle}>O que vamos jogar?</Text>
+          <Text style={styles.textStyle}>Escolha a dificuldade</Text>
           <Image source={Capy2} style={styles.imgStyle} />
         </View>
 
         <CardDificulty
           text="Fácil"
           image={dific1}
-          onPress={() => { }}
+          onPress={() => goToGame("facil")}
           style={{ backgroundColor: "#A8E6A3" }}
         />
 
         <CardDificulty
           text="Médio"
           image={dific2}
-          onPress={() => { }}
+          onPress={() => goToGame("medio")}
           style={{ backgroundColor: "#FFD97D" }}
         />
 
         <CardDificulty
           text="Difícil"
           image={dific3}
-          onPress={() => { }}
+          onPress={() => goToGame("dificil")}
           style={{ backgroundColor: "#FF9E9E" }}
         />
       </ImageBackground>

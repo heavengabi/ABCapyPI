@@ -9,6 +9,7 @@ import jogo3 from "../src/assets/images/gameImages/jogo3.png";
 import Capy1 from "../src/assets/images/gameImages/Capy1.png";
 import CardGame from "@/src/components/gameComponents/gameCard/cardGame";
 import Header from "@/src/components/Header/Header";
+import { router } from "expo-router";
 
 const GamePages = () => {
   return (
@@ -33,19 +34,40 @@ const GamePages = () => {
         <CardGame
           text="Siga a ordem"
           image={jogo1}
-          onPress={() => console.log("clicou")}
+          onPress={() =>
+            router.push({
+              pathname: "/dificultyPages",
+              params: {
+                game: "sequence",
+              },
+            })
+          }
         />
 
         <CardGame
           text="Jogo da memória"
           image={jogo2}
-          onPress={() => console.log("clicou")}
+          onPress={() =>
+            router.push({
+              pathname: "/dificultyPages",
+              params: {
+                game: "memory",
+              },
+            })
+          }
         />
 
         <CardGame
           text="Jogo do igual"
           image={jogo3}
-          onPress={() => console.log("clicou")}
+          onPress={() =>
+            router.push({
+              pathname: "/dificultyPages",
+              params: {
+                game: "equality",
+              },
+            })
+          }
         />
       </ImageBackground>
     </SafeAreaView>
