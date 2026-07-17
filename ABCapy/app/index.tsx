@@ -16,8 +16,8 @@ export default function Login() {
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
        <Image source={LogoImage} /> 
       <View style={{ flexDirection: "column", gap: 20, marginTop: 20 }}>
-        <Button title="CADASTRAR" onPress={() => router.push("/cadastro")} />
-        <Button title="LOGIN" onPress={() => router.push("/login")}  style={{backgroundColor: "white", borderColor: "#93CCF7", borderWidth: 3}} textStyle={{color: "#93CCF7"}} />
+        <Button title="CADASTRAR" onPress={() => router.push("/Register")} />
+        <Button title="LOGIN" onPress={() => router.push("/SignUpParent")}  style={{backgroundColor: "white", borderColor: "#93CCF7", borderWidth: 3}} textStyle={{color: "#93CCF7"}} />
       </View>   
 
     </View>

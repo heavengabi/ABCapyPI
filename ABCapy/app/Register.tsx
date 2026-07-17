@@ -12,15 +12,14 @@ export default function Cadastro() {
         <View style={{ flex: 1, justifyContent: "center", alignItems: "center",  }}>
           <Image source={logoImage} width={100} height={100}/>
           <View style={{ flexDirection: "column", gap: 20, marginTop: 20}}>
-            <Text style={{fontSize: 24, fontWeight: "800", textAlign: "center"}}>LOGIN</Text>
-            <Text style={{textAlign: "center", fontSize:12, fontWeight: "800"}}>Entre para continuar sua jornada!</Text>
-           
+            <Text style={{fontSize: 24, fontWeight: "800", textAlign: "center"}}>CADASTRO</Text>
+            <Text style={{textAlign: "center", fontSize:12, fontWeight: "800"}}>Junte-se à aventura com a Capy</Text>
+            <TextInput placeholder="Nome do responsável" style={{height: 48, backgroundColor: "white", borderRadius: 15, padding: 12}}/>
             <TextInput placeholder="Email" style={{height: 48, backgroundColor: "white", borderRadius: 15, padding: 12}}/>
             <TextInput placeholder="Senha" secureTextEntry style={{height: 48, backgroundColor: "white", borderRadius: 15, padding: 12}}/>
-            
-            <Button title="Continuar" onPress={() => router.push("/escolhaCapivara")} />
-            <Text style={{textAlign: "center"}}>Não tem uma conta? Cadastre-se</Text>
-            <Text style={{textAlign: "center"}}>Esqueci minha senha</Text>
+            <TextInput  placeholder="confirmar senha"  secureTextEntry style={{height: 48, backgroundColor: "white", borderRadius: 15, padding: 12}}/>
+            <Button title="Continuar" onPress={() => router.push("/CharacterSelection")} />
+            <Text style={{textAlign: "center"}}>Já tem uma conta? Entre</Text>
           </View>
         </View>
       </ImageBackground>
