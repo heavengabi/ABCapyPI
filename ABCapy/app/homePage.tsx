@@ -12,13 +12,12 @@ import HomeCard from "@/src/components/homeComponents/HomeCard";
 import capyHome from "../src/assets/images/homeImages/capyHome.png";
 import gradiente from "../src/assets/images/homeImages/gradiente.png";
 import { router } from "expo-router";
-import speechBubble from "../src/assets/images/homeImages/speechBubble.png"
-import book from "../src/assets/images/homeImages/book.png"
-import estrela from "../src/assets/images/homeImages/estrela.png"
-import perfil from "../src/assets/images/homeImages/perfil.png"
-import globo from "../src/assets/images/homeImages/globo.png"
-import castelo from "../src/assets/images/homeImages/castelo.png"
-import menu from "../src/assets/images/homeImages/menu.png"
+import speechBubble from "../src/assets/images/homeImages/speechBubble.png";
+import book from "../src/assets/images/homeImages/book.png";
+import estrela from "../src/assets/images/homeImages/estrela.png";
+import Footer from "@/src/components/Footer/Footer";
+import menu from "../src/assets/images/homeImages/menu.png";
+
 const HomePage = () => {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#85ccffc9" }}>
@@ -26,7 +25,7 @@ const HomePage = () => {
         <Text style={styles.texto}>Olá!</Text>
         <Image source={capyHome} style={styles.capy} />
 
-        <Pressable style={styles.menuButton} onPress={() => { }}>
+        <Pressable style={styles.menuButton} onPress={() => {}}>
           <Image source={menu} style={styles.menuIcon} />
         </Pressable>
       </ImageBackground>
@@ -53,22 +52,7 @@ const HomePage = () => {
         />
       </View>
 
-      <View style={styles.footerBar}>
-        <View style={styles.footerBar}>
-          <Pressable style={styles.footerButton} onPress={() => { }}>
-            <Image source={globo} style={styles.icon} />
-          </Pressable>
-
-          <Pressable style={styles.footerButton} onPress={() => { }}>
-            <Image source={castelo} style={styles.icon} />
-          </Pressable>
-
-          <Pressable style={styles.footerButton} onPress={() => { }}>
-            <Image source={perfil} style={styles.icon} />
-          </Pressable>
-        </View>
-
-      </View>
+      <Footer />
     </SafeAreaView>
   );
 };
@@ -123,24 +107,6 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
 
-  footerBar: {
-    height: 70,
-    backgroundColor: "#FFF",
-    flexDirection: "row",
-    gap: 30,
-    alignItems: "center",
-    justifyContent: "center"
-  },
-
-  footerButton: {
-    padding: 10,
-  },
-
-  icon: {
-    width: 28,
-    height: 28,
-  },
-
   menuButton: {
     position: "absolute",
     top: 15,
@@ -152,6 +118,5 @@ const styles = StyleSheet.create({
     width: 31,
     height: 31,
     resizeMode: "contain",
-  }
+  },
 });
-
