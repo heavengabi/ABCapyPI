@@ -1,6 +1,6 @@
 import React from "react";
 import { Pressable, StyleProp, StyleSheet, Text, ViewStyle, TextStyle} from "react-native";
-import { Themes } from "../global";
+import { Themes } from "../../global";
 import { ViewProps } from "react-native-svg/lib/typescript/fabric/utils";
 
 type ButtonProps = {

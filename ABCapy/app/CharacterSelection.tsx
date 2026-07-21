@@ -1,7 +1,8 @@
-import { Button } from '@/src/components/button';
+import { Button } from '@/src/components/ui/button';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function CharacterSelection() {
   const [personagem, setPersonagem] = useState('sabida');
@@ -20,7 +21,7 @@ export default function CharacterSelection() {
   ];
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    < SafeAreaView   style={styles.container}>
       
       
       <Text style={styles.titulo}>Escolha seu Personagem</Text>
@@ -74,9 +75,9 @@ export default function CharacterSelection() {
      
        <View style={{ flexDirection: "column", gap: 20, marginTop: 20 }}>
               
-              <Button title="Continuar" onPress={() => router.push("/ChildName")}  style={{backgroundColor: "white", borderColor: "#93CCF7", borderWidth: 3}} textStyle={{color: "#93CCF7"}} />
+              <Button title="Continuar" onPress={() => router.push("/ChildName")}  />
             </View>   
-    </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -85,6 +86,8 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: 'center',
     backgroundColor: '#E2F2FD',
+    flex: 1,
+    gap:16
   },
   titulo: {
     fontSize: 18,
