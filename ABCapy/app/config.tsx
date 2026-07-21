@@ -1,7 +1,7 @@
 import React from "react";
 import { ScrollView, Text, View, StyleSheet, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
+import { Button } from "@/src/components/ui/button";
 const colors = [
     { color: "#93CCF7", name: "Azul" },
     { color: "#FF847A", name: "Vermelho" },
@@ -40,16 +40,40 @@ export default function ConfigPage() {
                         </View>
                     </View>
                 </View>
-                 <View style={style.optionsContainer}>
+                 <View style={style.container}>
+                            <Text style={{ textAlign: "center", fontWeight: "bold" }}>Tamanho da fonte</Text>
+                            
         {fontSizes.map((item, index) => (
             <View key={index} style={style.buttonOption}>
                 {/* Aqui você pode aplicar o tamanho dinamicamente se quiser dar um preview real */}
-                <Text style={[style.buttonText, { fontSize: item.value }]}>
+                <Text style={ { fontSize: item.value }}>
                     {item.label}
                 </Text>
             </View>
         ))}
     </View>
+                 <View style={style.container3}>
+                    <View style={{flexDirection:"row", gap:20}}>
+                    icon    
+                    <View>
+                            <Text style={{ textAlign: "center", fontWeight: "bold" }}>Tamanho da fonte</Text>
+                    </View>
+                    </View>
+                            <Text style={style.subtitle}>Narração por voz</Text>
+                            
+        
+    </View>
+                 <View style={style.container4}>
+                    <View style={{flexDirection:"row", gap:20}}>
+                       
+                    <View>
+                            <Text style={{ textAlign: "center", fontWeight: 400 }}>Previa do texto</Text>
+                    </View>
+                    </View>
+                            <Text style={{fontSize: 14, fontWeight: "600", textAlign:"center"}} >Olha! esse texto é um exemplo para ver as mudanças.  </Text>
+        
+    </View>
+                            <Button title="Sair da conta" onPress={() => { console.log("Teste")}}/>
                
             </ScrollView>
         </SafeAreaView>
@@ -93,8 +117,28 @@ const style = StyleSheet.create({
         borderRadius: 20,
         justifyContent: "center",
         alignItems: "center",
-        padding: 15
+        padding: 15,
+        gap:20
     },
+    container3:{
+        width: 309,
+        height: 133,
+        backgroundColor: "#CDE9FF",
+        borderRadius: 20,
+        justifyContent: "center",
+        alignItems: "center",
+        padding: 15,
+        
+    },
+    container4: {
+        width: 309,
+        height: 121,
+         backgroundColor: "#CDE9FF",
+        borderRadius: 20,
+        justifyContent: "center",
+        alignItems: "center",
+        padding: 15,
+    }, 
     gridColors: {
         flexDirection: "row",
         flexWrap: "wrap",
@@ -115,6 +159,12 @@ const style = StyleSheet.create({
     },
     buttonOption: {
         backgroundColor: "#ffffff", 
+        width: 245,
+        height: 51,
+        padding: 10,
+        borderRadius:20,
+        justifyContent: "center",
+        alignItems: "flex-start"
     
-    }
+    },
 });
