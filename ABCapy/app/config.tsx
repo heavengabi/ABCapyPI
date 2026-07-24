@@ -1,170 +1,350 @@
-import React from "react";
-import { ScrollView, Text, View, StyleSheet, TouchableOpacity } from "react-native";
+import React, { useState } from "react";
+import {
+  ScrollView,
+  Text,
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Switch,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Button } from "@/src/components/ui/button";
+import {
+  Palette,
+  Type,
+  Volume2,
+  ChevronLeft,
+  Check,
+} from "lucide-react-native";
+import { router } from "expo-router";
+
 const colors = [
-    { color: "#93CCF7", name: "Azul" },
-    { color: "#FF847A", name: "Vermelho" },
-    { color: "#8DD26E", name: "Verde" },
-    { color: "#FFDD1F", name: "Amarelo" }
+  { color: "#8ECBFC", name: "azul" },
+  { color: "#FF8E89", name: "Rosa" },
+  { color: "#9FE178", name: "verde" },
+  { color: "#FFE14D", name: "amarelo" },
 ];
+
 const fontSizes = [
-    { label: "Normal", value: 16 },
-    { label: "Grande", value: 20 },
-    { label: "Muito grande", value: 24 }
+  { label: "Normal", value: 16 },
+  { label: "Grande", value: 20 },
+  { label: "Muito grande", value: 24 },
 ];
 
 export default function ConfigPage() {
-    return (
-        <SafeAreaView style={style.safeArea}>
-            {/* O SEGREDO ESTÁ AQUI: style padrão NÃO tem alinhamento, apenas o contentContainerStyle */}
-            <ScrollView 
-                style={style.scrollViewBase} 
-                contentContainerStyle={style.scrollContent}
-            >
-                <View style={style.headerContainer}>
-                    <Text style={style.title}>Configurações</Text>
-                    <Text style={style.subtitle}>Personalize sua experiência</Text>
-                </View>
+  const [selectedColor, setSelectedColor] = useState(0);
+  const [selectedFont, setSelectedFont] = useState(0);
+  const [isVoiceEnabled, setIsVoiceEnabled] = useState(false);
 
-                <View style={style.container}>
-                    <View style={{ gap: 20, width: "100%" }}>
-                        <Text style={{ textAlign: "center", fontWeight: "bold" }}>Tema de cores</Text>
-                        <View style={style.gridColors}>
-                            {colors.map((item, index) => (
-                                <TouchableOpacity key={index} style={style.cardColor}>
-                                    <View style={{ backgroundColor: item.color, borderRadius: 20, width: 30, height: 30, marginBottom: 8 }} />
-                                    <Text style={{ fontSize: 14 }}>{item.name}</Text>
-                                </TouchableOpacity>
-                            ))}
-                        </View>
-                    </View>
-                </View>
-                 <View style={style.container}>
-                            <Text style={{ textAlign: "center", fontWeight: "bold" }}>Tamanho da fonte</Text>
-                            
-        {fontSizes.map((item, index) => (
-            <View key={index} style={style.buttonOption}>
-                {/* Aqui você pode aplicar o tamanho dinamicamente se quiser dar um preview real */}
-                <Text style={ { fontSize: item.value }}>
-                    {item.label}
-                </Text>
+  return (
+    <SafeAreaView style={style.safeArea}>
+      <ScrollView
+        style={style.scrollViewBase}
+        contentContainerStyle={style.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        
+        <View style={style.headerContainer}>
+          <TouchableOpacity
+            style={style.backButton}
+            onPress={() => router.back()}
+          >
+            <ChevronLeft size={28} color="#000" />
+          </TouchableOpacity>
+          <View style={style.headerTitleContainer}>
+            <Text style={style.title}>Configurações</Text>
+            <Text style={style.subtitleHeader}>cores de fundo</Text>
+          </View>
+        </View>
+
+      
+        <View style={style.cardContainer}>
+          <View style={style.cardHeader}>
+            <View style={style.iconBadge}>
+              <Palette size={18} color="#2B7BB9" />
             </View>
-        ))}
-    </View>
-                 <View style={style.container3}>
-                    <View style={{flexDirection:"row", gap:20}}>
-                    icon    
-                    <View>
-                            <Text style={{ textAlign: "center", fontWeight: "bold" }}>Tamanho da fonte</Text>
+            <View>
+              <Text style={style.cardTitle}>Tema de cores</Text>
+              <Text style={style.cardSubtitle}>customize sua experiência</Text>
+            </View>
+          </View>
+
+          <View style={style.gridColors}>
+            {colors.map((item, index) => {
+              const isSelected = selectedColor === index;
+              return (
+                <TouchableOpacity
+                  key={index}
+                  style={style.cardColor}
+                  onPress={() => setSelectedColor(index)}
+                  activeOpacity={0.8}
+                >
+                  <View style={[style.colorCircle, { backgroundColor: item.color }]} />
+                  <Text style={style.colorText}>{item.name}</Text>
+                  
+                  {isSelected && (
+                    <View style={style.checkBadge}>
+                      <Check size={12} color="#000" />
                     </View>
-                    </View>
-                            <Text style={style.subtitle}>Narração por voz</Text>
-                            
+                  )}
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
+
         
-    </View>
-                 <View style={style.container4}>
-                    <View style={{flexDirection:"row", gap:20}}>
-                       
-                    <View>
-                            <Text style={{ textAlign: "center", fontWeight: 400 }}>Previa do texto</Text>
-                    </View>
-                    </View>
-                            <Text style={{fontSize: 14, fontWeight: "600", textAlign:"center"}} >Olha! esse texto é um exemplo para ver as mudanças.  </Text>
+        <View style={style.cardContainer}>
+          <View style={style.cardHeader}>
+            <View style={style.iconBadge}>
+              <Type size={18} color="#2B7BB9" />
+            </View>
+            <View>
+              <Text style={style.cardTitle}>Tamanho da Fonte</Text>
+              <Text style={style.cardSubtitle}>ajuste o tamanho do texto</Text>
+            </View>
+          </View>
+
+          <View style={{ gap: 10, width: "100%", marginTop: 10 }}>
+            {fontSizes.map((item, index) => {
+              const isSelected = selectedFont === index;
+              return (
+                <TouchableOpacity
+                  key={index}
+                  style={[
+                    style.fontOptionButton,
+                    isSelected && style.fontOptionSelected,
+                  ]}
+                  onPress={() => setSelectedFont(index)}
+                >
+                  <Text style={style.fontOptionText}>{item.label}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
+
         
-    </View>
-                            <Button title="Sair da conta" onPress={() => { console.log("Teste")}}/>
-               
-            </ScrollView>
-        </SafeAreaView>
-    );
+        <View style={style.cardContainer}>
+          <View style={style.cardHeader}>
+            <View style={style.iconBadge}>
+              <Volume2 size={18} color="#2B7BB9" />
+            </View>
+            <View>
+              <Text style={style.cardTitle}>Narração de voz</Text>
+              <Text style={style.cardSubtitle}>Ouvir o que está na tela</Text>
+            </View>
+          </View>
+
+          <View style={style.switchRow}>
+            <Text style={style.switchText}>
+              {isVoiceEnabled ? "Ativado" : "Desativado"}
+            </Text>
+            <Switch
+              value={isVoiceEnabled}
+              onValueChange={setIsVoiceEnabled}
+              trackColor={{ false: "#B2DBFC", true: "#0284C7" }}
+              thumbColor="#FFFFFF"
+            />
+          </View>
+        </View>
+
+        
+        <View style={style.cardContainer}>
+          <Text style={[style.cardTitle, { textAlign: "center", marginBottom: 12 }]}>
+            prévia do texto
+          </Text>
+          <Text style={style.previewText}>
+            Olha! esse texto é um exemplo para ver as mudanças.
+          </Text>
+        </View>
+
+
+        <TouchableOpacity style={style.logoutButton}>
+          <Text style={style.logoutText}>sair da conta</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </SafeAreaView>
+  );
 }
 
 const style = StyleSheet.create({
-    safeArea: {
-        flex: 1, 
-        backgroundColor: "#f5f5f5"
-    },
-    scrollViewBase: {
-        flex: 1 // O estilo base do ScrollView SÓ controla o tamanho do container de rolagem
-    },
-    scrollContent: {
-        flexGrow: 1,               // Permite que o container interno se estique para centralizar
-        justifyContent: "center",  // AGORA SIM: Alinhamento vertical apenas aqui
-        alignItems: "center",      // AGORA SIM: Alinhamento horizontal apenas aqui
-        paddingVertical: 40,
-        gap: 20
-    },
-    headerContainer: {
-        marginBottom: 30,
-        alignItems: "center"
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: "bold",
-        textAlign: "center"
-    },
-    subtitle: {
-        fontSize: 14,
-        color: "#666",
-        textAlign: "center",
-        marginTop: 4
-    },
-    container: {
-        width: 309,
-        height: 280,
-        backgroundColor: "#CDE9FF",
-        borderRadius: 20,
-        justifyContent: "center",
-        alignItems: "center",
-        padding: 15,
-        gap:20
-    },
-    container3:{
-        width: 309,
-        height: 133,
-        backgroundColor: "#CDE9FF",
-        borderRadius: 20,
-        justifyContent: "center",
-        alignItems: "center",
-        padding: 15,
-        
-    },
-    container4: {
-        width: 309,
-        height: 121,
-         backgroundColor: "#CDE9FF",
-        borderRadius: 20,
-        justifyContent: "center",
-        alignItems: "center",
-        padding: 15,
-    }, 
-    gridColors: {
-        flexDirection: "row",
-        flexWrap: "wrap",
-        justifyContent: "center",
-        gap: 15
-    },
-    cardColor: {
-        backgroundColor: "#ffffff", 
-        width: 117, 
-        height: 88, 
-        borderRadius: 20, 
-        justifyContent: "center", 
-        alignItems: "center"
-    },
-    optionsContainer: {
-    gap: 12, 
-    backgroundColor: "#CDE9FF",
-    },
-    buttonOption: {
-        backgroundColor: "#ffffff", 
-        width: 245,
-        height: 51,
-        padding: 10,
-        borderRadius:20,
-        justifyContent: "center",
-        alignItems: "flex-start"
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#DDF0FF",
+  },
+  scrollViewBase: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    alignItems: "center",
+    gap: 16,
+  },
+  
+  headerContainer: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 10,
+    position: "relative",
+  },
+  backButton: {
+    position: "absolute",
+    left: 0,
+    backgroundColor: "#FFFFFF",
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  headerTitleContainer: {
+    alignItems: "center",
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#000000",
+  },
+  subtitleHeader: {
+    fontSize: 14,
+    color: "#8AA2B8",
+  },
+  
+  cardContainer: {
+    width: "100%",
+    maxWidth: 340,
+    backgroundColor: "#C5E5FF",
+    borderRadius: 24,
+    padding: 16,
     
-    },
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  cardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginBottom: 16,
+  },
+  iconBadge: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#A8D8FF",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#000000",
+  },
+  cardSubtitle: {
+    fontSize: 12,
+    color: "#6B859E",
+  },
+  
+  gridColors: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  cardColor: {
+    backgroundColor: "#FFFFFF",
+    width: "47%",
+    height: 90,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    position: "relative",
+  },
+  colorCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    marginBottom: 6,
+  },
+  colorText: {
+    fontSize: 13,
+    color: "#333",
+    fontWeight: "500",
+  },
+  checkBadge: {
+    position: "absolute",
+    right: 8,
+    bottom: 8,
+    backgroundColor: "#A3E635",
+    borderRadius: 10,
+    padding: 3,
+  },
+
+  fontOptionButton: {
+    backgroundColor: "#BCDFFF",
+    height: 48,
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  fontOptionSelected: {
+    backgroundColor: "#A3D3FF",
+    borderWidth: 1,
+    borderColor: "#0284C7",
+  },
+  fontOptionText: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#1E293B",
+  },
+ 
+  switchRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: "#A1D4FF",
+    height: 48,
+    borderRadius: 24,
+    paddingHorizontal: 16,
+  },
+  switchText: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#1E293B",
+  },
+
+  previewText: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#0284C7",
+    textAlign: "center",
+    lineHeight: 22,
+    paddingHorizontal: 10,
+  },
+  
+  logoutButton: {
+    width: "100%",
+    maxWidth: 340,
+    height: 52,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  logoutText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#0284C7",
+  },
 });

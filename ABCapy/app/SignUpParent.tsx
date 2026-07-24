@@ -1,10 +1,13 @@
 import { Button } from "@/src/components/ui/button";
 import React from "react";
 import { ImageBackground, View , Image,TextInput,  Text} from "react-native";
+import { Lock, Mail } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import logoImage from "../src/assets/images/small-logo.png";
 import BackgroundImage from "../src/assets/images/bg-login.png";
 import { router } from "expo-router";
+
+
 export default function Cadastro() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -18,9 +21,17 @@ export default function Cadastro() {
           </View>
           <View style={{ flexDirection: "column", gap: 20, marginTop: 50}}>
            
-            <TextInput placeholder="Email" style={{height: 48, backgroundColor: "white", borderRadius: 15, padding: 12}}/>
-            <TextInput placeholder="Senha" secureTextEntry style={{height: 48, backgroundColor: "white", borderRadius: 15, padding: 12}}/>
+             <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: "white", height: 48, borderRadius: 15, paddingHorizontal: 12, gap: 10 }}>
+              <Mail color="#666" size={20} />
+              <TextInput placeholder="Email" secureTextEntry style={{ flex: 1 }} />
+            </View>
+
             
+            <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: "white", height: 48, borderRadius: 15, paddingHorizontal: 12, gap: 10 }}>
+              <Lock color="#666" size={20} />
+              <TextInput placeholder="Confirmar senha" secureTextEntry style={{ flex: 1 }} />
+            </View>
+
             <Button title="Continuar" onPress={() => router.push("/")} style={{marginTop:20}} />
             <Text style={{textAlign: "center"}}>Não tem uma conta? Cadastre-se</Text>
             <Text style={{textAlign: "center"}}>Esqueci minha senha</Text>
