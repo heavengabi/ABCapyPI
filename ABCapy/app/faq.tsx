@@ -7,11 +7,12 @@ import {
   ScrollView,
   Image,
 } from "react-native";
-
 import { List } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 
 const Faq = () => {
+  const navigation = useNavigation();
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
   const handlePress = (index: number) => {
@@ -32,7 +33,7 @@ const Faq = () => {
     {
       title: "Como posso personalizar a experiência para o meu filho(a)?",
       content:
-        "Você pode personalizar as pranchas, frases e cartões na aba de configurações.",
+        "Você pode personalizar nas configurações.",
     },
     {
       title: "É possível acompanhar o progresso da criança no aplicativo?",
@@ -43,7 +44,10 @@ const Faq = () => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Pressable style={styles.backButton}>
+      <Pressable
+        style={styles.backButton}
+        onPress={() => navigation.goBack()}
+      >
         <Ionicons name="arrow-back" size={24} color="#000000" />
       </Pressable>
 
@@ -93,7 +97,7 @@ const Faq = () => {
           style={styles.characterImage}
         />
       </View>
-    </>
+    </ScrollView>
   );
 };
 
@@ -124,6 +128,7 @@ const styles = StyleSheet.create({
     color: "#000000",
     textAlign: "center",
     marginBottom: 24,
+
   },
 
   accordionContainer: {
@@ -200,7 +205,6 @@ const styles = StyleSheet.create({
     width: 180,
     height: 180,
     resizeMode: "contain",
-
     right: -18,
     bottom: -60,
   },
