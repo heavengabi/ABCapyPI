@@ -44,7 +44,7 @@ const MemoryGame = () => {
       >
         <Header
           title="Jogo da Memória"
-          text="<"
+          icon="arrow-back"
           onPress={() => {}}
           headerStyle={{ backgroundColor: jogo.header }}
           buttonStyle={{ backgroundColor: jogo.button }}

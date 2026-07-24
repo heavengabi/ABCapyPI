@@ -20,7 +20,7 @@ const GamePages = () => {
         resizeMode="cover"
       >
         <Header
-          text="<"
+          icon="arrow-back"
           onPress={() => {}}
           headerStyle={{ backgroundColor: "#A8DAFF" }}
           buttonStyle={{ backgroundColor: "#69B9F7" }}

@@ -7,43 +7,29 @@ import {
   ScrollView,
   Image,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { List } from "react-native-paper";
 
 const Faq = () => {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Pressable>
-        <Text style={styles.back}>{"<"}</Text>
-      </Pressable>
+    <>
+      <ScrollView contentContainerStyle={styles.container}>
 
-      <Text style={styles.title}>FAQ</Text>
 
-      <List.Accordion
-        title="Como utilizar o CAA?"
-        expanded={expanded}
-        onPress={() => setExpanded(!expanded)}
-        style={styles.accordion}
-      >
-        <View style={{ padding: 16 }}>
-          <Text>
-            O CAA auxilia a comunicação por meio de{"\n"}
-            figuras e símbolos.
-          </Text>
-        </View>
-      </List.Accordion>
+      </ScrollView>
 
       <View style={styles.footer}>
         <Text>Footer Content</Text>
         <Text>Additional Footer Content</Text>
 
         <Image
-          source={require("")}
+          source={require("../src/assets/images/homeImages/capyHome.png")}
           style={styles.image}
         />
       </View>
-    </ScrollView>
+    </>
   );
 };
 
@@ -53,11 +39,7 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     backgroundColor: "#fff",
-    flexGrow: 1,
-  },
-
-  back: {
-    fontSize: 28,
+    justifyContent: "space-between",
   },
 
   title: {
@@ -71,10 +53,11 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginBottom: 20,
   },
-
   footer: {
+    marginTop: "auto",
+    backgroundColor: "#93CCF7",
+    padding: 20,
     alignItems: "center",
-    marginTop: 40,
   },
 
   image: {
@@ -82,5 +65,14 @@ const styles = StyleSheet.create({
     height: 120,
     resizeMode: "contain",
     marginTop: 20,
+  },
+
+  btnBack: {
+    backgroundColor: "#93CCF7",
+    borderRadius: 30,
+    width: 49,
+    height: 49,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
