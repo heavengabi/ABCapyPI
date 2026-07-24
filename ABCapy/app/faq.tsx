@@ -43,7 +43,7 @@ const Faq = () => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Pressable style={styles.backButton}>
-        <Ionicons name="chevron-back" size={24} color="#2C3E50" />
+        <Ionicons name="arrow-back" size={24} color="#000000" />
       </Pressable>
 
       <Text style={styles.title}>Principais dúvidas</Text>
@@ -58,7 +58,7 @@ const Faq = () => {
               expanded={expandedIndex === index}
               onPress={() => handlePress(index)}
               style={styles.accordion}
-              theme={{ colors: { primary: "#2C3E50" } }}
+              theme={{ colors: { primary: "#000000" } }}
             >
               <View style={styles.accordionContent}>
                 <Text style={styles.contentText}>{item.content}</Text>
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 26,
     fontWeight: "bold",
-    color: "#2C3E50",
+    color: "#000000",
     textAlign: "center",
     marginBottom: 24,
   },
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
   },
 
   accordionTitle: {
-    color: "#2C3E50",
+    color: "#000000",
     fontWeight: "600",
     fontSize: 14,
   },
@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
   },
 
   contentText: {
-    color: "#4A5568",
+    color: "#000000",
     fontSize: 14,
     lineHeight: 20,
   },
@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
   },
 
   footerTitle: {
-    color: "#2C3E50",
+    color: "#000000",
     fontSize: 14,
     fontWeight: "700",
     lineHeight: 20,
