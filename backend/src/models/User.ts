@@ -1,4 +1,5 @@
 import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Children } from "./Children";
 
 @Entity("users")
 export class User {
@@ -13,6 +14,7 @@ export class User {
 
   @Column({ nullable: false })
   password: string;
-
-
+  
+  @OneToOne(() => Children)
+  child: Children;
 }
