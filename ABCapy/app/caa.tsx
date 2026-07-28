@@ -1,22 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   StyleSheet,
   Text,
   View,
   TouchableOpacity,
   ScrollView,
-  
   Image,
   Dimensions,
 } from 'react-native';
-import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
+import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-// Dados dos cartões da grade
-// Atualização do array CARDS com os nomes exatos das imagens
+import * as Speech from 'expo-speech';
+
 const CARDS = [
   { id: '1', title: 'Sair', image: require('../src/assets/caaCardsImages/sair.png') },
   { id: '2', title: 'Eu', image: require('../src/assets/caaCardsImages/eu.png') },
-  { id: '3', title: 'Você', image: require('../src/assets/caaCardsImages/eu.png') }, // Ajuste caso tenha a imagem do 'tu/você'
+  { id: '3', title: 'Você', image: require('../src/assets/caaCardsImages/eu.png') },
   { id: '4', title: 'Quero', image: require('../src/assets/caaCardsImages/quero.png') },
   { id: '5', title: 'Parar', image: require('../src/assets/caaCardsImages/parar.png') },
   { id: '6', title: 'Comer', image: require('../src/assets/caaCardsImages/comer.png') },
@@ -28,13 +27,37 @@ const CARDS = [
   { id: '12', title: 'Banheiro', image: require('../src/assets/caaCardsImages/sanitários.png') },
   { id: '13', title: 'Sim', image: require('../src/assets/caaCardsImages/sim.png') },
   { id: '14', title: 'Escola', image: require('../src/assets/caaCardsImages/escola.png') },
-  { id: '15', isAddButton: true }, // Cartão com ícone de "+"
+  { id: '15', isAddButton: true },
 ];
 
 export default function CAAScreen() {
+  
+  const [selectedWords, setSelectedWords] = useState([]);
+
+
+  const handleCardPress = (title) => {
+    if (title) {
+      setSelectedWords((prevWords) => [...prevWords, title]);
+    }
+  };
+
+ 
+  const handleClear = () => {
+    setSelectedWords([]);
+    Speech.stop(); 
+  };
+
+  
+  const handleSpeak = () => {
+    if (selectedWords.length > 0) {
+      const phraseToSpeak = selectedWords.join(' ');
+      Speech.speak(phraseToSpeak, { language: 'pt-BR' });
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      {/* 1. Cabeçalho Superior */}
+      
       <View style={styles.header}>
         <TouchableOpacity style={styles.menuButton}>
           <Ionicons name="menu-outline" size={32} color="#2C3E50" />
@@ -42,26 +65,35 @@ export default function CAAScreen() {
         <Text style={styles.headerTitle}>Monte sua frase</Text>
       </View>
 
-      {/* 2. Área da Mensagem (Caixa de texto e Ações) */}
+     
       <View style={styles.phraseContainer}>
         <View style={styles.phraseBox}>
-          <Text style={styles.placeholderText}>
-            Toque nos cartões abaixo para construir sua mensagem
-          </Text>
+          {selectedWords.length === 0 ? (
+            <Text style={styles.placeholderText}>
+              Toque nos cartões abaixo para construir sua mensagem
+            </Text>
+          ) : (
+            <Text style={styles.selectedPhraseText}>
+              {selectedWords.join(' ')}
+            </Text>
+          )}
         </View>
 
-        {/* Botões de Apagar e Ouvir */}
+        {
         <View style={styles.actionButtonsRow}>
-          <TouchableOpacity style={styles.circleButton}>
-            <Ionicons name="trash-outline" size={24} color="#3498DB" />
+          
+          <TouchableOpacity style={styles.circleButton} onPress={handleClear}>
+            <Ionicons name="trash-outline" size={24} color="#E74C3C" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.circleButton}>
+
+          {/* Falar / Ler frase */}
+          <TouchableOpacity style={styles.circleButton} onPress={handleSpeak}>
             <Ionicons name="volume-medium-outline" size={26} color="#3498DB" />
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* 3. Painel de Cartões (Fundo Branco com Borda Arredondada) */}
+      
       <View style={styles.cardsContainer}>
         <ScrollView
           showsVerticalScrollIndicator={false}
@@ -75,8 +107,11 @@ export default function CAAScreen() {
                     <Ionicons name="add" size={36} color="#2C3E50" />
                   </TouchableOpacity>
                 ) : (
-                  <TouchableOpacity style={styles.card}>
-                    {/* Substitua o uri/source pela sua imagem local ou remota */}
+                  <TouchableOpacity
+                    style={styles.card}
+                    onPress={() => handleCardPress(item.title)}
+                    activeOpacity={0.7}
+                  >
                     <Image
                       source={item.image}
                       style={styles.cardImage}
@@ -91,7 +126,7 @@ export default function CAAScreen() {
         </ScrollView>
       </View>
 
-      {/* 4. Menu de Navegação Inferior (Bottom Bar) */}
+      
       <View style={styles.bottomNav}>
         <TouchableOpacity style={styles.navItem}>
           <FontAwesome5 name="globe" size={24} color="#5D8AA8" />
@@ -114,13 +149,12 @@ export default function CAAScreen() {
 
 const { width } = Dimensions.get('window');
 const CARD_MARGIN = 8;
-// Calcula a largura para 3 colunas perfeitas
 const CARD_WIDTH = (width - 40 - CARD_MARGIN * 6) / 3;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#EAF6FF', // Azul claro de fundo
+    backgroundColor: '#EAF6FF',
   },
   header: {
     paddingHorizontal: 20,
@@ -144,11 +178,11 @@ const styles = StyleSheet.create({
   phraseBox: {
     backgroundColor: '#FFFFFF',
     width: '100%',
-    padding: 20,
+    minHeight: 70,
+    padding: 15,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    // Sombras
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
@@ -158,8 +192,14 @@ const styles = StyleSheet.create({
   placeholderText: {
     color: '#BDC3C7',
     textAlign: 'center',
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '500',
+  },
+  selectedPhraseText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#2C3E50',
+    textAlign: 'center',
   },
   actionButtonsRow: {
     flexDirection: 'row',
@@ -167,9 +207,9 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   circleButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 46,
+    height: 46,
+    borderRadius: 23,
     backgroundColor: '#CDE8FA',
     alignItems: 'center',
     justifyContent: 'center',
@@ -180,7 +220,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
     borderWidth: 1.5,
-    borderColor: '#A8D5BA', // Borda verde bem suave visível no protótipo
+    borderColor: '#A8D5BA',
     borderBottomWidth: 0,
     paddingTop: 20,
     paddingHorizontal: 10,
@@ -201,7 +241,7 @@ const styles = StyleSheet.create({
   card: {
     width: '100%',
     height: CARD_WIDTH,
-    backgroundColor: '#D9D9D9', // Cinza do cartão
+    backgroundColor: '#D9D9D9',
     borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
