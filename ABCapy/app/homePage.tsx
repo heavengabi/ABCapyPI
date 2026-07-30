@@ -37,7 +37,7 @@ const HomePage = () => {
           title="Comunicação"
           text="monte frases e se comunique"
           image={speechBubble}
-          onPress={() => router.push("/gamePages")}
+          onPress={() => router.push("/")}
         />
         <HomeCard
           title="Jogos"
@@ -49,7 +49,7 @@ const HomePage = () => {
           title="Histórias"
           text="Explore novas Histórias"
           image={book}
-          onPress={() => router.push("/gamePages")}
+          onPress={() => router.push("/")}
         />
       </View>
 

@@ -49,7 +49,7 @@ const DificultyPages = () => {
       >
         <Header
           icon="arrow-back"
-          onPress={() => { }}
+          onPress={() => {router.push("/gamePages") }}
           headerStyle={{ backgroundColor: "#A8DAFF" }}
           buttonStyle={{ backgroundColor: "#69B9F7" }}
         />

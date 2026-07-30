@@ -1,7 +1,7 @@
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { View, Text, Pressable, ImageBackground, StyleSheet } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import Header from "@/src/components/Header/Header";
 import easySeq from "../src/assets/images/gameImages/easySeq.png";
 import mediumSeq from "../src/assets/images/gameImages/mediumSeq.png";
@@ -44,7 +44,7 @@ const SequencingGame = () => {
                 <Header
                     title="Siga a Ordem"
                     icon="arrow-back"
-                    onPress={() => { }}
+                    onPress={() => {router.push("/gamePages")}}
                     headerStyle={{ backgroundColor: jogo.header }}
                     buttonStyle={{ backgroundColor: jogo.button }}
                 />

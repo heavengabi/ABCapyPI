@@ -1,12 +1,13 @@
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, ImageBackground, StyleSheet, View } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import Header from "@/src/components/Header/Header";
 
 import easy from "../src/assets/images/gameImages/easy.png";
 import medium from "../src/assets/images/gameImages/medium.png";
 import hard from "../src/assets/images/gameImages/hard.png";
+
 
 
 const MemoryGame = () => {
@@ -35,8 +36,7 @@ const MemoryGame = () => {
 
   const jogo = settings[(difficulty as keyof typeof settings) ?? "facil"];
 
-  const quantidade =
-    difficulty === "facil" ? 6 : difficulty === "medio" ? 8 : 12;
+ 
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -48,7 +48,7 @@ const MemoryGame = () => {
         <Header
           title="Jogo da Memória"
           icon="arrow-back"
-          onPress={() => {}}
+          onPress={() => {router.push("/gamePages")}}
           headerStyle={{ backgroundColor: jogo.header }}
           buttonStyle={{ backgroundColor: jogo.button }}
         />
