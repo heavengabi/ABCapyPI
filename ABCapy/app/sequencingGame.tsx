@@ -43,7 +43,7 @@ const SequencingGame = () => {
             >
                 <Header
                     title="Siga a Ordem"
-                    text="<"
+                    icon="arrow-back"
                     onPress={() => { }}
                     headerStyle={{ backgroundColor: jogo.header }}
                     buttonStyle={{ backgroundColor: jogo.button }}

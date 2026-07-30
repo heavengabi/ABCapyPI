@@ -43,7 +43,7 @@ const EqualityGame = () => {
             >
                 <Header
                     title="Jogo do IGUAL"
-                    text="<"
+                    icon="arrow-back"
                     onPress={() => { }}
                     headerStyle={{ backgroundColor: jogo.header }}
                     buttonStyle={{ backgroundColor: jogo.button }}

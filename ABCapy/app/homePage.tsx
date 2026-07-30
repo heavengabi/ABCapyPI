@@ -18,6 +18,7 @@ import estrela from "../src/assets/images/homeImages/estrela.png";
 import Footer from "@/src/components/Footer/Footer";
 import menu from "../src/assets/images/homeImages/menu.png";
 
+
 const HomePage = () => {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#85ccffc9" }}>

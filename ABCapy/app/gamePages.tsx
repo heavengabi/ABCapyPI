@@ -49,7 +49,7 @@ const GamePages = () => {
           image={jogo2}
           onPress={() =>
             router.push({
-              pathname: "/dificultyPages",
+              pathname: "/",
               params: {
                 game: "memoryGame",
               },
