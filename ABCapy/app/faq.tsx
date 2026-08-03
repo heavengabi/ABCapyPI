@@ -23,22 +23,22 @@ const Faq = () => {
     {
       title: "Como utilizar o CAA?",
       content:
-        "O CAA auxilia a comunicação por meio de figuras e símbolos.",
+        "O CAA (Comunicação Aumentativa e Alternativa) permite que a criança se comunique por meio de figuras e símbolos. Basta selecionar as imagens para formar frases ou expressar necessidades, facilitando a comunicação de forma simples e intuitiva.",
     },
     {
       title: "O ABCapy é baseado em alguma metodologia de ensino?",
       content:
-        "Sim, utilizamos metodologias baseadas em evidências para o desenvolvimento infantil.",
+        "As atividades do aplicativo são baseadas nos princípios da ABA (Análise do Comportamento Aplicada), utilizando estímulos, repetição e reforço positivo para contribuir com o desenvolvimento das habilidades cognitivas e da comunicação da criança.",
     },
     {
       title: "Como posso personalizar a experiência para o meu filho(a)?",
       content:
-        "Você pode personalizar nas configurações.",
+        "As preferências do aplicativo podem ser ajustadas na tela de Configurações. Nela é possível personalizar a experiência de uso conforme as necessidades da criança, tornando a navegação mais confortável e adequada.",
     },
     {
       title: "É possível acompanhar o progresso da criança no aplicativo?",
       content:
-        "Sim, relatórios de uso e desenvolvimento estão disponíveis para os responsáveis.",
+        "Sim. É possível acompanhar o progresso da criança pela tela de Perfil. Nela são exibidas informações sobre a evolução, o desempenho nas atividades e as conquistas obtidas durante o uso do aplicativo.",
     },
   ];
 
