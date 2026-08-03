@@ -206,6 +206,6 @@ const styles = StyleSheet.create({
     height: 180,
     resizeMode: "contain",
     right: -18,
-    bottom: -60,
+    bottom: -70,
   },
 });
