@@ -1,7 +1,7 @@
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, ImageBackground, StyleSheet } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import Header from "@/src/components/Header/Header";
 import easy from "../src/assets/images/gameImages/easy.png";
 import medium from "../src/assets/images/gameImages/medium.png";
@@ -43,8 +43,8 @@ const EqualityGame = () => {
             >
                 <Header
                     title="Jogo do IGUAL"
-                    text="<"
-                    onPress={() => { }}
+                    icon="arrow-back"
+                    onPress={() => {router.push("/gamePages")}}
                     headerStyle={{ backgroundColor: jogo.header }}
                     buttonStyle={{ backgroundColor: jogo.button }}
                 />

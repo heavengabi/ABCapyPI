@@ -7,7 +7,7 @@ import jogo1 from "../src/assets/images/gameImages/jogo1.png";
 import jogo2 from "../src/assets/images/gameImages/jogo2.png";
 import jogo3 from "../src/assets/images/gameImages/jogo3.png";
 import Capy1 from "../src/assets/images/gameImages/Capy1.png";
-import CardGame from "@/src/components/gameComponents/gameCard/cardGame";
+import CardGame from "@/src/components/gameComponents/cardGames/cardGames";
 import Header from "@/src/components/Header/Header";
 import { router } from "expo-router";
 
@@ -21,7 +21,7 @@ const GamePages = () => {
       >
         <Header
           icon="arrow-back"
-          onPress={() => {}}
+          onPress={() => {router.push('/homePage')}}
           headerStyle={{ backgroundColor: "#A8DAFF" }}
           buttonStyle={{ backgroundColor: "#69B9F7" }}
         />

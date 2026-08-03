@@ -48,8 +48,8 @@ const DificultyPages = () => {
         resizeMode="cover"
       >
         <Header
-          text="<"
-          onPress={() => { }}
+          icon="arrow-back"
+          onPress={() => {router.push("/gamePages") }}
           headerStyle={{ backgroundColor: "#A8DAFF" }}
           buttonStyle={{ backgroundColor: "#69B9F7" }}
         />
