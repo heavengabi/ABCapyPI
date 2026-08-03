@@ -44,7 +44,7 @@ const SequencingGame = () => {
                 <Header
                     title="Siga a Ordem"
                     icon="arrow-back"
-                    onPress={() => {router.push("/gamePages")}}
+                    onPress={() => {router.back()}}
                     headerStyle={{ backgroundColor: jogo.header }}
                     buttonStyle={{ backgroundColor: jogo.button }}
                 />

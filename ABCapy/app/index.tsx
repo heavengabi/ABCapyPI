@@ -5,5 +5,5 @@ import MemoryGame from "./memoryGame";
 import Faq from "./faq";
 
 export default function Index() {
-  return <MemoryGame />;
+  return <HomePage />;
 }

@@ -48,7 +48,7 @@ const MemoryGame = () => {
         <Header
           title="Jogo da Memória"
           icon="arrow-back"
-          onPress={() => {router.push("/gamePages")}}
+          onPress={() => {router.back()}}
           headerStyle={{ backgroundColor: jogo.header }}
           buttonStyle={{ backgroundColor: jogo.button }}
         />

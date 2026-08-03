@@ -48,7 +48,7 @@ const Faq = () => {
         style={styles.backButton}
         onPress={() => navigation.goBack()}
       >
-        <Ionicons name="arrow-back" size={24} color="#000000" />
+        <Ionicons name="arrow-back" size={24} color="#000000" onPress={() => navigation.goBack()} />
       </Pressable>
 
       <Text style={styles.title}>Principais dúvidas</Text>
