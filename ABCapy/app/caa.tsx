@@ -51,7 +51,7 @@ export default function CAAScreen() {
   const handleSpeak = () => {
     if (selectedWords.length > 0) {
       const phraseToSpeak = selectedWords.join(' ');
-      Speech.speak(phraseToSpeak, { language: 'pt-BR' });
+      Speech.speak(phraseToSpeak, { language: 'pt-br' });
     }
   };
 
@@ -86,11 +86,12 @@ export default function CAAScreen() {
             <Ionicons name="trash-outline" size={24} color="#E74C3C" />
           </TouchableOpacity>
 
-          {/* Falar / Ler frase */}
+         
           <TouchableOpacity style={styles.circleButton} onPress={handleSpeak}>
             <Ionicons name="volume-medium-outline" size={26} color="#3498DB" />
           </TouchableOpacity>
         </View>
+}
       </View>
 
       
