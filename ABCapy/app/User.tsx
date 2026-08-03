@@ -127,7 +127,7 @@ export default function UserPage() {
       transparent={true}
       onRequestClose={() => setVisibleModal(false)}
       >
-        <ActionModal/>
+        <ActionModal  handleClose={() => setVisibleModal(false)}/>
       </Modal>
     </SafeAreaView>
 
