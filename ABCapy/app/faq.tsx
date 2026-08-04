@@ -10,6 +10,7 @@ import {
 import { List } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { router } from "expo-router";
 
 const Faq = () => {
   const navigation = useNavigation();
@@ -46,7 +47,7 @@ const Faq = () => {
     <ScrollView contentContainerStyle={styles.container}>
       <Pressable
         style={styles.backButton}
-        onPress={() => navigation.goBack()}
+        onPress={() => router.back()}
       >
         <Ionicons name="arrow-back" size={24} color="#000000" onPress={() => navigation.goBack()} />
       </Pressable>
