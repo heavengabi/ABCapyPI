@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Button } from '@/src/components/ui/button'; 
 import BackgroundImage from '../src/assets/images/bg-login.png';
-
+import HomePage from './homePage';
 export default function ChildName() {
   const [nome, setNome] = useState('');
   const [personagem, setPersonagem] = useState('sabida'); 
@@ -35,7 +35,7 @@ export default function ChildName() {
         />
         
         <View style={{ flexDirection: 'column', gap: 20, marginTop: 150 }}>
-          <Button title="Continuar" onPress={() => router.push('/SignUpParent')} />
+          <Button title="Continuar" onPress={() => router.push('/homePage')} />
         </View>
       </ImageBackground>
     </SafeAreaView>

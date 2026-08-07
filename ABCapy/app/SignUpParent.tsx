@@ -6,7 +6,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import logoImage from "../src/assets/images/small-logo.png";
 import BackgroundImage from "../src/assets/images/bg-login.png";
 import { router } from "expo-router";
-
+import HomePage from "./homePage";
 
 export default function Cadastro() {
   return (
@@ -32,7 +32,7 @@ export default function Cadastro() {
               <TextInput placeholder="Confirmar senha" secureTextEntry style={{ flex: 1 }} />
             </View>
 
-            <Button title="Continuar" onPress={() => router.push("/")} style={{marginTop:20}} />
+            <Button title="Continuar" onPress={() => router.push("/homePage")} style={{marginTop:20}} />
             <Text style={{textAlign: "center"}}>Não tem uma conta? Cadastre-se</Text>
             <Text style={{textAlign: "center"}}>Esqueci minha senha</Text>
           </View>

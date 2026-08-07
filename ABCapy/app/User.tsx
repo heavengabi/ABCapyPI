@@ -7,26 +7,143 @@ import {
   TouchableOpacity,
   Image,
   Modal,
+  TouchableWithoutFeedback,
+  FlatList,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Pencil, Lock } from "lucide-react-native";
 import { ActionModal } from "@/src/components/ui/ActionModal";
-import Footer from "@/src/components/Footer/Footer";
 
 const StarsNumber: number = 3;
+
 const UserName: string = "Paçoco";
 const CompletedActivities: number = 15;
 const TotalStars: number = 39;
 
-export default function UserPage() {
-    const [visibleModal, setVisibleModal] = useState(false);
+
+const CATEGORIES = [
+  { id: "1", name: "nenhum" },
+  { id: "2", name: "chapéus", icon: "🎩" },
+  { id: "3", name: "óculos", icon: "👓" },
+];
+
+const ITEMS = [
+  {
+    id: "101",
+    image: require("../src/assets/characterAccessories/FarmerCapy.png"),
+  },
+  {
+    id: "102",
+    image: require("../src/assets/characterAccessories/FarmerCapy.png"),
+  },
+  {
+    id: "103",
+    image: require("../src/assets/characterAccessories/PirateCapy.png"),
+  },
+  {
+    id: "104",
+    image: require("../src/assets/characterAccessories/FarmerCapy.png"),
+  },
+];
+
+
+interface ActionModalProps {
+  handleClose: () => void;
+}
+
+function ActionModalContent({ handleClose }: ActionModalProps) {
+  const [selectedCategory, setSelectedCategory] = useState("2");
+  const [selectedItem, setSelectedItem] = useState("103");
+
   return (
-    <SafeAreaView edges={["top"]} style={style.safeArea}>
+    <View style={modalStyle.modalContainer}>
+      
+      <TouchableOpacity style={modalStyle.closeButton} onPress={handleClose}>
+        <X size={20} color="#000" />
+      </TouchableOpacity>
+
+      
+      <Text style={modalStyle.title}>Acessórios</Text>
+      <Text style={modalStyle.subtitle}>Personalize {UserName}</Text>
+
+      
+      <View style={modalStyle.categoriesRow}>
+        {CATEGORIES.map((cat) => {
+          const isSelected = selectedCategory === cat.id;
+          return (
+            <TouchableOpacity
+              key={cat.id}
+              onPress={() => setSelectedCategory(cat.id)}
+              style={[
+                modalStyle.categoryTab,
+                isSelected && modalStyle.categoryTabSelected,
+              ]}
+            >
+              {cat.icon && <Text style={{ marginRight: 6 }}>{cat.icon}</Text>}
+              <Text
+                style={[
+                  modalStyle.categoryText,
+                  isSelected && modalStyle.categoryTextSelected,
+                ]}
+              >
+                {cat.name}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+
+     
+      <View style={modalStyle.gridContainer}>
+        {ITEMS.map((item) => {
+          const isSelected = selectedItem === item.id;
+          return (
+            <TouchableOpacity
+              key={item.id}
+              onPress={() => setSelectedItem(item.id)}
+              style={[
+                modalStyle.itemCard,
+                isSelected && modalStyle.itemCardSelected,
+              ]}
+            >
+              <Image source={item.image} style={modalStyle.itemImage} />
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+
+  
+      <View style={modalStyle.footer}>
+        <View style={modalStyle.starPriceRow}>
+          <Image
+            source={require("../src/assets/images/solar_star-bold-duotone.png")}
+            style={{ width: 22, height: 22 }}
+          />
+          <Text style={modalStyle.starPriceText}>50</Text>
+        </View>
+
+        <TouchableOpacity
+          style={modalStyle.confirmButton}
+          onPress={handleClose}
+        >
+          <Text style={modalStyle.confirmButtonText}>confirmar</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}
+
+
+export default function UserPage() {
+  const [visibleModal, setVisibleModal] = useState(false);
+
+  return (
+    <SafeAreaView edges={["top", "bottom"]} style={style.safeArea}>
       <ScrollView
+        style={{ flex: 1 }}
         contentContainerStyle={style.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        
         <View style={style.headerStars}>
           <Image
             source={require("../src/assets/images/solar_star-bold-duotone.png")}
@@ -35,7 +152,7 @@ export default function UserPage() {
           <Text style={style.starsText}>{StarsNumber}</Text>
         </View>
 
-       
+        
         <Text style={style.pageTitle}>Perfil</Text>
 
        
@@ -46,34 +163,39 @@ export default function UserPage() {
               style={style.imagemPersonagem}
             />
           </View>
-          
+
           <View style={style.badgeAcessorio}>
             <Image
               source={require("../src/assets/characterAccessories/FarmerCapy.png")}
-              style={{ width: 52, height: 32, resizeMode:"cover"}}
+              style={{ width: 52, height: 32, resizeMode: "cover" }}
             />
           </View>
         </View>
 
-    
         <View style={style.userNameRow}>
           <Text style={style.userNameText}>{UserName}</Text>
-          <TouchableOpacity style={style.editButton} onPress={() => setVisibleModal(true)}>
+          <TouchableOpacity
+            style={style.editButton}
+            onPress={() => setVisibleModal(true)}
+          >
             <Pencil color="#0284C7" size={16} />
           </TouchableOpacity>
         </View>
 
+       
         <View style={style.progressSection}>
           <View style={style.progressBarContainer}>
             <View style={style.progressBarBackground}>
               <View style={[style.progressBarFill, { width: "70%" }]} />
             </View>
 
-           
             <View style={style.rewardContainer}>
               <Image
                 source={require("../src/assets/characterAccessories/PirateCapy.png")}
-                style={[style.rewardImage, { tintColor: "rgba(80, 80, 80, 0.6)" }]}
+                style={[
+                  style.rewardImage,
+                  { tintColor: "rgba(80, 80, 80, 0.6)" },
+                ]}
               />
               <Lock size={18} color="#000" style={style.lockIcon} />
             </View>
@@ -90,13 +212,8 @@ export default function UserPage() {
             <Text style={style.gamesTitleText}>jogos mais jogados</Text>
           </View>
 
+          <View style={style.podiumPlaceholder} />
 
-          <View style={style.podiumPlaceholder}>
-           
-           
-          </View>
-
-        
           <View style={style.statsRow}>
             <View style={style.statBox}>
               <Text style={style.statNumber}>27</Text>
@@ -110,8 +227,7 @@ export default function UserPage() {
           </View>
         </View>
 
-     
-
+        
         <View style={style.finalCard}>
           <Text style={style.finalCardLabel}>estrelas conquistadas</Text>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
@@ -123,18 +239,30 @@ export default function UserPage() {
           </View>
         </View>
       </ScrollView>
-      <Modal
-      visible={visibleModal}
-      transparent={true}
-      onRequestClose={() => setVisibleModal(false)}
-      >
-        <ActionModal/>
-      </Modal>
-      <Footer/>
-    </SafeAreaView>
 
+     
+      <Modal
+        visible={visibleModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setVisibleModal(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setVisibleModal(false)}>
+          <View style={style.modalOverlay}>
+            <TouchableWithoutFeedback>
+              <View style={{ width: "100%" }}>
+                <ActionModalContent
+                  handleClose={() => setVisibleModal(false)}
+                />
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+    </SafeAreaView>
   );
 }
+
 
 const style = StyleSheet.create({
   safeArea: {
@@ -143,10 +271,9 @@ const style = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingBottom: 40,
+    paddingBottom: 100, // ou 120
     alignItems: "center",
   },
-  
   headerStars: {
     alignSelf: "flex-end",
     flexDirection: "row",
@@ -166,7 +293,6 @@ const style = StyleSheet.create({
     marginTop: 10,
     marginBottom: 20,
   },
-  
   avatarWrapper: {
     position: "relative",
     marginBottom: 15,
@@ -178,7 +304,7 @@ const style = StyleSheet.create({
     alignItems: "center",
     borderRadius: 70,
     backgroundColor: "#FFF",
-    borderColor: "#93CCF7", 
+    borderColor: "#93CCF7",
     borderWidth: 8,
     overflow: "hidden",
   },
@@ -186,7 +312,6 @@ const style = StyleSheet.create({
     width: "85%",
     height: "85%",
     resizeMode: "contain",
-    
   },
   badgeAcessorio: {
     position: "absolute",
@@ -200,10 +325,8 @@ const style = StyleSheet.create({
     alignItems: "center",
     borderWidth: 2,
     borderColor: "#FFF",
-    overflow:"hidden"
-
+    overflow: "hidden",
   },
-  
   userNameRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -223,7 +346,6 @@ const style = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-
   progressSection: {
     width: "100%",
     alignItems: "center",
@@ -257,7 +379,6 @@ const style = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     position: "relative",
-    
   },
   rewardImage: {
     width: 42,
@@ -273,7 +394,6 @@ const style = StyleSheet.create({
     marginTop: 8,
     textAlign: "center",
   },
- 
   gamesCard: {
     width: "100%",
     backgroundColor: "#E3F2FD",
@@ -300,7 +420,7 @@ const style = StyleSheet.create({
     fontWeight: "bold",
   },
   podiumPlaceholder: {
-    height: 120, 
+    height: 120,
     width: "100%",
   },
   statsRow: {
@@ -322,7 +442,6 @@ const style = StyleSheet.create({
     color: "#297AB8",
     marginTop: 2,
   },
- 
   finalCard: {
     width: "100%",
     backgroundColor: "#FFFFFF",
@@ -345,5 +464,127 @@ const style = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     color: "#000",
+  },
+
+ 
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
+    justifyContent: "flex-end",
+  },
+});
+
+const modalStyle = StyleSheet.create({
+  modalContainer: {
+    backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingHorizontal: 20,
+    paddingTop: 24,
+    paddingBottom: 34,
+    alignItems: "center",
+    width: "100%",
+    position: "relative",
+  },
+  closeButton: {
+    position: "absolute",
+    right: 20,
+    top: 20,
+    zIndex: 10,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "800",
+    color: "#297AB8",
+    marginBottom: 2,
+  },
+  subtitle: {
+    fontSize: 13,
+    color: "#A0AEC0",
+    marginBottom: 20,
+  },
+  categoriesRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginBottom: 20,
+    width: "100%",
+    justifyContent: "center",
+  },
+  categoryTab: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    backgroundColor: "#F3F4F6",
+  },
+  categoryTabSelected: {
+    backgroundColor: "#FFFFFF",
+    borderWidth: 2,
+    borderColor: "#93CCF7",
+  },
+  categoryText: {
+    fontSize: 14,
+    color: "#4A5568",
+    fontWeight: "500",
+  },
+  categoryTextSelected: {
+    color: "#297AB8",
+    fontWeight: "bold",
+  },
+  gridContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    width: "100%",
+    gap: 12,
+    marginBottom: 16,
+  },
+  itemCard: {
+    width: "22%",
+    aspectRatio: 1,
+    backgroundColor: "#F3F4F6",
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "transparent",
+  },
+  itemCardSelected: {
+    backgroundColor: "#EBF8FF",
+    borderColor: "#93CCF7",
+  },
+  itemImage: {
+    width: "75%",
+    height: "75%",
+    resizeMode: "contain",
+  },
+  footer: {
+    width: "100%",
+    alignItems: "center",
+    marginTop: 8,
+  },
+  starPriceRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginBottom: 16,
+  },
+  starPriceText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#000",
+  },
+  confirmButton: {
+    backgroundColor: "#F3F4F6",
+    width: "60%",
+    paddingVertical: 12,
+    borderRadius: 14,
+    alignItems: "center",
+  },
+  confirmButtonText: {
+    color: "#297AB8",
+    fontWeight: "bold",
+    fontSize: 16,
   },
 });
