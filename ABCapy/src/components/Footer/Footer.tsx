@@ -5,11 +5,12 @@ import globo from "../../assets/images/homeImages/globo.png";
 import castelo from "../../assets/images/homeImages/castelo.png";
 import HomePage from "@/app/homePage";
 import UserPage from "@/app/User";
+import { router } from "expo-router";
 const Footer = () => {
   return (
     <View style={styles.footerBar}>
       <View style={styles.footerBar}>
-        <Pressable style={styles.footerButton} onPress={() => {}}>
+        <Pressable style={styles.footerButton} onPress={() => router.push("/homePage")}>
           <Image source={globo} style={styles.icon} />
         </Pressable>
 
@@ -17,7 +18,7 @@ const Footer = () => {
           <Image source={castelo} style={styles.icon} />
         </Pressable>
 
-        <Pressable style={styles.footerButton} onPress={() => {}}>
+        <Pressable style={styles.footerButton} onPress={() => router.push("/User")}>
           <Image source={perfil} style={styles.icon} />
         </Pressable>
       </View>
