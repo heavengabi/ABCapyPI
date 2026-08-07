@@ -14,13 +14,15 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Pencil, Lock, X } from "lucide-react-native";
 import Footer from "@/src/components/Footer/Footer";
 
-// --- DADOS CONSTANTES ---
+
+
 const StarsNumber: number = 3;
+
 const UserName: string = "Paçoco";
 const CompletedActivities: number = 15;
 const TotalStars: number = 39;
 
-// --- DADOS DO MODAL (Personalização) ---
+
 const CATEGORIES = [
   { id: "1", name: "nenhum" },
   { id: "2", name: "chapéus", icon: "🎩" },
@@ -46,7 +48,7 @@ const ITEMS = [
   },
 ];
 
-// --- COMPONENTE INTERNO DO MODAL (ActionModal) ---
+
 interface ActionModalProps {
   handleClose: () => void;
 }
@@ -57,16 +59,16 @@ function ActionModalContent({ handleClose }: ActionModalProps) {
 
   return (
     <View style={modalStyle.modalContainer}>
-      {/* Botão Fechar (X) */}
+      
       <TouchableOpacity style={modalStyle.closeButton} onPress={handleClose}>
         <X size={20} color="#000" />
       </TouchableOpacity>
 
-      {/* Título e Subtítulo */}
+      
       <Text style={modalStyle.title}>Acessórios</Text>
       <Text style={modalStyle.subtitle}>Personalize {UserName}</Text>
 
-      {/* Categorias (Nenhum, Chapéus, Óculos) */}
+      
       <View style={modalStyle.categoriesRow}>
         {CATEGORIES.map((cat) => {
           const isSelected = selectedCategory === cat.id;
@@ -93,7 +95,7 @@ function ActionModalContent({ handleClose }: ActionModalProps) {
         })}
       </View>
 
-      {/* Grid de Itens / Acessórios */}
+     
       <View style={modalStyle.gridContainer}>
         {ITEMS.map((item) => {
           const isSelected = selectedItem === item.id;
@@ -112,7 +114,7 @@ function ActionModalContent({ handleClose }: ActionModalProps) {
         })}
       </View>
 
-      {/* Preço em Estrelas e Botão Confirmar */}
+  
       <View style={modalStyle.footer}>
         <View style={modalStyle.starPriceRow}>
           <Image
@@ -133,7 +135,7 @@ function ActionModalContent({ handleClose }: ActionModalProps) {
   );
 }
 
-// --- PÁGINA PRINCIPAL ---
+
 export default function UserPage() {
   const [visibleModal, setVisibleModal] = useState(false);
 
@@ -144,7 +146,6 @@ export default function UserPage() {
         contentContainerStyle={style.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Estrelas do Topo */}
         <View style={style.headerStars}>
           <Image
             source={require("../src/assets/images/solar_star-bold-duotone.png")}
@@ -153,10 +154,10 @@ export default function UserPage() {
           <Text style={style.starsText}>{StarsNumber}</Text>
         </View>
 
-        {/* Título da Página */}
+        
         <Text style={style.pageTitle}>Perfil</Text>
 
-        {/* Avatar e Capivara */}
+       
         <View style={style.avatarWrapper}>
           <View style={style.circuloOpcao}>
             <Image
@@ -173,7 +174,6 @@ export default function UserPage() {
           </View>
         </View>
 
-        {/* Nome do Usuário + Botão de Lápis */}
         <View style={style.userNameRow}>
           <Text style={style.userNameText}>{UserName}</Text>
           <TouchableOpacity
@@ -184,7 +184,7 @@ export default function UserPage() {
           </TouchableOpacity>
         </View>
 
-        {/* Progresso de Recompensas */}
+       
         <View style={style.progressSection}>
           <View style={style.progressBarContainer}>
             <View style={style.progressBarBackground}>
@@ -208,7 +208,7 @@ export default function UserPage() {
           </Text>
         </View>
 
-        {/* Jogos mais jogados */}
+        
         <View style={style.gamesCard}>
           <View style={style.gamesTitleBadge}>
             <Text style={style.gamesTitleText}>jogos mais jogados</Text>
@@ -229,7 +229,7 @@ export default function UserPage() {
           </View>
         </View>
 
-        {/* Estrelas Conquistadas */}
+        
         <View style={style.finalCard}>
           <Text style={style.finalCardLabel}>estrelas conquistadas</Text>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
@@ -242,7 +242,7 @@ export default function UserPage() {
         </View>
       </ScrollView>
 
-      {/* --- MODAL SLIDE UP --- */}
+     
       <Modal
         visible={visibleModal}
         transparent={true}
@@ -266,7 +266,7 @@ export default function UserPage() {
   );
 }
 
-// --- ESTILOS DA PÁGINA ---
+
 const style = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -469,6 +469,7 @@ const style = StyleSheet.create({
     color: "#000",
   },
 
+ 
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.4)",
