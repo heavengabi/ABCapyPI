@@ -35,7 +35,7 @@ export default function ChildName() {
         />
         
         <View style={{ flexDirection: 'column', gap: 20, marginTop: 150 }}>
-          <Button title="Continuar" onPress={() => router.push('/SignUpParent')} />
+          <Button title="Continuar" onPress={() => router.push('/homePage')} />
         </View>
       </ImageBackground>
     </SafeAreaView>

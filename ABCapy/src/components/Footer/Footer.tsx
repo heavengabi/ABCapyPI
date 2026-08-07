@@ -3,6 +3,7 @@ import React from "react";
 import perfil from "../../assets/images/homeImages/perfil.png";
 import globo from "../../assets/images/homeImages/globo.png";
 import castelo from "../../assets/images/homeImages/castelo.png";
+import { router } from "expo-router";
 
 const Footer = () => {
   return (
@@ -16,7 +17,7 @@ const Footer = () => {
           <Image source={castelo} style={styles.icon} />
         </Pressable>
 
-        <Pressable style={styles.footerButton} onPress={() => {}}>
+        <Pressable style={styles.footerButton} onPress={() => {router.push('/User')}}>
           <Image source={perfil} style={styles.icon} />
         </Pressable>
       </View>
