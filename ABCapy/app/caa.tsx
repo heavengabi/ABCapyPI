@@ -11,6 +11,7 @@ import {
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Speech from 'expo-speech';
+import Footer from '@/src/components/Footer/Footer';
 
 const CARDS = [
   { id: '1', title: 'Sair', image: require('../src/assets/caaCardsImages/sair.png') },
@@ -128,22 +129,7 @@ export default function CAAScreen() {
       </View>
 
       
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem}>
-          <FontAwesome5 name="globe" size={24} color="#5D8AA8" />
-          <Text style={[styles.navText, styles.navTextActive]}>início</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.navItem}>
-          <FontAwesome5 name="chess-rook" size={22} color="#7F8C8D" />
-          <Text style={styles.navText}>história</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.navItem}>
-          <Ionicons name="person-outline" size={24} color="#7F8C8D" />
-          <Text style={styles.navText}>perfil</Text>
-        </TouchableOpacity>
-      </View>
+<Footer/>
     </SafeAreaView>
   );
 }

@@ -13,10 +13,16 @@ import { Image } from "react-native";
 import gramaa from "../src/assets/storiesImages/gramaa.png";
 import Caminho from "@/src/components/Story/Caminho";
 import Footer from "@/src/components/Footer/Footer";
+import Botao from "@/src/components/Story/Botao";
+import a from "../src/assets/storiesImages/a.png";
+import b from "../src/assets/storiesImages/b.png";
+import c from "../src/assets/storiesImages/c.png";
+import d from "../src/assets/storiesImages/d.png";
+
 const Stories = () => {
   return (
-    <SafeAreaView style={{flex:1}}>
-      <ImageBackground source={historias} >
+    <SafeAreaView style={{ flex: 1 }}>
+      <ImageBackground source={historias} style={{ flex: 1 }}>
         <Ionicons
           name="menu"
           size={40}
@@ -24,20 +30,38 @@ const Stories = () => {
           style={styles.menu}
           onPress={() => {}}
         />
+
         <ScrollView contentContainerStyle={styles.storyContent}>
           <View style={styles.container}>
             <Text style={styles.text1}>Se aventure por essas histórias</Text>
           </View>
+
           <View style={styles.conteudo}>
             <Image source={gramaa} style={styles.grama} />
 
             <View style={styles.caminhoContainer}>
               <Caminho />
+
+            <View>
+              <Botao image={a} />
+            </View>
+            <View>
+              <Botao image={b} />
+            </View>
+            <View>
+              <Botao image={c} />
+            </View>
+            <View>
+              <Botao image={d} />
+            </View>
+ 
+
             </View>
           </View>
         </ScrollView>
       </ImageBackground>
-      <Footer/>
+
+      <Footer />
     </SafeAreaView>
   );
 };
@@ -45,8 +69,6 @@ const Stories = () => {
 export default Stories;
 
 const styles = StyleSheet.create({
-
-
   menu: {
     marginTop: 10,
     marginLeft: 20,
@@ -85,7 +107,7 @@ const styles = StyleSheet.create({
 
   caminhoContainer: {
     position: "absolute",
-    top: 200, // ajuste conforme necessário
+    top: 300, // ajuste conforme necessário
     left: 0,
     right: -100,
     bottom: 0,

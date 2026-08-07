@@ -17,6 +17,7 @@ import book from "../src/assets/images/homeImages/book.png";
 import estrela from "../src/assets/images/homeImages/estrela.png";
 import Footer from "@/src/components/Footer/Footer";
 import menu from "../src/assets/images/homeImages/menu.png";
+import Stories from "./Stories";
 
 const HomePage = () => {
   return (
@@ -36,7 +37,7 @@ const HomePage = () => {
           title="Comunicação"
           text="monte frases e se comunique"
           image={speechBubble}
-          onPress={() => router.push("/")}
+          onPress={() => router.push("/caa")}
         />
         <HomeCard
           title="Jogos"
@@ -48,7 +49,7 @@ const HomePage = () => {
           title="Histórias"
           text="Explore novas Histórias"
           image={book}
-          onPress={() => router.push("/")}
+          onPress={() => router.push("/Stories")}
         />
       </View>
 

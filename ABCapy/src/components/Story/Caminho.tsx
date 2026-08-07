@@ -5,9 +5,9 @@ export default function Caminho() {
   return (
     <Svg
       style={{ marginTop: 10 }}
-      width="90%"
-      height={1500}
-      viewBox="0 0 371 1247"
+      width="82%"
+      height={1300}
+      viewBox="0 0 370 1240"
     >
       <Path
         d="

@@ -11,8 +11,9 @@ import {
   FlatList,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Pencil, Lock } from "lucide-react-native";
+import { Pencil, Lock, X } from "lucide-react-native";
 import { ActionModal } from "@/src/components/ui/ActionModal";
+import Footer from "@/src/components/Footer/Footer";
 
 const StarsNumber: number = 3;
 
@@ -259,6 +260,7 @@ export default function UserPage() {
           </View>
         </TouchableWithoutFeedback>
       </Modal>
+      <Footer />
     </SafeAreaView>
   );
 }
