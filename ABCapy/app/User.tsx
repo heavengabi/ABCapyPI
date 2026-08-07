@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Pencil, Lock, X } from "lucide-react-native";
+import Footer from "@/src/components/Footer/Footer";
 
 // --- DADOS CONSTANTES ---
 const StarsNumber: number = 3;
@@ -27,10 +28,22 @@ const CATEGORIES = [
 ];
 
 const ITEMS = [
-  { id: "101", image: require("../src/assets/characterAccessories/FarmerCapy.png") },
-  { id: "102", image: require("../src/assets/characterAccessories/FarmerCapy.png") },
-  { id: "103", image: require("../src/assets/characterAccessories/PirateCapy.png") },
-  { id: "104", image: require("../src/assets/characterAccessories/FarmerCapy.png") },
+  {
+    id: "101",
+    image: require("../src/assets/characterAccessories/FarmerCapy.png"),
+  },
+  {
+    id: "102",
+    image: require("../src/assets/characterAccessories/FarmerCapy.png"),
+  },
+  {
+    id: "103",
+    image: require("../src/assets/characterAccessories/PirateCapy.png"),
+  },
+  {
+    id: "104",
+    image: require("../src/assets/characterAccessories/FarmerCapy.png"),
+  },
 ];
 
 // --- COMPONENTE INTERNO DO MODAL (ActionModal) ---
@@ -109,7 +122,10 @@ function ActionModalContent({ handleClose }: ActionModalProps) {
           <Text style={modalStyle.starPriceText}>50</Text>
         </View>
 
-        <TouchableOpacity style={modalStyle.confirmButton} onPress={handleClose}>
+        <TouchableOpacity
+          style={modalStyle.confirmButton}
+          onPress={handleClose}
+        >
           <Text style={modalStyle.confirmButtonText}>confirmar</Text>
         </TouchableOpacity>
       </View>
@@ -122,8 +138,9 @@ export default function UserPage() {
   const [visibleModal, setVisibleModal] = useState(false);
 
   return (
-    <SafeAreaView edges={["top"]} style={style.safeArea}>
+    <SafeAreaView edges={["top", "bottom"]} style={style.safeArea}>
       <ScrollView
+        style={{ flex: 1 }}
         contentContainerStyle={style.scrollContent}
         showsVerticalScrollIndicator={false}
       >
@@ -236,12 +253,15 @@ export default function UserPage() {
           <View style={style.modalOverlay}>
             <TouchableWithoutFeedback>
               <View style={{ width: "100%" }}>
-                <ActionModalContent handleClose={() => setVisibleModal(false)} />
+                <ActionModalContent
+                  handleClose={() => setVisibleModal(false)}
+                />
               </View>
             </TouchableWithoutFeedback>
           </View>
         </TouchableWithoutFeedback>
       </Modal>
+      <Footer />
     </SafeAreaView>
   );
 }
@@ -254,7 +274,7 @@ const style = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingBottom: 40,
+    paddingBottom: 100, // ou 120
     alignItems: "center",
   },
   headerStars: {
@@ -449,14 +469,12 @@ const style = StyleSheet.create({
     color: "#000",
   },
 
-
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.4)",
     justifyContent: "flex-end",
   },
 });
-
 
 const modalStyle = StyleSheet.create({
   modalContainer: {

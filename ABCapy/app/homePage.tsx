@@ -18,10 +18,9 @@ import estrela from "../src/assets/images/homeImages/estrela.png";
 import Footer from "@/src/components/Footer/Footer";
 import menu from "../src/assets/images/homeImages/menu.png";
 
-
 const HomePage = () => {
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#85ccffc9" }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#ffffffc9" }}>
       <ImageBackground source={gradiente} style={styles.gradiente}>
         <Text style={styles.texto}>Olá!</Text>
         <Image source={capyHome} style={styles.capy} />
@@ -63,7 +62,7 @@ export default HomePage;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#85ccffc9",
+    backgroundColor: "#ffffffc9",
   },
 
   gradiente: {
@@ -89,17 +88,15 @@ const styles = StyleSheet.create({
     bottom: 20,
   },
 
-  containerCards: {
-    flex: 1,
-    marginTop: -20,
-    backgroundColor: "#FFF",
-    borderTopLeftRadius: 25,
-    borderTopRightRadius: 25,
-    borderColor: "#CDE9FF",
-    borderWidth: 5,
-    alignItems: "center",
-    paddingTop: 18,
-  },
+containerCards: {
+  flex: 1,
+  marginTop: -20,
+  backgroundColor: "#FFF",
+  borderTopLeftRadius: 25,
+  borderTopRightRadius: 25,
+  alignItems: "center",
+  paddingTop: 18,
+},
 
   texto2: {
     fontSize: 28,
