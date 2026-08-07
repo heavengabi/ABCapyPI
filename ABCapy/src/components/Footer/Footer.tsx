@@ -3,7 +3,8 @@ import React from "react";
 import perfil from "../../assets/images/homeImages/perfil.png";
 import globo from "../../assets/images/homeImages/globo.png";
 import castelo from "../../assets/images/homeImages/castelo.png";
-
+import HomePage from "@/app/homePage";
+import UserPage from "@/app/User";
 const Footer = () => {
   return (
     <View style={styles.footerBar}>
