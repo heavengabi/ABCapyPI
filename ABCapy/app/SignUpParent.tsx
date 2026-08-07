@@ -6,7 +6,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import logoImage from "../src/assets/images/small-logo.png";
 import BackgroundImage from "../src/assets/images/bg-login.png";
 import { router } from "expo-router";
-
+import HomePage from "./homePage";
 
 export default function Cadastro() {
   return (
