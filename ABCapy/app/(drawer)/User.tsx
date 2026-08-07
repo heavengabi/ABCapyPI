@@ -13,9 +13,12 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Pencil, Lock, X } from "lucide-react-native";
 import { DrawerActions, useNavigation } from "@react-navigation/native";
-import menu from "../../src/assets/images/homeImages/menu.png";
+import menu from "../../src/assets/images/homeImages/menu.png";import Footer from "@/src/components/Footer/Footer";
+
+
 
 const StarsNumber: number = 3;
+
 const UserName: string = "Paçoco";
 const TotalStars: number = 39;
 
@@ -105,7 +108,10 @@ function ActionModalContent({ handleClose }: ActionModalProps) {
           <Text style={modalStyle.starPriceText}>50</Text>
         </View>
 
-        <TouchableOpacity style={modalStyle.confirmButton} onPress={handleClose}>
+        <TouchableOpacity
+          style={modalStyle.confirmButton}
+          onPress={handleClose}
+        >
           <Text style={modalStyle.confirmButtonText}>confirmar</Text>
         </TouchableOpacity>
       </View>
@@ -122,8 +128,9 @@ export default function UserPage() {
   };
 
   return (
-    <SafeAreaView edges={["top"]} style={style.safeArea}>
+    <SafeAreaView edges={["top", "bottom"]} style={style.safeArea}>
       <ScrollView
+        style={{ flex: 1 }}
         contentContainerStyle={style.scrollContent}
         showsVerticalScrollIndicator={false}
       >
@@ -238,12 +245,15 @@ export default function UserPage() {
           <View style={style.modalOverlay}>
             <TouchableWithoutFeedback>
               <View style={{ width: "100%" }}>
-                <ActionModalContent handleClose={() => setVisibleModal(false)} />
+                <ActionModalContent
+                  handleClose={() => setVisibleModal(false)}
+                />
               </View>
             </TouchableWithoutFeedback>
           </View>
         </TouchableWithoutFeedback>
       </Modal>
+      <Footer />
     </SafeAreaView>
   );
 }
@@ -255,7 +265,7 @@ const style = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingBottom: 40,
+    paddingBottom: 100, // ou 120
     alignItems: "center",
   },
   topBar: {

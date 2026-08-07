@@ -56,7 +56,7 @@ const HomePage = () => {
             title="Comunicação"
             text="monte frases e se comunique"
             image={speechBubble}
-            onPress={() => router.push("/caaPages")} // Ajuste para a rota real da sua tela CAA
+            onPress={() => router.push("/caa")} // Ajuste para a rota real da sua tela CAA
           />
           <HomeCard
             title="Jogos"
@@ -68,7 +68,7 @@ const HomePage = () => {
             title="Histórias"
             text="Explore novas Histórias"
             image={book}
-            onPress={() => router.push("/storyPages")} // Ajuste para a rota de histórias
+            onPress={() => router.push("/StoryPages")} // Ajuste para a rota de histórias
           />
         </ScrollView>
       </View>
