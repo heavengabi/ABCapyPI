@@ -11,62 +11,74 @@ import {
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Speech from 'expo-speech';
-import { ComponenteModal } from '@/src/components/ui/ActionModal';
+import { DrawerActions, useNavigation } from '@react-navigation/native';
 
 const CARDS = [
-  { id: '1', title: 'Sair', image: require('../src/assets/caaCardsImages/sair.png') },
-  { id: '2', title: 'Eu', image: require('../src/assets/caaCardsImages/eu.png') },
-  { id: '3', title: 'Você', image: require('../src/assets/caaCardsImages/eu.png') },
-  { id: '4', title: 'Quero', image: require('../src/assets/caaCardsImages/quero.png') },
-  { id: '5', title: 'Parar', image: require('../src/assets/caaCardsImages/parar.png') },
-  { id: '6', title: 'Comer', image: require('../src/assets/caaCardsImages/comer.png') },
-  { id: '7', title: 'Obrigado', image: require('../src/assets/caaCardsImages/obrigado.png') },
-  { id: '8', title: 'Desculpa', image: require('../src/assets/caaCardsImages/pedirDesculpa.png') },
-  { id: '9', title: 'Beber', image: require('../src/assets/caaCardsImages/beber.png') },
-  { id: '10', title: 'Repetir', image: require('../src/assets/caaCardsImages/ouvir.png') },
-  { id: '11', title: 'Dormir', image: require('../src/assets/caaCardsImages/dormir.png') },
-  { id: '12', title: 'Banheiro', image: require('../src/assets/caaCardsImages/sanitários.png') },
-  { id: '13', title: 'Sim', image: require('../src/assets/caaCardsImages/sim.png') },
-  { id: '14', title: 'Escola', image: require('../src/assets/caaCardsImages/escola.png') },
+  { id: '1', title: 'Sair', image: require('../../src/assets/caaCardsImages/sair.png') },
+  { id: '2', title: 'Eu', image: require('../../src/assets/caaCardsImages/eu.png') },
+  { id: '3', title: 'Você', image: require('../../src/assets/caaCardsImages/eu.png') },
+  { id: '4', title: 'Quero', image: require('../../src/assets/caaCardsImages/quero.png') },
+  { id: '5', title: 'Parar', image: require('../../src/assets/caaCardsImages/parar.png') },
+  { id: '6', title: 'Comer', image: require('../../src/assets/caaCardsImages/comer.png') },
+  { id: '7', title: 'Obrigado', image: require('../../src/assets/caaCardsImages/obrigado.png') },
+  { id: '8', title: 'Desculpa', image: require('../../src/assets/caaCardsImages/pedirDesculpa.png') },
+  { id: '9', title: 'Beber', image: require('../../src/assets/caaCardsImages/beber.png') },
+  { id: '10', title: 'Repetir', image: require('../../src/assets/caaCardsImages/ouvir.png') },
+  { id: '11', title: 'Dormir', image: require('../../src/assets/caaCardsImages/dormir.png') },
+  { id: '12', title: 'Banheiro', image: require('../../src/assets/caaCardsImages/sanitários.png') },
+  { id: '13', title: 'Sim', image: require('../../src/assets/caaCardsImages/sim.png') },
+  { id: '14', title: 'Escola', image: require('../../src/assets/caaCardsImages/escola.png') },
   { id: '15', isAddButton: true },
 ];
 
 export default function CAAScreen() {
-  
-  const [selectedWords, setSelectedWords] = useState([]);
+  const navigation = useNavigation();
+  const [selectedWords, setSelectedWords] = useState<string[]>([]);
 
+  // Handler do Menu
+  const openMenu = () => {
+    navigation.dispatch(DrawerActions.openDrawer());
+  };
 
-  const handleCardPress = (title) => {
+  // Adiciona palavra e fala individualmente (opcional)
+  const handleCardPress = (title?: string) => {
     if (title) {
-      setSelectedWords((prevWords) => [...prevWords, title]);
+      setSelectedWords((prev) => [...prev, title]);
+      // Exemplo de TTS ao clicar no card individual (opcional):
+      // Speech.speak(title, { language: 'pt-BR' });
     }
   };
 
- 
-  const handleClear = () => {
-    setSelectedWords([]);
-    Speech.stop(); 
+  // Remove uma palavra específica clicando nela
+  const handleRemoveWord = (indexToRemove: number) => {
+    setSelectedWords((prev) => prev.filter((_, index) => index !== indexToRemove));
   };
 
-  
+  // Limpa toda a frase
+  const handleClear = () => {
+    setSelectedWords([]);
+    Speech.stop();
+  };
+
+  // Fala a frase completa
   const handleSpeak = () => {
     if (selectedWords.length > 0) {
       const phraseToSpeak = selectedWords.join(' ');
-      Speech.speak(phraseToSpeak, { language: 'pt-br' });
+      Speech.speak(phraseToSpeak, { language: 'pt-BR' });
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      
+
       <View style={styles.header}>
-        <TouchableOpacity style={styles.menuButton}>
+        <TouchableOpacity style={styles.menuButton} onPress={openMenu}>
           <Ionicons name="menu-outline" size={32} color="#2C3E50" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Monte sua frase</Text>
       </View>
 
-     
+      {/* Área da Frase */}
       <View style={styles.phraseContainer}>
         <View style={styles.phraseBox}>
           {selectedWords.length === 0 ? (
@@ -74,28 +86,47 @@ export default function CAAScreen() {
               Toque nos cartões abaixo para construir sua mensagem
             </Text>
           ) : (
-            <Text style={styles.selectedPhraseText}>
-              {selectedWords.join(' ')}
-            </Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.wordsScroll}
+            >
+              {selectedWords.map((word, index) => (
+                <TouchableOpacity
+                  key={`${word}-${index}`}
+                  style={styles.wordChip}
+                  onPress={() => handleRemoveWord(index)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.wordChipText}>{word}</Text>
+                  <Ionicons name="close-circle" size={16} color="#7F8C8D" />
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           )}
         </View>
 
-        {
+        {/* Botões de Ação */}
         <View style={styles.actionButtonsRow}>
-          
-          <TouchableOpacity style={styles.circleButton} onPress={handleClear}>
-            <Ionicons name="trash-outline" size={24} color="#E74C3C" />
+          <TouchableOpacity
+            style={[styles.circleButton, selectedWords.length === 0 && styles.disabledButton]}
+            onPress={handleClear}
+            disabled={selectedWords.length === 0}
+          >
+            <Ionicons name="trash-outline" size={24} color={selectedWords.length > 0 ? '#E74C3C' : '#BDC3C7'} />
           </TouchableOpacity>
 
-         
-          <TouchableOpacity style={styles.circleButton} onPress={handleSpeak}>
-            <Ionicons name="volume-medium-outline" size={26} color="#3498DB" />
+          <TouchableOpacity
+            style={[styles.circleButton, selectedWords.length === 0 && styles.disabledButton]}
+            onPress={handleSpeak}
+            disabled={selectedWords.length === 0}
+          >
+            <Ionicons name="volume-medium-outline" size={26} color={selectedWords.length > 0 ? '#3498DB' : '#BDC3C7'} />
           </TouchableOpacity>
         </View>
-}
       </View>
 
-      
+      {/* Grid de Cartões */}
       <View style={styles.cardsContainer}>
         <ScrollView
           showsVerticalScrollIndicator={false}
@@ -105,7 +136,7 @@ export default function CAAScreen() {
             {CARDS.map((item) => (
               <View key={item.id} style={styles.cardWrapper}>
                 {item.isAddButton ? (
-                  <TouchableOpacity style={[styles.card, styles.addCard]}>
+                  <TouchableOpacity style={[styles.card, styles.addCard]} activeOpacity={0.7}>
                     <Ionicons name="add" size={36} color="#2C3E50" />
                   </TouchableOpacity>
                 ) : (
@@ -128,15 +159,15 @@ export default function CAAScreen() {
         </ScrollView>
       </View>
 
-      
+      {/* NAVEGAÇÃO INFERIOR */}
       <View style={styles.bottomNav}>
         <TouchableOpacity style={styles.navItem}>
-          <FontAwesome5 name="globe" size={24} color="#5D8AA8" />
+          <FontAwesome5 name="globe" size={22} color="#5D8AA8" />
           <Text style={[styles.navText, styles.navTextActive]}>início</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.navItem}>
-          <FontAwesome5 name="chess-rook" size={22} color="#7F8C8D" />
+          <FontAwesome5 name="chess-rook" size={20} color="#7F8C8D" />
           <Text style={styles.navText}>história</Text>
         </TouchableOpacity>
 
@@ -181,7 +212,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     width: '100%',
     minHeight: 70,
-    padding: 15,
+    padding: 10,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
@@ -197,11 +228,27 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
   },
-  selectedPhraseText: {
-    fontSize: 20,
-    fontWeight: 'bold',
+  wordsScroll: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 5,
+  },
+  wordChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#EBF5FB',
+    borderColor: '#3498DB',
+    borderWidth: 1,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 16,
+    gap: 6,
+  },
+  wordChipText: {
+    fontSize: 16,
+    fontWeight: '600',
     color: '#2C3E50',
-    textAlign: 'center',
   },
   actionButtonsRow: {
     flexDirection: 'row',
@@ -215,6 +262,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#CDE8FA',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  disabledButton: {
+    backgroundColor: '#EAEDED',
   },
   cardsContainer: {
     flex: 1,

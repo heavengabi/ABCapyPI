@@ -8,17 +8,16 @@ import {
   Image,
   Modal,
   TouchableWithoutFeedback,
-  FlatList,
+  Pressable,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Pencil, Lock, X } from "lucide-react-native";
-
+import { DrawerActions, useNavigation } from "@react-navigation/native";
+import menu from "../../src/assets/images/homeImages/menu.png";
 
 const StarsNumber: number = 3;
 const UserName: string = "Paçoco";
-const CompletedActivities: number = 15;
 const TotalStars: number = 39;
-
 
 const CATEGORIES = [
   { id: "1", name: "nenhum" },
@@ -27,12 +26,11 @@ const CATEGORIES = [
 ];
 
 const ITEMS = [
-  { id: "101", image: require("../src/assets/characterAccessories/FarmerCapy.png") },
-  { id: "102", image: require("../src/assets/characterAccessories/FarmerCapy.png") },
-  { id: "103", image: require("../src/assets/characterAccessories/PirateCapy.png") },
-  { id: "104", image: require("../src/assets/characterAccessories/FarmerCapy.png") },
+  { id: "101", image: require("../../src/assets/characterAccessories/FarmerCapy.png") },
+  { id: "102", image: require("../../src/assets/characterAccessories/FarmerCapy.png") },
+  { id: "103", image: require("../../src/assets/characterAccessories/PirateCapy.png") },
+  { id: "104", image: require("../../src/assets/characterAccessories/FarmerCapy.png") },
 ];
-
 
 interface ActionModalProps {
   handleClose: () => void;
@@ -44,16 +42,14 @@ function ActionModalContent({ handleClose }: ActionModalProps) {
 
   return (
     <View style={modalStyle.modalContainer}>
-      
-      <TouchableOpacity style={modalStyle.closeButton} onPress={handleClose}>
+      <TouchableOpacity style={modalStyle.closeButton} onPress={handleClose} hitSlop={10}>
         <X size={20} color="#000" />
       </TouchableOpacity>
 
-      
       <Text style={modalStyle.title}>Acessórios</Text>
       <Text style={modalStyle.subtitle}>Personalize {UserName}</Text>
 
-      
+      {/* Categorias */}
       <View style={modalStyle.categoriesRow}>
         {CATEGORIES.map((cat) => {
           const isSelected = selectedCategory === cat.id;
@@ -80,7 +76,7 @@ function ActionModalContent({ handleClose }: ActionModalProps) {
         })}
       </View>
 
-     
+      {/* Grid de Itens */}
       <View style={modalStyle.gridContainer}>
         {ITEMS.map((item) => {
           const isSelected = selectedItem === item.id;
@@ -99,11 +95,11 @@ function ActionModalContent({ handleClose }: ActionModalProps) {
         })}
       </View>
 
-  
+      {/* Footer Modal */}
       <View style={modalStyle.footer}>
         <View style={modalStyle.starPriceRow}>
           <Image
-            source={require("../src/assets/images/solar_star-bold-duotone.png")}
+            source={require("../../src/assets/images/solar_star-bold-duotone.png")}
             style={{ width: 22, height: 22 }}
           />
           <Text style={modalStyle.starPriceText}>50</Text>
@@ -117,9 +113,13 @@ function ActionModalContent({ handleClose }: ActionModalProps) {
   );
 }
 
-
 export default function UserPage() {
   const [visibleModal, setVisibleModal] = useState(false);
+  const navigation = useNavigation();
+
+  const openMenu = () => {
+    navigation.dispatch(DrawerActions.openDrawer());
+  };
 
   return (
     <SafeAreaView edges={["top"]} style={style.safeArea}>
@@ -127,34 +127,41 @@ export default function UserPage() {
         contentContainerStyle={style.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <View style={style.headerStars}>
-          <Image
-            source={require("../src/assets/images/solar_star-bold-duotone.png")}
-            style={{ width: 24, height: 24 }}
-          />
-          <Text style={style.starsText}>{StarsNumber}</Text>
+        {/* Header Superior reorganizado */}
+        <View style={style.topBar}>
+          <Pressable onPress={openMenu} hitSlop={10}>
+            <Image source={menu} style={style.menuIcon} />
+          </Pressable>
+
+          <View style={style.headerStars}>
+            <Image
+              source={require("../../src/assets/images/solar_star-bold-duotone.png")}
+              style={{ width: 24, height: 24 }}
+            />
+            <Text style={style.starsText}>{StarsNumber}</Text>
+          </View>
         </View>
 
-        
         <Text style={style.pageTitle}>Perfil</Text>
 
-       
+        {/* Avatar */}
         <View style={style.avatarWrapper}>
           <View style={style.circuloOpcao}>
             <Image
-              source={require("../src/assets/charactersImages/StudentCapy.png")}
+              source={require("../../src/assets/charactersImages/StudentCapy.png")}
               style={style.imagemPersonagem}
             />
           </View>
 
           <View style={style.badgeAcessorio}>
             <Image
-              source={require("../src/assets/characterAccessories/FarmerCapy.png")}
+              source={require("../../src/assets/characterAccessories/FarmerCapy.png")}
               style={{ width: 52, height: 32, resizeMode: "cover" }}
             />
           </View>
         </View>
 
+        {/* Nome do Usuário */}
         <View style={style.userNameRow}>
           <Text style={style.userNameText}>{UserName}</Text>
           <TouchableOpacity
@@ -165,7 +172,7 @@ export default function UserPage() {
           </TouchableOpacity>
         </View>
 
-       
+        {/* Progresso */}
         <View style={style.progressSection}>
           <View style={style.progressBarContainer}>
             <View style={style.progressBarBackground}>
@@ -174,11 +181,8 @@ export default function UserPage() {
 
             <View style={style.rewardContainer}>
               <Image
-                source={require("../src/assets/characterAccessories/PirateCapy.png")}
-                style={[
-                  style.rewardImage,
-                  { tintColor: "rgba(80, 80, 80, 0.6)" },
-                ]}
+                source={require("../../src/assets/characterAccessories/PirateCapy.png")}
+                style={style.rewardImageLocked}
               />
               <Lock size={18} color="#000" style={style.lockIcon} />
             </View>
@@ -189,7 +193,7 @@ export default function UserPage() {
           </Text>
         </View>
 
-        
+        {/* Card Jogos */}
         <View style={style.gamesCard}>
           <View style={style.gamesTitleBadge}>
             <Text style={style.gamesTitleText}>jogos mais jogados</Text>
@@ -210,20 +214,20 @@ export default function UserPage() {
           </View>
         </View>
 
-        
+        {/* Estrelas Conquistadas */}
         <View style={style.finalCard}>
           <Text style={style.finalCardLabel}>estrelas conquistadas</Text>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
             <Text style={style.finalCardValue}>{TotalStars}</Text>
             <Image
-              source={require("../src/assets/images/solar_star-bold-duotone.png")}
+              source={require("../../src/assets/images/solar_star-bold-duotone.png")}
               style={{ width: 22, height: 22 }}
             />
           </View>
         </View>
       </ScrollView>
 
-     
+      {/* Modal Acessórios */}
       <Modal
         visible={visibleModal}
         transparent={true}
@@ -244,7 +248,6 @@ export default function UserPage() {
   );
 }
 
-
 const style = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -255,12 +258,22 @@ const style = StyleSheet.create({
     paddingBottom: 40,
     alignItems: "center",
   },
+  topBar: {
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 10,
+  },
+  menuIcon: {
+    width: 31,
+    height: 31,
+    resizeMode: "contain",
+  },
   headerStars: {
-    alignSelf: "flex-end",
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    marginTop: 10,
   },
   starsText: {
     fontSize: 18,
@@ -361,10 +374,11 @@ const style = StyleSheet.create({
     alignItems: "center",
     position: "relative",
   },
-  rewardImage: {
+  rewardImageLocked: {
     width: 42,
     height: 42,
     resizeMode: "cover",
+    tintColor: "rgba(80, 80, 80, 0.6)",
   },
   lockIcon: {
     position: "absolute",
@@ -446,15 +460,12 @@ const style = StyleSheet.create({
     fontWeight: "bold",
     color: "#000",
   },
-
- 
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.4)",
     justifyContent: "flex-end",
   },
 });
-
 
 const modalStyle = StyleSheet.create({
   modalContainer: {
@@ -517,7 +528,7 @@ const modalStyle = StyleSheet.create({
   gridContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
     width: "100%",
     gap: 12,
     marginBottom: 16,
