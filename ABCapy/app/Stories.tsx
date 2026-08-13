@@ -18,6 +18,9 @@ import a from "../src/assets/storiesImages/a.png";
 import b from "../src/assets/storiesImages/b.png";
 import c from "../src/assets/storiesImages/c.png";
 import d from "../src/assets/storiesImages/d.png";
+import e from "../src/assets/storiesImages/e.png";
+import f from "../src/assets/storiesImages/f.png";
+import g from "../src/assets/storiesImages/g.png";
 
 const Stories = () => {
   return (
@@ -31,7 +34,7 @@ const Stories = () => {
           onPress={() => {}}
         />
 
-        <ScrollView contentContainerStyle={styles.storyContent}>
+        <ScrollView>
           <View style={styles.container}>
             <Text style={styles.text1}>Se aventure por essas histórias</Text>
           </View>
@@ -42,20 +45,27 @@ const Stories = () => {
             <View style={styles.caminhoContainer}>
               <Caminho />
 
-            <View>
-              <Botao image={a} />
-            </View>
-            <View>
-              <Botao image={b} />
-            </View>
-            <View>
-              <Botao image={c} />
-            </View>
-            <View>
-              <Botao image={d} />
-            </View>
- 
-
+              <View style={[styles.btnContainer, { top: -30, right: "64%" }]}>
+                <Botao image={a} />
+              </View>
+              <View style={[styles.btnContainer, { top: 185, left: "50%" }]}>
+                <Botao image={b} />
+              </View>
+              <View style={[styles.btnContainer, { top: 340, right: "75%" }]}>
+                <Botao image={c} />
+              </View>
+              <View style={[styles.btnContainer, { top: 480, left: "55%" }]}>
+                <Botao image={d} />
+              </View>
+              <View style={[styles.btnContainer, { top: 650, right: "75%" }]}>
+                <Botao image={e} />
+              </View>
+              <View style={[styles.btnContainer, { top: 800, left: "55%" }]}>
+                <Botao image={f} />
+              </View>
+              <View style={[styles.btnContainer, { top: 950, right: "75%" }]}>
+                <Botao image={g} />
+              </View>
             </View>
           </View>
         </ScrollView>
@@ -94,7 +104,6 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
 
-  storyContent: {},
   conteudo: {
     flex: 1,
     position: "relative",
@@ -107,9 +116,13 @@ const styles = StyleSheet.create({
 
   caminhoContainer: {
     position: "absolute",
-    top: 300, // ajuste conforme necessário
+    top: 190, // ajuste conforme necessário
     left: 0,
     right: -100,
     bottom: 0,
+  },
+
+  btnContainer: {
+    position: "absolute",
   },
 });

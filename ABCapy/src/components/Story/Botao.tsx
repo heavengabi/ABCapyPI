@@ -25,12 +25,14 @@ export default Botao;
 
 const styles = StyleSheet.create({
   btn: {
-    width: 100,
-    height: 100,
-    backgroundColor: "red",
+    width: 120,
+    height: 120,
+    backgroundColor: "#59ADED",
     justifyContent: "center",
     alignItems: "center",
-    borderRadius:48.1
+    borderRadius:70,
+    elevation:8,
+
   },
 
   image: {
