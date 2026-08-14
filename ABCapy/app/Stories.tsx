@@ -21,7 +21,9 @@ import d from "../src/assets/storiesImages/d.png";
 import e from "../src/assets/storiesImages/e.png";
 import f from "../src/assets/storiesImages/f.png";
 import g from "../src/assets/storiesImages/g.png";
-
+import Recompensa from "@/src/components/Story/Recompensa";
+import starStory from "../src/assets/storiesImages/starStory.png";
+import { router } from "expo-router";
 const Stories = () => {
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -46,25 +48,32 @@ const Stories = () => {
               <Caminho />
 
               <View style={[styles.btnContainer, { top: -30, right: "64%" }]}>
-                <Botao image={a} />
+                <Botao image={a} onPress={() => router.push("/StoryPage")} />
+                <Recompensa quantidade={3} imagem={starStory} />
               </View>
               <View style={[styles.btnContainer, { top: 185, left: "50%" }]}>
-                <Botao image={b} />
+                <Botao image={b} onPress={() => router.push("/StoryPage")} />
+                <Recompensa quantidade={3} imagem={starStory} />
               </View>
               <View style={[styles.btnContainer, { top: 340, right: "75%" }]}>
-                <Botao image={c} />
+                <Botao image={c} onPress={() => router.push("/StoryPage")} />
+                <Recompensa quantidade={3} imagem={starStory} />
               </View>
               <View style={[styles.btnContainer, { top: 480, left: "55%" }]}>
-                <Botao image={d} />
+                <Botao image={d} onPress={() => router.push("/StoryPage")} />
+                <Recompensa quantidade={3} imagem={starStory} />
               </View>
               <View style={[styles.btnContainer, { top: 650, right: "75%" }]}>
-                <Botao image={e} />
+                <Botao image={e} onPress={() => router.push("/StoryPage")} />
+                <Recompensa quantidade={3} imagem={starStory} />
               </View>
               <View style={[styles.btnContainer, { top: 800, left: "55%" }]}>
-                <Botao image={f} />
+                <Botao image={f} onPress={() => router.push("/StoryPage")} />
+                <Recompensa quantidade={3} imagem={starStory} />
               </View>
               <View style={[styles.btnContainer, { top: 950, right: "75%" }]}>
-                <Botao image={g} />
+                <Botao image={g} onPress={() => router.push("/StoryPage")} />
+                <Recompensa quantidade={3} imagem={starStory} />
               </View>
             </View>
           </View>
