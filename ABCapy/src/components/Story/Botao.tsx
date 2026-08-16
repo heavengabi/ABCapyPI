@@ -13,10 +13,10 @@ type Props = {
   onPress: () => void;
 };
 
-const Botao = ({ image }: Props) => {
+const Botao = ({ image, onPress}: Props) => {
   return (
     <View style={styles.container}>
-      <Pressable style={styles.btn}>
+      <Pressable style={styles.btn} onPress={onPress}>
         <Image source={image} style={styles.image} />
       </Pressable>
     </View>
