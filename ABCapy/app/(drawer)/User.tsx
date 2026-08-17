@@ -50,7 +50,7 @@ function ActionModalContent({ handleClose }: ActionModalProps) {
       <Text style={modalStyle.title}>Acessórios</Text>
       <Text style={modalStyle.subtitle}>Personalize {UserName}</Text>
 
-      {/* Categorias */}
+     
       <View style={modalStyle.categoriesRow}>
         {CATEGORIES.map((cat) => {
           const isSelected = selectedCategory === cat.id;
@@ -96,7 +96,7 @@ function ActionModalContent({ handleClose }: ActionModalProps) {
         })}
       </View>
 
-      {/* Footer Modal */}
+      
       <View style={modalStyle.footer}>
         <View style={modalStyle.starPriceRow}>
           <Image
@@ -177,7 +177,7 @@ export default function UserPage() {
           </TouchableOpacity>
         </View>
 
-        {/* Progresso */}
+        
         <View style={style.progressSection}>
           <View style={style.progressBarContainer}>
             <View style={style.progressBarBackground}>
@@ -198,7 +198,7 @@ export default function UserPage() {
           </Text>
         </View>
 
-        {/* Card Jogos */}
+       
         <View style={style.gamesCard}>
           <View style={style.gamesTitleBadge}>
             <Text style={style.gamesTitleText}>jogos mais jogados</Text>
@@ -263,7 +263,7 @@ const style = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingBottom: 100, // ou 120
+    paddingBottom: 100,
     alignItems: "center",
   },
   topBar: {
@@ -291,7 +291,7 @@ const style = StyleSheet.create({
   pageTitle: {
     color: "#297AB8",
     fontSize: 34,
-    fontWeight: "800",
+    fontFamily:"Poppins_700Bold",
     marginTop: 10,
     marginBottom: 20,
   },
@@ -337,7 +337,7 @@ const style = StyleSheet.create({
   },
   userNameText: {
     fontSize: 24,
-    fontWeight: "bold",
+    fontFamily:"Poppins_600SemiBold",
     color: "#297AB8",
   },
   editButton: {
@@ -420,7 +420,7 @@ const style = StyleSheet.create({
   gamesTitleText: {
     color: "#297AB8",
     fontSize: 16,
-    fontWeight: "bold",
+    fontFamily:"Poppins_700Bold"
   },
   podiumPlaceholder: {
     height: 120,
@@ -437,12 +437,13 @@ const style = StyleSheet.create({
   },
   statNumber: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontFamily:"Poppins_700Bold",
     color: "#000",
   },
   statLabel: {
     fontSize: 12,
     color: "#297AB8",
+    fontFamily:"Poppins_400Regular",
     marginTop: 2,
   },
   finalCard: {
@@ -462,10 +463,11 @@ const style = StyleSheet.create({
     fontSize: 14,
     color: "#297AB8",
     marginBottom: 4,
+    fontFamily:"Poppins_400Regular"
   },
   finalCardValue: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontFamily:"Poppins_700Bold",
     color: "#000",
   },
   modalOverlay: {

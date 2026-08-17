@@ -205,12 +205,13 @@ const style = StyleSheet.create({
   },
   title: {
     fontSize: 22,
-    fontWeight: "bold",
+    fontFamily: "Poppins_700Bold",
     color: "#000000",
   },
   subtitleHeader: {
     fontSize: 14,
     color: "#8AA2B8",
+    fontFamily:"Poppins_600SemiBold"
   },
   
   cardContainer: {
@@ -242,12 +243,13 @@ const style = StyleSheet.create({
   },
   cardTitle: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontFamily: "Poppins_500Medium",
     color: "#000000",
   },
   cardSubtitle: {
     fontSize: 12,
     color: "#6B859E",
+    fontFamily:"Poppins_400Regular"
   },
   
   gridColors: {

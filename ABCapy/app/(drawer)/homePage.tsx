@@ -11,12 +11,14 @@ import {
 import { router, useNavigation } from "expo-router";
 import { DrawerActions } from "@react-navigation/native";
 
+
+import CapyImage from "../../src/assets/images/capyImages/Group 338.svg";
+
 // Componentes
 import HomeCard from "@/src/components/homeComponents/HomeCard";
 import Footer from "@/src/components/Footer/Footer";
 
-// Assets
-import capyHome from "../../src/assets/images/homeImages/capyHome.png";
+// Assets PNG
 import gradiente from "../../src/assets/images/homeImages/gradiente.png";
 import speechBubble from "../../src/assets/images/homeImages/speechBubble.png";
 import book from "../../src/assets/images/homeImages/book.png";
@@ -34,7 +36,9 @@ const HomePage = () => {
     <SafeAreaView style={styles.container}>
       <ImageBackground source={gradiente} style={styles.gradiente}>
         <Text style={styles.texto}>Olá!</Text>
-        <Image source={capyHome} style={styles.capy} />
+
+       
+        <CapyImage width={260} height={170} style={styles.capy} />
 
         <Pressable
           style={styles.menuButton}
@@ -93,15 +97,12 @@ const styles = StyleSheet.create({
   texto: {
     color: "#297AB8",
     fontSize: 22,
-    fontWeight: "bold",
     position: "absolute",
+    fontFamily:"Poppins_700Bold",
     top: 50,
   },
 
   capy: {
-    width: 260,
-    height: 170,
-    resizeMode: "contain",
     position: "absolute",
     bottom: 20,
   },
@@ -118,7 +119,7 @@ const styles = StyleSheet.create({
 
   texto2: {
     fontSize: 28,
-    fontWeight: "bold",
+    fontFamily:"Poppins_700Bold",
     color: "#6ABFEF",
     marginBottom: 15,
   },

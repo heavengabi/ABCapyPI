@@ -4,39 +4,49 @@ import {
   View,
   ScrollView,
   ImageBackground,
+  Pressable,
 } from "react-native";
 import React from "react";
-import historias from "../src/assets/storiesImages/historias.png";
+import menu from "../../src/assets/images/homeImages/menu.png";
+import historias from "../../src/assets/storiesImages/historias.png";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "react-native";
-import gramaa from "../src/assets/storiesImages/gramaa.png";
+import gramaa from "../../src/assets/storiesImages/gramaa.png";
 import Caminho from "@/src/components/Story/Caminho";
 import Footer from "@/src/components/Footer/Footer";
 import Botao from "@/src/components/Story/Botao";
-import a from "../src/assets/storiesImages/a.png";
-import b from "../src/assets/storiesImages/b.png";
-import c from "../src/assets/storiesImages/c.png";
-import d from "../src/assets/storiesImages/d.png";
-import e from "../src/assets/storiesImages/e.png";
-import f from "../src/assets/storiesImages/f.png";
-import g from "../src/assets/storiesImages/g.png";
+import a from "../../src/assets/storiesImages/a.png";
+import b from "../../src/assets/storiesImages/b.png";
+import c from "../../src/assets/storiesImages/c.png";
+import d from "../../src/assets/storiesImages/d.png";
+import e from "../../src/assets/storiesImages/e.png";
+import f from "../../src/assets/storiesImages/f.png";
+import g from "../../src/assets/storiesImages/g.png";
+import CapyStory from "../../src/assets/images/capyImages/capyStory.svg"
 import Recompensa from "@/src/components/Story/Recompensa";
-import starStory from "../src/assets/storiesImages/starStory.png";
-import { router } from "expo-router";
+import starStory from "../../src/assets/storiesImages/starStory.png";
+import { router, useNavigation } from "expo-router";
+import { DrawerActions } from "@react-navigation/native";
 const Stories = () => {
+   const navigation = useNavigation();
+  
+    const openMenu = () => {
+      navigation.dispatch(DrawerActions.openDrawer());
+    };
+
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <ImageBackground source={historias} style={{ flex: 1 }}>
-        <Ionicons
-          name="menu"
-          size={40}
-          color="black"
-          style={styles.menu}
-          onPress={() => {}}
-        />
+    <SafeAreaView style={{ flex: 1, backgroundColor:"#D7ECFB" }}>
+
 
         <ScrollView>
+       <Pressable
+                 style={styles.menuButton}
+                 onPress={openMenu}
+                 hitSlop={10}
+               >
+                 <Image source={menu} style={styles.menuIcon} />
+               </Pressable>
           <View style={styles.container}>
             <Text style={styles.text1}>Se aventure por essas histórias</Text>
           </View>
@@ -78,7 +88,7 @@ const Stories = () => {
             </View>
           </View>
         </ScrollView>
-      </ImageBackground>
+     
 
       <Footer />
     </SafeAreaView>
@@ -99,13 +109,25 @@ const styles = StyleSheet.create({
     marginTop: 15,
     alignItems: "center",
   },
+   menuButton: {
+    
+    top: 0,
+    left: 15,
+    zIndex: 10,
+  },
+
+  menuIcon: {
+    width: 31,
+    height: 31,
+    resizeMode: "contain",
+  },
 
   text1: {
     color: "#297AB8",
-    fontWeight: "bold",
+    fontFamily:"Poppins_700Bold",
     fontSize: 25,
     textAlign: "center",
-    bottom: -30,
+    bottom: -10,
   },
 
   story: {

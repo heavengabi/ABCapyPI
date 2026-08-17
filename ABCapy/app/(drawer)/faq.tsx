@@ -11,7 +11,7 @@ import { List } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { router } from "expo-router";
-
+import FaqBoy from "../../src/assets/charactersImages/faqBoy.svg";
 const Faq = () => {
   const navigation = useNavigation();
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
@@ -93,8 +93,7 @@ const Faq = () => {
           </View>
         </View>
 
-        <Image
-          source={require("../src/assets/images/homeImages/faq.png")}
+        <FaqBoy
           style={styles.characterImage}
         />
       </View>
@@ -125,7 +124,7 @@ const styles = StyleSheet.create({
 
   title: {
     fontSize: 26,
-    fontWeight: "bold",
+    fontFamily:"Poppins_600SemiBold",
     color: "#000000",
     textAlign: "center",
     marginBottom: 24,
@@ -152,6 +151,7 @@ const styles = StyleSheet.create({
     color: "#000000",
     fontWeight: "600",
     fontSize: 14,
+    fontFamily:"Poppins_500Medium"
   },
 
   accordionContent: {
@@ -163,6 +163,7 @@ const styles = StyleSheet.create({
     color: "#000000",
     fontSize: 14,
     lineHeight: 20,
+    fontFamily:"Poppins_400Regular",
   },
 
   footer: {
@@ -198,7 +199,7 @@ const styles = StyleSheet.create({
   emailText: {
     color: "#FFF",
     fontSize: 14,
-    fontWeight: "500",
+    fontFamily:"Poppins_500Medium",
   },
 
   characterImage: {
@@ -206,7 +207,7 @@ const styles = StyleSheet.create({
     width: 180,
     height: 180,
     resizeMode: "contain",
-    right: -18,
-    bottom: -70,
+    right: -10  ,
+    bottom: -10,
   },
 });
