@@ -9,6 +9,8 @@ import { Accessory } from "../models/Accessories";
 import { Game } from "../models/Games";
 import { StoryHistory } from "../models/StoryHistory";
 import { User } from "../models/User";
+import { Story } from "../models/Story";
+import { StoryPage } from "../models/StoryPage";
 
 dotenv.config();
 const { DB_HOST, DB_PORT, DB_USER, DB_PWD, DB_NAME } = process.env;
@@ -30,6 +32,8 @@ export const AppDataSource = new DataSource({
     GameHistory,
     Game,
     StoryHistory,
+    Story,
+    StoryPage,
     User,
   ],
 });

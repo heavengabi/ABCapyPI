@@ -1,16 +1,29 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+} from "typeorm";
 import { Children } from "./Children";
+import { Story } from "./Story";
 
 @Entity("story_history")
 export class StoryHistory {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Children)
+  @ManyToOne(() => Children, {
+    onDelete: "CASCADE",
+  })
   child: Children;
 
-  @Column()
-  storyId: number;
+  @ManyToOne(() => Story, {
+    onDelete: "CASCADE",
+  })
+  story: Story;
+
+  @Column({ default: 0 })
+  currentPage: number;
 
   @Column({ default: false })
   completed: boolean;
