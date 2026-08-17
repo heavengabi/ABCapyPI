@@ -43,47 +43,47 @@ const CARDS = [
   {
     id: "6",
     title: "Comer",
-    image: require("../../src/assets/caaCardsImages/comer.png"),
+    image: require("../../../src/assets/caaCardsImages/comer.png"),
   },
   {
     id: "7",
     title: "Obrigado",
-    image: require("../../src/assets/caaCardsImages/obrigado.png"),
+    image: require("../../../src/assets/caaCardsImages/obrigado.png"),
   },
   {
     id: "8",
     title: "Desculpa",
-    image: require("../../src/assets/caaCardsImages/pedirDesculpa.png"),
+    image: require("../../../src/assets/caaCardsImages/pedirDesculpa.png"),
   },
   {
     id: "9",
     title: "Beber",
-    image: require("../../src/assets/caaCardsImages/beber.png"),
+    image: require("../../../src/assets/caaCardsImages/beber.png"),
   },
   {
     id: "10",
     title: "Repetir",
-    image: require("../../src/assets/caaCardsImages/ouvir.png"),
+    image: require("../../../src/assets/caaCardsImages/ouvir.png"),
   },
   {
     id: "11",
     title: "Dormir",
-    image: require("../../src/assets/caaCardsImages/dormir.png"),
+    image: require("../../../src/assets/caaCardsImages/dormir.png"),
   },
   {
     id: "12",
     title: "Banheiro",
-    image: require("../../src/assets/caaCardsImages/sanitários.png"),
+    image: require("../../../src/assets/caaCardsImages/sanitários.png"),
   },
   {
     id: "13",
     title: "Sim",
-    image: require("../../src/assets/caaCardsImages/sim.png"),
+    image: require("../../../src/assets/caaCardsImages/sim.png"),
   },
   {
     id: "14",
     title: "Escola",
-    image: require("../../src/assets/caaCardsImages/escola.png"),
+    image: require("../../../src/assets/caaCardsImages/escola.png"),
   },
   { id: "15", isAddButton: true },
 ];

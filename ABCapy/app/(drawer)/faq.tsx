@@ -11,7 +11,7 @@ import { List } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { router } from "expo-router";
-import FaqBoy from "../../src/assets/charactersImages/faqBoy.svg";
+import FaqBoy from "../../../src/assets/charactersImages/faqBoy.svg";
 const Faq = () => {
   const navigation = useNavigation();
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
