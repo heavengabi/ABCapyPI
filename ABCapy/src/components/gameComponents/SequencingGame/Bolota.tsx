@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import Svg, { Circle, Defs, RadialGradient, Stop } from "react-native-svg";
 import { Animated, Pressable, StyleSheet } from "react-native";
 import { useAudioPlayer } from "expo-audio";
@@ -7,10 +7,25 @@ type Props = {
   top: number;
   left: number;
   cor: "verde" | "amarela" | "vermelha";
+  ativa?: boolean;
+  explodiu?: boolean;
+  onPress?: () => void;
 };
 
-const Bolota = ({ top, left, cor }: Props) => {
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+
+const Bolota = ({
+  top,
+  left,
+  cor,
+  ativa = false,
+  explodiu = false,
+  onPress,
+}: Props) => {
   const escala = useRef(new Animated.Value(1)).current;
+
+  const brilho = useRef(new Animated.Value(0)).current;
+
   const opacidade = useRef(new Animated.Value(1)).current;
 
   const player = useAudioPlayer(require("../../../sounds/pop.mp3"));
@@ -42,30 +57,52 @@ const Bolota = ({ top, left, cor }: Props) => {
 
   const gradienteId = `gradiente-${cor}-${top}-${left}`;
 
-  const explodir = () => {
-    // Toca o som
+  useEffect(() => {
+    Animated.timing(brilho, {
+      toValue: ativa ? 1 : 0,
+      duration: 150,
+      useNativeDriver: true,
+    }).start();
+  }, [ativa]);
+
+  useEffect(() => {
+    if (explodiu) {
+      Animated.parallel([
+        Animated.timing(escala, {
+          toValue: 1.5,
+          duration: 120,
+          useNativeDriver: true,
+        }),
+
+        Animated.timing(opacidade, {
+          toValue: 0,
+          duration: 180,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      escala.setValue(1);
+      opacidade.setValue(1);
+    }
+  }, [explodiu]);
+
+  const escalaAcesa = brilho.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 1.12],
+  });
+
+  const handlePress = () => {
     player.seekTo(0);
     player.play();
 
-    // Anima a bolota
-    Animated.parallel([
-      Animated.timing(escala, {
-        toValue: 1.4,
-        duration: 150,
-        useNativeDriver: true,
-      }),
-
-      Animated.timing(opacidade, {
-        toValue: 0,
-        duration: 150,
-        useNativeDriver: true,
-      }),
-    ]).start();
+    onPress?.();
   };
 
   return (
     <Pressable
-      onPress={explodir}
+      onPress={handlePress}
+      // CORREÇÃO 2: Desativa a captura de toques quando a bolota estiver explodida
+      pointerEvents={explodiu ? "none" : "auto"}
       style={[
         styles.container,
         {
@@ -76,8 +113,8 @@ const Bolota = ({ top, left, cor }: Props) => {
     >
       <Animated.View
         style={{
-          transform: [{ scale: escala }],
           opacity: opacidade,
+          transform: [{ scale: escala }, { scale: escalaAcesa }],
         }}
       >
         <Svg width={105} height={105}>
@@ -91,7 +128,6 @@ const Bolota = ({ top, left, cor }: Props) => {
             </RadialGradient>
           </Defs>
 
-          {/* Bolota */}
           <Circle
             cx="52"
             cy="52"
@@ -101,13 +137,20 @@ const Bolota = ({ top, left, cor }: Props) => {
             strokeWidth="2"
           />
 
-          {/* Brilho principal */}
+          <AnimatedCircle
+            cx="52"
+            cy="52"
+            r="49"
+            fill="none"
+            stroke="white"
+            strokeWidth="4"
+            opacity={brilho}
+          />
+
           <Circle cx="34" cy="28" r="8" fill="white" opacity={0.85} />
 
-          {/* Brilho menor */}
           <Circle cx="27" cy="34" r="3" fill="white" opacity={0.7} />
 
-          {/* Brilho lateral */}
           <Circle cx="76" cy="65" r="4" fill="white" opacity={0.5} />
         </Svg>
       </Animated.View>
