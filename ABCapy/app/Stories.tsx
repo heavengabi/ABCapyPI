@@ -4,12 +4,12 @@ import {
   View,
   ScrollView,
   ImageBackground,
+  Image,
 } from "react-native";
 import React from "react";
 import historias from "../src/assets/storiesImages/historias.png";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Image } from "react-native";
 import gramaa from "../src/assets/storiesImages/gramaa.png";
 import Caminho from "@/src/components/Story/Caminho";
 import Footer from "@/src/components/Footer/Footer";
@@ -24,6 +24,7 @@ import g from "../src/assets/storiesImages/g.png";
 import Recompensa from "@/src/components/Story/Recompensa";
 import starStory from "../src/assets/storiesImages/starStory.png";
 import { router } from "expo-router";
+
 const Stories = () => {
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -51,26 +52,32 @@ const Stories = () => {
                 <Botao image={a} onPress={() => router.push("/StoryPage")} />
                 <Recompensa quantidade={3} imagem={starStory} />
               </View>
+
               <View style={[styles.btnContainer, { top: 185, left: "50%" }]}>
                 <Botao image={b} onPress={() => router.push("/StoryPage")} />
                 <Recompensa quantidade={3} imagem={starStory} />
               </View>
+
               <View style={[styles.btnContainer, { top: 340, right: "75%" }]}>
                 <Botao image={c} onPress={() => router.push("/StoryPage")} />
                 <Recompensa quantidade={3} imagem={starStory} />
               </View>
+
               <View style={[styles.btnContainer, { top: 480, left: "55%" }]}>
                 <Botao image={d} onPress={() => router.push("/StoryPage")} />
                 <Recompensa quantidade={3} imagem={starStory} />
               </View>
+
               <View style={[styles.btnContainer, { top: 650, right: "75%" }]}>
                 <Botao image={e} onPress={() => router.push("/StoryPage")} />
                 <Recompensa quantidade={3} imagem={starStory} />
               </View>
+
               <View style={[styles.btnContainer, { top: 800, left: "55%" }]}>
                 <Botao image={f} onPress={() => router.push("/StoryPage")} />
                 <Recompensa quantidade={3} imagem={starStory} />
               </View>
+
               <View style={[styles.btnContainer, { top: 950, right: "75%" }]}>
                 <Botao image={g} onPress={() => router.push("/StoryPage")} />
                 <Recompensa quantidade={3} imagem={starStory} />
@@ -95,7 +102,7 @@ const styles = StyleSheet.create({
 
   container: {
     width: 300,
-    alignSelf: "center", // Centraliza horizontalmente
+    alignSelf: "center",
     marginTop: 15,
     alignItems: "center",
   },
@@ -106,11 +113,6 @@ const styles = StyleSheet.create({
     fontSize: 25,
     textAlign: "center",
     bottom: -30,
-  },
-
-  story: {
-    flex: 1,
-    marginTop: 20,
   },
 
   conteudo: {
@@ -125,7 +127,7 @@ const styles = StyleSheet.create({
 
   caminhoContainer: {
     position: "absolute",
-    top: 190, // ajuste conforme necessário
+    top: 190,
     left: 0,
     right: -100,
     bottom: 0,
