@@ -6,7 +6,7 @@ import {
   ImageBackground,
   Image,
 } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import historias from "../src/assets/storiesImages/historias.png";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -25,7 +25,46 @@ import Recompensa from "@/src/components/Story/Recompensa";
 import starStory from "../src/assets/storiesImages/starStory.png";
 import { router } from "expo-router";
 
+type Story = {
+  id: number;
+  title: string;
+  cover: string;
+};
+
+const API_URL = "http://192.168.100.22:3000/api";
+
 const Stories = () => {
+  const [stories, setStories] = useState<Story[]>([]);
+
+  useEffect(() => {
+    loadStories();
+  }, []);
+
+  const loadStories = async () => {
+    try {
+      const response = await fetch(`${API_URL}/stories`);
+
+      if (!response.ok) {
+        throw new Error("Erro ao buscar histórias");
+      }
+
+      const data = await response.json();
+
+      setStories(data);
+    } catch (error) {
+      console.log("Erro ao carregar histórias:", error);
+    }
+  };
+
+  const abrirHistoria = (storyId: number) => {
+    router.push({
+      pathname: "/StoryPage",
+      params: {
+        storyId: storyId.toString(),
+      },
+    });
+  };
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ImageBackground source={historias} style={{ flex: 1 }}>
@@ -34,12 +73,14 @@ const Stories = () => {
           size={40}
           color="black"
           style={styles.menu}
-          onPress={() => {}}
+          onPress={() => { }}
         />
 
         <ScrollView>
           <View style={styles.container}>
-            <Text style={styles.text1}>Se aventure por essas histórias</Text>
+            <Text style={styles.text1}>
+              Se aventure por essas histórias
+            </Text>
           </View>
 
           <View style={styles.conteudo}>
@@ -48,39 +89,151 @@ const Stories = () => {
             <View style={styles.caminhoContainer}>
               <Caminho />
 
-              <View style={[styles.btnContainer, { top: -30, right: "64%" }]}>
-                <Botao image={a} onPress={() => router.push("/StoryPage")} />
-                <Recompensa quantidade={3} imagem={starStory} />
+              <View
+                style={[
+                  styles.btnContainer,
+                  { top: -30, right: "64%" },
+                ]}
+              >
+                <Botao
+                  image={a}
+                  onPress={() => {
+                    if (stories[0]) {
+                      abrirHistoria(stories[0].id);
+                    }
+                  }}
+                />
+
+                <Recompensa
+                  quantidade={3}
+                  imagem={starStory}
+                />
               </View>
 
-              <View style={[styles.btnContainer, { top: 185, left: "50%" }]}>
-                <Botao image={b} onPress={() => router.push("/StoryPage")} />
-                <Recompensa quantidade={3} imagem={starStory} />
+              <View
+                style={[
+                  styles.btnContainer,
+                  { top: 185, left: "50%" },
+                ]}
+              >
+                <Botao
+                  image={b}
+                  onPress={() => {
+                    if (stories[1]) {
+                      abrirHistoria(stories[1].id);
+                    }
+                  }}
+                />
+
+                <Recompensa
+                  quantidade={3}
+                  imagem={starStory}
+                />
               </View>
 
-              <View style={[styles.btnContainer, { top: 340, right: "75%" }]}>
-                <Botao image={c} onPress={() => router.push("/StoryPage")} />
-                <Recompensa quantidade={3} imagem={starStory} />
+              <View
+                style={[
+                  styles.btnContainer,
+                  { top: 340, right: "75%" },
+                ]}
+              >
+                <Botao
+                  image={c}
+                  onPress={() => {
+                    if (stories[2]) {
+                      abrirHistoria(stories[2].id);
+                    }
+                  }}
+                />
+
+                <Recompensa
+                  quantidade={3}
+                  imagem={starStory}
+                />
               </View>
 
-              <View style={[styles.btnContainer, { top: 480, left: "55%" }]}>
-                <Botao image={d} onPress={() => router.push("/StoryPage")} />
-                <Recompensa quantidade={3} imagem={starStory} />
+              <View
+                style={[
+                  styles.btnContainer,
+                  { top: 480, left: "55%" },
+                ]}
+              >
+                <Botao
+                  image={d}
+                  onPress={() => {
+                    if (stories[3]) {
+                      abrirHistoria(stories[3].id);
+                    }
+                  }}
+                />
+
+                <Recompensa
+                  quantidade={3}
+                  imagem={starStory}
+                />
               </View>
 
-              <View style={[styles.btnContainer, { top: 650, right: "75%" }]}>
-                <Botao image={e} onPress={() => router.push("/StoryPage")} />
-                <Recompensa quantidade={3} imagem={starStory} />
+              <View
+                style={[
+                  styles.btnContainer,
+                  { top: 650, right: "75%" },
+                ]}
+              >
+                <Botao
+                  image={e}
+                  onPress={() => {
+                    if (stories[4]) {
+                      abrirHistoria(stories[4].id);
+                    }
+                  }}
+                />
+
+                <Recompensa
+                  quantidade={3}
+                  imagem={starStory}
+                />
               </View>
 
-              <View style={[styles.btnContainer, { top: 800, left: "55%" }]}>
-                <Botao image={f} onPress={() => router.push("/StoryPage")} />
-                <Recompensa quantidade={3} imagem={starStory} />
+              <View
+                style={[
+                  styles.btnContainer,
+                  { top: 800, left: "55%" },
+                ]}
+              >
+                <Botao
+                  image={f}
+                  onPress={() => {
+                    if (stories[5]) {
+                      abrirHistoria(stories[5].id);
+                    }
+                  }}
+                />
+
+                <Recompensa
+                  quantidade={3}
+                  imagem={starStory}
+                />
               </View>
 
-              <View style={[styles.btnContainer, { top: 950, right: "75%" }]}>
-                <Botao image={g} onPress={() => router.push("/StoryPage")} />
-                <Recompensa quantidade={3} imagem={starStory} />
+              <View
+                style={[
+                  styles.btnContainer,
+                  { top: 950, right: "75%" },
+                ]}
+              >
+                <Botao
+                  image={g}
+                  onPress={() => {
+                    if (stories[6]) {
+                      abrirHistoria(stories[6].id);
+                    }
+                  }}
+                />
+
+                <Recompensa
+                  quantidade={3}
+                  imagem={starStory}
+                />
               </View>
             </View>
           </View>

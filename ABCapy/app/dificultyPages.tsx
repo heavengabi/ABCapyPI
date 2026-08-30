@@ -11,12 +11,16 @@ import dific3 from "../src/assets/images/gameImages/dific3.png";
 import { router, useLocalSearchParams } from "expo-router";
 
 const DificultyPages = () => {
-  const { game } = useLocalSearchParams();
+  const { game, gameId } = useLocalSearchParams();
 
-  const goToGame = (difficulty: "facil" | "medio" | "dificil") => {
+  const goToGame = (
+    difficulty: "facil" | "medio" | "dificil"
+  ) => {
+
     let pathname = "";
 
     switch (game) {
+
       case "equalityGame":
         pathname = "/equalityGame";
         break;
@@ -32,14 +36,15 @@ const DificultyPages = () => {
       default:
         pathname = "/equalityGame";
     }
+
     router.push({
       pathname: pathname as any,
       params: {
         difficulty,
+        gameId,
       },
     });
   };
-
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ImageBackground
@@ -49,7 +54,7 @@ const DificultyPages = () => {
       >
         <Header
           icon="arrow-back"
-          onPress={() => {router.push("/gamePages") }}
+          onPress={() => { router.push("/gamePages") }}
           headerStyle={{ backgroundColor: "#A8DAFF" }}
           buttonStyle={{ backgroundColor: "#69B9F7" }}
         />

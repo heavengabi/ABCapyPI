@@ -15,7 +15,7 @@ import easySeq from "../src/assets/images/gameImages/easySeq.png";
 import mediumSeq from "../src/assets/images/gameImages/mediumSeq.png";
 import hardSeq from "../src/assets/images/gameImages/hardSeq.png";
 
-import Bolota from "../src/components/gameComponents/SequencingGame/Bolota";
+import 
 
 const SequencingGame = () => {
   const { difficulty } = useLocalSearchParams();
@@ -120,9 +120,9 @@ const SequencingGame = () => {
                 left={bolota.left}
                 cor={
                   bolota.cor as
-                    | "verde"
-                    | "amarela"
-                    | "vermelha"
+                  | "verde"
+                  | "amarela"
+                  | "vermelha"
                 }
               />
             ))}
