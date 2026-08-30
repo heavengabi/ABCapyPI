@@ -1,8 +1,15 @@
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import {
+  Column,
+  Entity,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from "typeorm";
+
 import { User } from "./User";
 
 @Entity("child")
 export class Children {
+
   @PrimaryGeneratedColumn()
   id: number;
 
