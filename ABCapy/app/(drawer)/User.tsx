@@ -13,7 +13,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Pencil, Lock, X } from "lucide-react-native";
 import { DrawerActions, useNavigation } from "@react-navigation/native";
-import menu from "../../../src/assets/images/homeImages/menu.png";import Footer from "@/src/components/Footer/Footer";
+import menu from "../../src/assets/images/homeImages/menu.png";import Footer from "@/src/components/Footer/Footer";
 
 const StarsNumber: number = 3;
 
@@ -27,10 +27,10 @@ const CATEGORIES = [
 ];
 
 const ITEMS = [
-  { id: "101", image: require("../../../src/assets/characterAccessories/FarmerCapy.png") },
-  { id: "102", image: require("../../../src/assets/characterAccessories/FarmerCapy.png") },
-  { id: "103", image: require("../../../src/assets/characterAccessories/PirateCapy.png") },
-  { id: "104", image: require("../../../src/assets/characterAccessories/FarmerCapy.png") },
+  { id: "101", image: require("../../src/assets/characterAccessories/FarmerCapy.png") },
+  { id: "102", image: require("../../src/assets/characterAccessories/FarmerCapy.png") },
+  { id: "103", image: require("../../src/assets/characterAccessories/PirateCapy.png") },
+  { id: "104", image: require("../../src/assets/characterAccessories/FarmerCapy.png") },
 ];
 
 interface ActionModalProps {
@@ -100,7 +100,7 @@ function ActionModalContent({ handleClose }: ActionModalProps) {
       <View style={modalStyle.footer}>
         <View style={modalStyle.starPriceRow}>
           <Image
-            source={require("../../../src/assets/images/solar_star-bold-duotone.png")}
+            source={require("../../src/assets/images/solar_star-bold-duotone.png")}
             style={{ width: 22, height: 22 }}
           />
           <Text style={modalStyle.starPriceText}>50</Text>
@@ -140,7 +140,7 @@ export default function UserPage() {
 
           <View style={style.headerStars}>
             <Image
-              source={require("../../../src/assets/images/solar_star-bold-duotone.png")}
+              source={require("../../src/assets/images/solar_star-bold-duotone.png")}
               style={{ width: 24, height: 24 }}
             />
             <Text style={style.starsText}>{StarsNumber}</Text>
@@ -153,14 +153,14 @@ export default function UserPage() {
         <View style={style.avatarWrapper}>
           <View style={style.circuloOpcao}>
             <Image
-              source={require("../../../src/assets/charactersImages/StudentCapy.png")}
+              source={require("../../src/assets/charactersImages/StudentCapy.png")}
               style={style.imagemPersonagem}
             />
           </View>
 
           <View style={style.badgeAcessorio}>
             <Image
-              source={require("../../../src/assets/characterAccessories/FarmerCapy.png")}
+              source={require("../../src/assets/characterAccessories/FarmerCapy.png")}
               style={{ width: 52, height: 32, resizeMode: "cover" }}
             />
           </View>
@@ -186,7 +186,7 @@ export default function UserPage() {
 
             <View style={style.rewardContainer}>
               <Image
-                source={require("../../../src/assets/characterAccessories/PirateCapy.png")}
+                source={require("../../src/assets/characterAccessories/PirateCapy.png")}
                 style={style.rewardImageLocked}
               />
               <Lock size={18} color="#000" style={style.lockIcon} />
@@ -225,7 +225,7 @@ export default function UserPage() {
           <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
             <Text style={style.finalCardValue}>{TotalStars}</Text>
             <Image
-              source={require("../../../src/assets/images/solar_star-bold-duotone.png")}
+              source={require("../../src/assets/images/solar_star-bold-duotone.png")}
               style={{ width: 22, height: 22 }}
             />
           </View>
