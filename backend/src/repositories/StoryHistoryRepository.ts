@@ -3,54 +3,27 @@ import { StoryHistory } from "../models/StoryHistory";
 
 const repo = AppDataSource.getRepository(StoryHistory);
 
-export const StoryHistoryRepository = {
-  async findAll() {
-    return repo.find({
-      relations: ["child", "story"],
-    });
-  },
-
-  async findById(id: number) {
-    return repo.findOne({
-      where: { id },
-      relations: ["child", "story"],
-    });
-  },
-
-  async findByChildId(childId: number) {
-    return repo.find({
-      where: {
-        child: {
-          id: childId,
-        },
-      },
-      relations: ["child", "story"],
-    });
-  },
-
+export const storyHistoryRepository = {
   async findByChildAndStory(childId: number, storyId: number) {
-    return repo.findOne({
+    return await repo.findOne({
       where: {
-        child: {
-          id: childId,
-        },
-        story: {
-          id: storyId,
-        },
+        child: { id: childId },
+        story: { id: storyId },
       },
-      relations: ["child", "story"],
+      relations: ["story", "child"],
     });
   },
 
-  create(data: {}) {
-    return repo.create(data);
+  async listByChild(childId: number) {
+    return await repo.find({
+      where: { child: { id: childId } },
+      relations: ["story"],
+      order: { updatedAt: "DESC" },
+    });
   },
 
-  async save(history: StoryHistory) {
-    return repo.save(history);
-  },
-
-  async delete(id: number) {
-    return repo.delete(id);
+  async save(data: Partial<StoryHistory>) {
+    const history = repo.create(data);
+    return await repo.save(history);
   },
 };

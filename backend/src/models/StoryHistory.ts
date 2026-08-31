@@ -3,6 +3,9 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
+  JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from "typeorm";
 import { Children } from "./Children";
 import { Story } from "./Story";
@@ -12,14 +15,12 @@ export class StoryHistory {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Children, {
-    onDelete: "CASCADE",
-  })
+  @ManyToOne(() => Children, { onDelete: "CASCADE" })
+  @JoinColumn({ name: "childId" })
   child: Children;
 
-  @ManyToOne(() => Story, {
-    onDelete: "CASCADE",
-  })
+  @ManyToOne(() => Story, (story) => story.histories, { onDelete: "CASCADE" })
+  @JoinColumn({ name: "storyId" })
   story: Story;
 
   @Column({ default: 0 })
@@ -30,4 +31,10 @@ export class StoryHistory {
 
   @Column({ default: 0 })
   starsEarned: number;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

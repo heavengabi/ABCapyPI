@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from "typeorm";
@@ -13,10 +14,12 @@ export class GameHistory {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Children)
+  @ManyToOne(() => Children, { onDelete: "CASCADE" })
+  @JoinColumn({ name: "childId" })
   child: Children;
 
-  @ManyToOne(() => Game)
+  @ManyToOne(() => Game, { onDelete: "CASCADE" })
+  @JoinColumn({ name: "gameId" })
   game: Game;
 
   @Column({ default: 0 })
