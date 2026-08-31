@@ -7,29 +7,20 @@ import {
   ViewStyle,
   StyleProp,
 } from "react-native";
-
+import { Ionicons } from "@expo/vector-icons";
 type Props = {
   title?: string;
-  text: string;
+  icon?: keyof typeof Ionicons.glyphMap;
   onPress: () => void;
   headerStyle?: StyleProp<ViewStyle>;
   buttonStyle?: StyleProp<ViewStyle>;
 };
 
-const Header = ({
-  title,
-  text,
-  onPress,
-  headerStyle,
-  buttonStyle,
-}: Props) => {
+const Header = ({ title, icon, onPress, headerStyle, buttonStyle }: Props) => {
   return (
     <View style={[styles.header, headerStyle]}>
-      <Pressable
-        style={[styles.botao, buttonStyle]}
-        onPress={onPress}
-      >
-        <Text style={styles.btnText}>{text}</Text>
+      <Pressable style={[styles.botao, buttonStyle]} onPress={onPress}>
+        <Ionicons name={icon} size={28} color="#FFF" />
       </Pressable>
 
       <Text style={styles.title}>{title}</Text>

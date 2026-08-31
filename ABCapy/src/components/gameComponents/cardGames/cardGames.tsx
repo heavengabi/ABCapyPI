@@ -5,8 +5,9 @@ import {
   Pressable,
   ImageSourcePropType,
 } from "react-native";
+
+import { StyleSheet } from "react-native";
 import React from "react";
-import { styles } from "../../gameComponents/gameCard/cardGameStyle";
 
 type Props = {
   text: string;
@@ -29,3 +30,26 @@ const CardGame = ({ text, image, onPress }: Props) => {
 };
 
 export default CardGame;
+
+
+export const styles = StyleSheet.create({
+  btnStyle: {
+    width: 295,
+    height: 135,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "white",
+    marginTop: 20,
+    borderRadius: 15,
+  },
+  cardBase: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  textStyle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    textTransform: "uppercase",
+    color: "#297AB8",
+  },
+});

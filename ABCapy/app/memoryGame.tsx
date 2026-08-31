@@ -1,12 +1,14 @@
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Text, ImageBackground, StyleSheet } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { Text, ImageBackground, StyleSheet, View } from "react-native";
+import { router, useLocalSearchParams } from "expo-router";
 import Header from "@/src/components/Header/Header";
 
 import easy from "../src/assets/images/gameImages/easy.png";
 import medium from "../src/assets/images/gameImages/medium.png";
 import hard from "../src/assets/images/gameImages/hard.png";
+
+
 
 const MemoryGame = () => {
   const { difficulty } = useLocalSearchParams();
@@ -32,8 +34,9 @@ const MemoryGame = () => {
     },
   };
 
-  const jogo =
-    settings[(difficulty as keyof typeof settings) ?? "facil"];
+  const jogo = settings[(difficulty as keyof typeof settings) ?? "facil"];
+
+ 
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -44,19 +47,11 @@ const MemoryGame = () => {
       >
         <Header
           title="Jogo da Memória"
-          text="<"
-          onPress={() => {}}
+          icon="arrow-back"
+          onPress={() => {router.back()}}
           headerStyle={{ backgroundColor: jogo.header }}
           buttonStyle={{ backgroundColor: jogo.button }}
         />
-
-        <Text style={styles.text1}>{jogo.titulo}</Text>
-
-        <Text style={styles.text2}>
-          ENCONTRE AS CARTAS IGUAIS
-        </Text>
-
-        {/* Aqui vai o componente das cartas */}
 
       </ImageBackground>
     </SafeAreaView>
@@ -85,5 +80,14 @@ const styles = StyleSheet.create({
     marginTop: 30,
     color: "white",
     textTransform: "uppercase",
+  },
+
+  grid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    marginTop: 40,
+    gap: 12,
+    paddingHorizontal: 20,
   },
 });

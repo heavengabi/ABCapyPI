@@ -8,47 +8,69 @@ import {
   StyleSheet,
   ImageBackground,
 } from "react-native";
+import { router, useNavigation } from "expo-router";
+import { DrawerActions } from "@react-navigation/native";
+
+
+import CapyImage from "../../src/assets/images/capyImages/Group 338.svg";
+
+// Componentes
 import HomeCard from "@/src/components/homeComponents/HomeCard";
-import capyHome from "../src/assets/images/homeImages/capyHome.png";
-import gradiente from "../src/assets/images/homeImages/gradiente.png";
-import { router } from "expo-router";
-import speechBubble from "../src/assets/images/homeImages/speechBubble.png";
-import book from "../src/assets/images/homeImages/book.png";
-import estrela from "../src/assets/images/homeImages/estrela.png";
 import Footer from "@/src/components/Footer/Footer";
-import menu from "../src/assets/images/homeImages/menu.png";
+
+// Assets PNG
+import gradiente from "../../src/assets/images/homeImages/gradiente.png";
+import speechBubble from "../../src/assets/images/homeImages/speechBubble.png";
+import book from "../../src/assets/images/homeImages/book.png";
+import estrela from "../../src/assets/images/homeImages/estrela.png";
+import menu from "../../src/assets/images/homeImages/menu.png";
 
 const HomePage = () => {
+  const navigation = useNavigation();
+
+  const openMenu = () => {
+    navigation.dispatch(DrawerActions.openDrawer());
+  };
+
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#85ccffc9" }}>
+    <SafeAreaView style={styles.container}>
       <ImageBackground source={gradiente} style={styles.gradiente}>
         <Text style={styles.texto}>Olá!</Text>
-        <Image source={capyHome} style={styles.capy} />
 
-        <Pressable style={styles.menuButton} onPress={() => {}}>
+       
+        <CapyImage width={260} height={170} style={styles.capy} />
+
+        <Pressable
+          style={styles.menuButton}
+          onPress={openMenu}
+          hitSlop={10}
+        >
           <Image source={menu} style={styles.menuIcon} />
         </Pressable>
       </ImageBackground>
 
       <View style={styles.containerCards}>
         <Text style={styles.texto2}>O que vamos fazer?</Text>
+
         <HomeCard
           title="Comunicação"
-          text="monte frases e se comunique"
+          text="Monte frases e se comunique"
           image={speechBubble}
-          onPress={() => router.push("/gamePages")}
+          onPress={() => router.push("/caa")}
         />
+
         <HomeCard
           title="Jogos"
-          text="aprenda brincando"
+          text="Aprenda brincando"
           image={estrela}
           onPress={() => router.push("/gamePages")}
         />
+
         <HomeCard
           title="Histórias"
-          text="Explore novas Histórias"
+          text="Explore novas histórias"
           image={book}
-          onPress={() => router.push("/gamePages")}
+          onPress={() => router.push("/Stories")}
         />
       </View>
 
@@ -62,7 +84,7 @@ export default HomePage;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#85ccffc9",
+    backgroundColor: "#ffffffc9",
   },
 
   gradiente: {
@@ -75,15 +97,12 @@ const styles = StyleSheet.create({
   texto: {
     color: "#297AB8",
     fontSize: 22,
-    fontWeight: "bold",
     position: "absolute",
+    fontFamily:"Poppins_700Bold",
     top: 50,
   },
 
   capy: {
-    width: 260,
-    height: 170,
-    resizeMode: "contain",
     position: "absolute",
     bottom: 20,
   },
@@ -94,15 +113,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFF",
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
-    borderColor: "#CDE9FF",
-    borderWidth: 5,
     alignItems: "center",
     paddingTop: 18,
   },
 
   texto2: {
     fontSize: 28,
-    fontWeight: "bold",
+    fontFamily:"Poppins_700Bold",
     color: "#6ABFEF",
     marginBottom: 15,
   },
