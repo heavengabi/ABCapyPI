@@ -1,3 +1,4 @@
+
 import {
   ImageBackground,
   Pressable,
@@ -38,8 +39,11 @@ const StoryPage = () => {
   const [pages, setPages] = useState<StoryPageData[]>([]);
   const [history, setHistory] = useState<StoryHistory | null>(null);
 
+  // A página agora é controlada SOMENTE pelo frontend
+  const [currentPage, setCurrentPage] = useState(1);
+
   const [loading, setLoading] = useState(true);
-  const [loadingNext, setLoadingNext] = useState(false);
+  const [loadingComplete, setLoadingComplete] = useState(false);
 
   const childId = 1;
 
@@ -70,14 +74,22 @@ const StoryPage = () => {
         throw new Error("Erro ao buscar páginas");
       }
 
-      const pagesData = await pagesResponse.json();
+      const pagesData: StoryPageData[] =
+        await pagesResponse.json();
 
       const orderedPages = pagesData.sort(
-        (a: StoryPageData, b: StoryPageData) =>
-          a.pageNumber - b.pageNumber
+        (a, b) => a.pageNumber - b.pageNumber
       );
 
       setPages(orderedPages);
+
+      // Sempre que abrir a história,
+      // começa na página 1.
+      setCurrentPage(1);
+
+      // =========================
+      // BUSCAR HISTÓRICO
+      // =========================
 
       const historyResponse = await fetch(
         `${API_URL}/story-history/child/${childId}/story/${id}`
@@ -86,6 +98,7 @@ const StoryPage = () => {
       if (historyResponse.ok) {
         const historyData = await historyResponse.json();
 
+        // Guarda apenas para saber se já foi concluída.
         setHistory(historyData);
       } else {
         // =========================
@@ -104,9 +117,6 @@ const StoryPage = () => {
             body: JSON.stringify({
               childId,
               storyId: id,
-              currentPage: 1,
-              completed: false,
-              starsEarned: 0,
             }),
           }
         );
@@ -130,20 +140,47 @@ const StoryPage = () => {
   // PRÓXIMA PÁGINA
   // =========================
 
-  const nextPage = async () => {
-    if (!history || loadingNext) {
+  const nextPage = () => {
+    if (currentPage < pages.length) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  // =========================
+  // PÁGINA ANTERIOR
+  // =========================
+
+  const previousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  // =========================
+  // CONCLUIR HISTÓRIA
+  // =========================
+
+  const completeStory = async () => {
+    if (!history || loadingComplete) {
       return;
     }
 
+    // Só pode concluir estando na última página
+    if (currentPage !== pages.length) {
+      return;
+    }
+
+    // Se já concluiu anteriormente,
+    // não manda concluir novamente.
     if (history.completed) {
       return;
     }
 
     try {
-      setLoadingNext(true);
+      setLoadingComplete(true);
 
       const response = await fetch(
-        `${API_URL}/story-history/${history.id}/next-page`,
+        `${API_URL}/story-history/${history.id}/complete`,
         {
           method: "PATCH",
           headers: {
@@ -154,12 +191,12 @@ const StoryPage = () => {
 
       const responseText = await response.text();
 
-      console.log("STATUS:", response.status);
-      console.log("RESPOSTA BACKEND:", responseText);
+      console.log("STATUS CONCLUIR:", response.status);
+      console.log("RESPOSTA CONCLUIR:", responseText);
 
       if (!response.ok) {
         throw new Error(
-          `Erro ao avançar página: ${response.status}`
+          `Erro ao concluir história: ${response.status}`
         );
       }
 
@@ -167,28 +204,10 @@ const StoryPage = () => {
 
       setHistory(updatedHistory);
     } catch (error) {
-      console.log("ERRO AO AVANÇAR:", error);
+      console.log("ERRO AO CONCLUIR:", error);
     } finally {
-      setLoadingNext(false);
+      setLoadingComplete(false);
     }
-  };
-  // =========================
-  // PÁGINA ANTERIOR
-  // =========================
-
-  const previousPage = () => {
-    if (!history) {
-      return;
-    }
-
-    if (history.currentPage <= 1) {
-      return;
-    }
-
-    setHistory({
-      ...history,
-      currentPage: history.currentPage - 1,
-    });
   };
 
   // =========================
@@ -226,13 +245,10 @@ const StoryPage = () => {
   // PÁGINA ATUAL
   // =========================
 
-  const currentPageNumber =
-    history?.currentPage || 1;
+  const currentPageData =
+    pages[currentPage - 1];
 
-  const currentPage =
-    pages[currentPageNumber - 1];
-
-  if (!currentPage) {
+  if (!currentPageData) {
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.loading}>
@@ -242,6 +258,9 @@ const StoryPage = () => {
     );
   }
 
+  const isLastPage =
+    currentPage === pages.length;
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ImageBackground
@@ -250,6 +269,7 @@ const StoryPage = () => {
         resizeMode="cover"
       >
         <View style={styles.container}>
+
           {/* MICROFONE */}
 
           <View style={styles.micContainer}>
@@ -266,23 +286,21 @@ const StoryPage = () => {
           <View style={styles.cardContainer}>
             <CardStory
               imagem={{
-                uri: currentPage.image,
+                uri: currentPageData.image,
               }}
-              subtitulo={currentPage.text}
-              paragrafo={currentPage.text}
+              subtitulo={currentPageData.text}
+              paragrafo={currentPageData.text}
             />
           </View>
 
           {/* BOTÕES */}
 
           <View style={styles.containerBtn}>
+
             <Pressable
               style={styles.btn}
               onPress={previousPage}
-              disabled={
-                !history ||
-                history.currentPage <= 1
-              }
+              disabled={currentPage <= 1}
             >
               <Text style={styles.text1}>
                 Anterior
@@ -290,26 +308,37 @@ const StoryPage = () => {
             </Pressable>
 
             <Text style={styles.text2}>
-              {currentPageNumber}
+              {currentPage}
             </Text>
 
-            <Pressable
-              style={styles.btn}
-              onPress={nextPage}
-              disabled={
-                loadingNext ||
-                history?.completed
-              }
-            >
-              <Text style={styles.text1}>
-                {history?.completed
-                  ? "Concluída"
-                  : "Próxima"}
-              </Text>
-            </Pressable>
+            {isLastPage ? (
+              <Pressable
+                style={styles.btn}
+                onPress={completeStory}
+                disabled={loadingComplete}
+              >
+                <Text style={styles.text1}>
+                  {loadingComplete
+                    ? "..."
+                    : history?.completed
+                    ? "Concluída"
+                    : "Concluir"}
+                </Text>
+              </Pressable>
+            ) : (
+              <Pressable
+                style={styles.btn}
+                onPress={nextPage}
+              >
+                <Text style={styles.text1}>
+                  Próxima
+                </Text>
+              </Pressable>
+            )}
+
           </View>
 
-
+          {/* MENSAGEM DE CONCLUSÃO */}
 
           {history?.completed && (
             <View style={styles.reward}>
@@ -318,6 +347,7 @@ const StoryPage = () => {
               </Text>
             </View>
           )}
+
         </View>
       </ImageBackground>
     </SafeAreaView>
