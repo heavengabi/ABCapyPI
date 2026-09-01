@@ -72,11 +72,12 @@ const StoryPage = () => {
 
       const pagesData = await pagesResponse.json();
 
-      setPages(pagesData);
+      const orderedPages = pagesData.sort(
+        (a: StoryPageData, b: StoryPageData) =>
+          a.pageNumber - b.pageNumber
+      );
 
-      // =========================
-      // BUSCAR HISTÓRICO
-      // =========================
+      setPages(orderedPages);
 
       const historyResponse = await fetch(
         `${API_URL}/story-history/child/${childId}/story/${id}`
@@ -151,23 +152,26 @@ const StoryPage = () => {
         }
       );
 
+      const responseText = await response.text();
+
+      console.log("STATUS:", response.status);
+      console.log("RESPOSTA BACKEND:", responseText);
+
       if (!response.ok) {
-        throw new Error("Erro ao avançar página");
+        throw new Error(
+          `Erro ao avançar página: ${response.status}`
+        );
       }
 
-      const updatedHistory = await response.json();
+      const updatedHistory = JSON.parse(responseText);
 
       setHistory(updatedHistory);
     } catch (error) {
-      console.log(
-        "Erro ao avançar página:",
-        error
-      );
+      console.log("ERRO AO AVANÇAR:", error);
     } finally {
       setLoadingNext(false);
     }
   };
-
   // =========================
   // PÁGINA ANTERIOR
   // =========================
