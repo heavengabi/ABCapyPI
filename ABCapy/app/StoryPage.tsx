@@ -1,4 +1,3 @@
-
 import {
   ImageBackground,
   Pressable,
@@ -6,26 +5,31 @@ import {
   Text,
   View,
   ActivityIndicator,
+  Modal,
 } from "react-native";
+
 import React, { useEffect, useState } from "react";
+
 import { Volume2 } from "lucide-react-native";
+
 import { SafeAreaView } from "react-native-safe-area-context";
+
 import { useLocalSearchParams } from "expo-router";
 
 import storysBack from "../src/assets/storiesImages/storysBack.png";
+
 import CardStory from "@/src/components/Story/CardStory";
 
 type StoryPageData = {
   id: number;
   pageNumber: number;
-  image: string;
+  illustration: string | null;
   text: string;
+  audioUrl: string | null;
 };
 
 type StoryHistory = {
   id: number;
-  childId: number;
-  storyId: number;
   currentPage: number;
   completed: boolean;
   starsEarned: number;
@@ -37,13 +41,17 @@ const StoryPage = () => {
   const { storyId } = useLocalSearchParams();
 
   const [pages, setPages] = useState<StoryPageData[]>([]);
-  const [history, setHistory] = useState<StoryHistory | null>(null);
 
-  // A página agora é controlada SOMENTE pelo frontend
-  const [currentPage, setCurrentPage] = useState(1);
+  const [history, setHistory] =
+    useState<StoryHistory | null>(null);
 
   const [loading, setLoading] = useState(true);
-  const [loadingComplete, setLoadingComplete] = useState(false);
+
+  const [loadingNext, setLoadingNext] =
+    useState(false);
+
+  const [showModal, setShowModal] =
+    useState(false);
 
   const childId = 1;
 
@@ -71,78 +79,60 @@ const StoryPage = () => {
       );
 
       if (!pagesResponse.ok) {
-        throw new Error("Erro ao buscar páginas");
+        throw new Error(
+          "Erro ao buscar páginas"
+        );
       }
 
-      const pagesData: StoryPageData[] =
+      const pagesData =
         await pagesResponse.json();
 
-      const orderedPages = pagesData.sort(
-        (a, b) => a.pageNumber - b.pageNumber
-      );
+      const orderedPages =
+        pagesData.sort(
+          (
+            a: StoryPageData,
+            b: StoryPageData
+          ) =>
+            a.pageNumber -
+            b.pageNumber
+        );
 
       setPages(orderedPages);
-
-      // Sempre que abrir a história,
-      // começa na página 1.
-      setCurrentPage(1);
 
       // =========================
       // BUSCAR HISTÓRICO
       // =========================
 
-      const historyResponse = await fetch(
-        `${API_URL}/story-history/child/${childId}/story/${id}`
-      );
-
-      if (historyResponse.ok) {
-        const historyData = await historyResponse.json();
-
-        // Guarda apenas para saber se já foi concluída.
-        setHistory(historyData);
-      } else {
-        // =========================
-        // CRIAR HISTÓRICO
-        // =========================
-
-        const createResponse = await fetch(
-          `${API_URL}/story-history`,
-          {
-            method: "POST",
-
-            headers: {
-              "Content-Type": "application/json",
-            },
-
-            body: JSON.stringify({
-              childId,
-              storyId: id,
-            }),
-          }
+      const historyResponse =
+        await fetch(
+          `${API_URL}/story-history/child/${childId}/story/${id}`
         );
 
-        if (!createResponse.ok) {
-          throw new Error("Erro ao criar histórico");
-        }
+      if (historyResponse.ok) {
+        const historyData =
+          await historyResponse.json();
 
-        const newHistory = await createResponse.json();
-
-        setHistory(newHistory);
+        setHistory({
+          id: historyData.id,
+          currentPage:
+            historyData.currentPage,
+          completed:
+            historyData.completed,
+          starsEarned:
+            historyData.starsEarned,
+        });
+      } else {
+        // Ainda não possui histórico
+        // Começa na página 1
+        setHistory(null);
       }
     } catch (error) {
-      console.log("Erro ao carregar história:", error);
+      console.log(
+        "Erro ao carregar história:",
+        error
+      );
     } finally {
       setLoading(false);
-    }
-  };
-
-  // =========================
-  // PRÓXIMA PÁGINA
-  // =========================
-
-  const nextPage = () => {
-    if (currentPage < pages.length) {
-      setCurrentPage(currentPage + 1);
     }
   };
 
@@ -151,8 +141,47 @@ const StoryPage = () => {
   // =========================
 
   const previousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
+    if (!history) {
+      return;
+    }
+
+    if (history.currentPage <= 1) {
+      return;
+    }
+
+    setHistory({
+      ...history,
+      currentPage:
+        history.currentPage - 1,
+    });
+  };
+
+  // =========================
+  // PRÓXIMA PÁGINA
+  // =========================
+
+  const nextPage = () => {
+    if (loadingNext) {
+      return;
+    }
+
+    if (currentPageNumber >= pages.length) {
+      return;
+    }
+
+    if (history) {
+      setHistory({
+        ...history,
+        currentPage:
+          history.currentPage + 1,
+      });
+    } else {
+      setHistory({
+        id: 0,
+        currentPage: 2,
+        completed: false,
+        starsEarned: 0,
+      });
     }
   };
 
@@ -161,52 +190,144 @@ const StoryPage = () => {
   // =========================
 
   const completeStory = async () => {
-    if (!history || loadingComplete) {
-      return;
-    }
-
-    // Só pode concluir estando na última página
-    if (currentPage !== pages.length) {
-      return;
-    }
-
-    // Se já concluiu anteriormente,
-    // não manda concluir novamente.
-    if (history.completed) {
+    if (loadingNext) {
       return;
     }
 
     try {
-      setLoadingComplete(true);
+      setLoadingNext(true);
 
-      const response = await fetch(
-        `${API_URL}/story-history/${history.id}/complete`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
+      // Se já existe histórico
+      if (history && history.id !== 0) {
+        const response = await fetch(
+          `${API_URL}/story-history/${history.id}/complete`,
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+          }
+        );
+
+        const responseText =
+          await response.text();
+
+        console.log(
+          "STATUS CONCLUIR:",
+          response.status
+        );
+
+        console.log(
+          "RESPOSTA:",
+          responseText
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `Erro ao concluir: ${response.status}`
+          );
         }
-      );
 
-      const responseText = await response.text();
+        const updatedHistory =
+          JSON.parse(responseText);
 
-      console.log("STATUS CONCLUIR:", response.status);
-      console.log("RESPOSTA CONCLUIR:", responseText);
+        setHistory({
+          id: updatedHistory.id,
+          currentPage:
+            updatedHistory.currentPage,
+          completed:
+            updatedHistory.completed,
+          starsEarned:
+            updatedHistory.starsEarned,
+        });
 
-      if (!response.ok) {
+        setShowModal(true);
+
+        return;
+      }
+
+      // =========================
+      // SE NÃO EXISTE HISTÓRICO
+      // CRIA E CONCLUI
+      // =========================
+
+      const createResponse =
+        await fetch(
+          `${API_URL}/story-history`,
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body: JSON.stringify({
+              childId,
+              storyId: Number(storyId),
+            }),
+          }
+        );
+
+      if (!createResponse.ok) {
+        const errorText =
+          await createResponse.text();
+
+        console.log(
+          "ERRO AO CRIAR HISTÓRICO:",
+          errorText
+        );
+
         throw new Error(
-          `Erro ao concluir história: ${response.status}`
+          "Erro ao criar histórico"
         );
       }
 
-      const updatedHistory = JSON.parse(responseText);
+      const newHistory =
+        await createResponse.json();
 
-      setHistory(updatedHistory);
+      // Agora conclui
+      const completeResponse =
+        await fetch(
+          `${API_URL}/story-history/${newHistory.id}/complete`,
+          {
+            method: "PATCH",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+          }
+        );
+
+      if (!completeResponse.ok) {
+        throw new Error(
+          "Erro ao concluir história"
+        );
+      }
+
+      const completedHistory =
+        await completeResponse.json();
+
+      setHistory({
+        id: completedHistory.id,
+        currentPage:
+          completedHistory.currentPage,
+        completed:
+          completedHistory.completed,
+        starsEarned:
+          completedHistory.starsEarned,
+      });
+
+      setShowModal(true);
     } catch (error) {
-      console.log("ERRO AO CONCLUIR:", error);
+      console.log(
+        "ERRO AO CONCLUIR:",
+        error
+      );
     } finally {
-      setLoadingComplete(false);
+      setLoadingNext(false);
     }
   };
 
@@ -216,10 +337,17 @@ const StoryPage = () => {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.safeArea}>
+      <SafeAreaView
+        style={styles.safeArea}
+      >
         <View style={styles.loading}>
-          <ActivityIndicator size="large" />
-          <Text>Carregando história...</Text>
+          <ActivityIndicator
+            size="large"
+          />
+
+          <Text>
+            Carregando história...
+          </Text>
         </View>
       </SafeAreaView>
     );
@@ -231,10 +359,13 @@ const StoryPage = () => {
 
   if (pages.length === 0) {
     return (
-      <SafeAreaView style={styles.safeArea}>
+      <SafeAreaView
+        style={styles.safeArea}
+      >
         <View style={styles.loading}>
           <Text>
-            Essa história não possui páginas.
+            Essa história não possui
+            páginas.
           </Text>
         </View>
       </SafeAreaView>
@@ -245,24 +376,34 @@ const StoryPage = () => {
   // PÁGINA ATUAL
   // =========================
 
-  const currentPageData =
-    pages[currentPage - 1];
+  const currentPageNumber =
+    history?.currentPage || 1;
 
-  if (!currentPageData) {
+  const currentPage =
+    pages[currentPageNumber - 1];
+
+  if (!currentPage) {
     return (
-      <SafeAreaView style={styles.safeArea}>
+      <SafeAreaView
+        style={styles.safeArea}
+      >
         <View style={styles.loading}>
-          <Text>Página não encontrada.</Text>
+          <Text>
+            Página não encontrada.
+          </Text>
         </View>
       </SafeAreaView>
     );
   }
 
   const isLastPage =
-    currentPage === pages.length;
+    currentPageNumber ===
+    pages.length;
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView
+      style={styles.safeArea}
+    >
       <ImageBackground
         source={storysBack}
         style={styles.background}
@@ -272,8 +413,12 @@ const StoryPage = () => {
 
           {/* MICROFONE */}
 
-          <View style={styles.micContainer}>
-            <Pressable style={styles.btnMic}>
+          <View
+            style={styles.micContainer}
+          >
+            <Pressable
+              style={styles.btnMic}
+            >
               <Volume2
                 size={28}
                 color="#2699D6"
@@ -283,71 +428,147 @@ const StoryPage = () => {
 
           {/* HISTÓRIA */}
 
-          <View style={styles.cardContainer}>
+          <View
+            style={styles.cardContainer}
+          >
             <CardStory
               imagem={{
-                uri: currentPageData.image,
+                uri:
+                  currentPage.illustration ||
+                  "",
               }}
-              subtitulo={currentPageData.text}
-              paragrafo={currentPageData.text}
+              subtitulo={
+                currentPage.text
+              }
+              paragrafo={
+                currentPage.text
+              }
             />
           </View>
 
           {/* BOTÕES */}
 
-          <View style={styles.containerBtn}>
+          <View
+            style={styles.containerBtn}
+          >
+            {/* ANTERIOR */}
 
             <Pressable
-              style={styles.btn}
-              onPress={previousPage}
-              disabled={currentPage <= 1}
+              style={[
+                styles.btn,
+                currentPageNumber <=
+                  1 &&
+                  styles.btnDisabled,
+              ]}
+              onPress={
+                previousPage
+              }
+              disabled={
+                currentPageNumber <= 1
+              }
             >
-              <Text style={styles.text1}>
+              <Text
+                style={styles.text1}
+              >
                 Anterior
               </Text>
             </Pressable>
 
-            <Text style={styles.text2}>
-              {currentPage}
+            {/* NÚMERO */}
+
+            <Text
+              style={styles.text2}
+            >
+              {currentPageNumber}
             </Text>
 
-            {isLastPage ? (
-              <Pressable
-                style={styles.btn}
-                onPress={completeStory}
-                disabled={loadingComplete}
-              >
-                <Text style={styles.text1}>
-                  {loadingComplete
-                    ? "..."
-                    : history?.completed
-                    ? "Concluída"
-                    : "Concluir"}
-                </Text>
-              </Pressable>
-            ) : (
-              <Pressable
-                style={styles.btn}
-                onPress={nextPage}
-              >
-                <Text style={styles.text1}>
-                  Próxima
-                </Text>
-              </Pressable>
-            )}
+            {/* PRÓXIMA / CONCLUIR */}
 
+            <Pressable
+              style={[
+                styles.btn,
+                loadingNext &&
+                  styles.btnDisabled,
+              ]}
+              onPress={
+                isLastPage
+                  ? completeStory
+                  : nextPage
+              }
+              disabled={loadingNext}
+            >
+              <Text
+                style={styles.text1}
+              >
+                {isLastPage
+                  ? "Concluir"
+                  : "Próxima"}
+              </Text>
+            </Pressable>
           </View>
 
-          {/* MENSAGEM DE CONCLUSÃO */}
+          {/* =========================
+              MODAL
+          ========================= */}
 
-          {history?.completed && (
-            <View style={styles.reward}>
-              <Text style={styles.rewardText}>
-                ⭐ História concluída!
-              </Text>
+          <Modal
+            visible={showModal}
+            transparent
+            animationType="fade"
+            onRequestClose={() =>
+              setShowModal(false)
+            }
+          >
+            <View
+              style={styles.modalOverlay}
+            >
+              <View
+                style={styles.modal}
+              >
+                <Text
+                  style={styles.modalStar}
+                >
+                  ⭐
+                </Text>
+
+                <Text
+                  style={styles.modalTitle}
+                >
+                  História concluída!
+                </Text>
+
+                <Text
+                  style={styles.modalText}
+                >
+                  Parabéns! Você ganhou
+                  uma estrela!
+                </Text>
+
+                <Text
+                  style={styles.modalReward}
+                >
+                  +1 ⭐
+                </Text>
+
+                <Pressable
+                  style={
+                    styles.modalButton
+                  }
+                  onPress={() =>
+                    setShowModal(false)
+                  }
+                >
+                  <Text
+                    style={
+                      styles.modalButtonText
+                    }
+                  >
+                    Continuar
+                  </Text>
+                </Pressable>
+              </View>
             </View>
-          )}
-
+          </Modal>
         </View>
       </ImageBackground>
     </SafeAreaView>
@@ -396,21 +617,20 @@ const styles = StyleSheet.create({
     height: 38,
     backgroundColor: "#FFFFFF",
     borderRadius: 10,
-
     alignItems: "center",
     justifyContent: "center",
-
     shadowColor: "#000",
-
     shadowOffset: {
       width: 0,
       height: 3,
     },
-
     shadowOpacity: 0.18,
     shadowRadius: 3,
-
     elevation: 4,
+  },
+
+  btnDisabled: {
+    opacity: 0.5,
   },
 
   text1: {
@@ -433,7 +653,6 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 40,
-
     alignItems: "center",
     justifyContent: "center",
   },
@@ -445,13 +664,58 @@ const styles = StyleSheet.create({
     gap: 10,
   },
 
-  reward: {
-    marginTop: 70,
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.45)",
     alignItems: "center",
+    justifyContent: "center",
   },
 
-  rewardText: {
-    fontSize: 20,
+  modal: {
+    width: "80%",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 25,
+    padding: 30,
+    alignItems: "center",
+    elevation: 10,
+  },
+
+  modalStar: {
+    fontSize: 60,
+    marginBottom: 10,
+  },
+
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+    color: "#297AB8",
+    marginBottom: 10,
+  },
+
+  modalText: {
+    fontSize: 17,
+    textAlign: "center",
+    marginBottom: 10,
+  },
+
+  modalReward: {
+    fontSize: 25,
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
+
+  modalButton: {
+    width: 150,
+    height: 45,
+    borderRadius: 12,
+    backgroundColor: "#A7DAFF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  modalButtonText: {
+    fontSize: 17,
     fontWeight: "bold",
   },
 });
