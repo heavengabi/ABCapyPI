@@ -8,29 +8,53 @@ const router = Router();
 
 // Stories
 
-router.get("/stories", StoryController.findAll);
+router.get(
+    "/stories",
+    StoryController.findAll
+);
 
-router.get("/stories/:id", StoryController.findById);
+router.get(
+    "/stories/:id",
+    StoryController.findById
+);
 
-router.post("/stories", StoryController.create);
+router.post(
+    "/stories",
+    StoryController.create
+);
 
-router.delete("/stories/:id", StoryController.delete);
+router.delete(
+    "/stories/:id",
+    StoryController.delete
+);
 
 
 // Story Pages
 
-router.get("/story-pages", StoryPageController.findAll);
+router.get(
+    "/story-pages",
+    StoryPageController.findAll
+);
 
-router.get("/story-pages/:id", StoryPageController.findById);
+router.get(
+    "/story-pages/:id",
+    StoryPageController.findById
+);
 
 router.get(
     "/stories/:storyId/pages",
     StoryPageController.findByStoryId
 );
 
-router.post("/story-pages", StoryPageController.create);
+router.post(
+    "/story-pages",
+    StoryPageController.create
+);
 
-router.delete("/story-pages/:id", StoryPageController.delete);
+router.delete(
+    "/story-pages/:id",
+    StoryPageController.delete
+);
 
 
 // Story History
@@ -50,14 +74,9 @@ router.get(
     StoryHistoryController.findByChild
 );
 
-router.post(
-    "/story-history",
-    StoryHistoryController.create
-);
-
 // Concluir história
-router.patch(
-    "/story-history/:id/complete",
+router.post(
+    "/story-history/complete",
     StoryHistoryController.complete
 );
 

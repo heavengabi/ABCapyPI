@@ -3,24 +3,28 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
-  JoinColumn
+  JoinColumn,
 } from "typeorm";
 import { Story } from "./Story";
+
 @Entity("story_pages")
 export class StoryPage {
   @PrimaryGeneratedColumn()
   id: number;
-  @Column()
+
+  @Column({ type: "int" })
   pageNumber: number;
-  @Column()
-  image: string;
-  @Column()
+
+  @Column({ type: "text" })
   text: string;
-  @Column()
-  storyId: number;
-  @ManyToOne(() => Story, story => story.pages, {
-    onDelete: "CASCADE"
-  })
+
+  @Column({ nullable: true })
+  illustration: string;
+
+  @Column({ nullable: true })
+  audioUrl: string;
+
+  @ManyToOne(() => Story, (story) => story.pages, { onDelete: "CASCADE" })
   @JoinColumn({ name: "storyId" })
   story: Story;
 }
