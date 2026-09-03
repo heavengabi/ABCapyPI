@@ -4,12 +4,13 @@ import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 export class Pictograms {
   @PrimaryGeneratedColumn()
   id: number;
-  @Column({ length: 100, nullable: false })
-  nameCard: string;
 
   @Column({ length: 100, nullable: false })
-  image: string;
+  name: string;
 
-  @Column({ length: 100, nullable: false })
-  audio: string; 
+  @Column({ length: 255, nullable: false })
+  imageUrl: string;
+
+  @Column({ length: 50, nullable: true })
+  category: string;
 }

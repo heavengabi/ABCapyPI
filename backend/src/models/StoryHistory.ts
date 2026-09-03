@@ -17,6 +17,7 @@ export class StoryHistory {
   @PrimaryGeneratedColumn()
   id: number;
 
+<<<<<<< HEAD
   @ManyToOne(
     () => Children,
     { onDelete: "CASCADE" }
@@ -29,6 +30,13 @@ export class StoryHistory {
     (story) => story.histories,
     { onDelete: "CASCADE" }
   )
+=======
+  @ManyToOne(() => Children, { onDelete: "CASCADE" })
+  @JoinColumn({ name: "childId" })
+  child: Children;
+
+  @ManyToOne(() => Story, (story) => story.histories, { onDelete: "CASCADE" })
+>>>>>>> 10bdf21ead63713a7e9de0c80f86d3c7f1d9afdc
   @JoinColumn({ name: "storyId" })
   story: Story;
 
