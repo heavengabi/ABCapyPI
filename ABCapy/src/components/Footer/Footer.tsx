@@ -1,36 +1,78 @@
 import React from "react";
-import { StyleSheet, Text, View, Pressable, Image } from "react-native";
-import { router } from "expo-router";
+import { StyleSheet, Text, View, Pressable } from "react-native";
+import { router, usePathname } from "expo-router";
 
-import perfil from "../../assets/images/homeImages/perfil.png";
-import globo from "../../assets/images/homeImages/globo.png";
-import castelo from "../../assets/images/homeImages/castelo.png";
+// Importação dos ícones do Lucide
+import {Earth, Castle, User } from "lucide-react-native";
+
+const ACTIVE_COLOR = "#297AB8";   // Cor quando selecionado (ex: Azul)
+const INACTIVE_COLOR = "#76848C"; // Cor quando não selecionado (Cinza)
 
 const Footer = () => {
+  const pathname = usePathname();
+
+  // Verifica qual rota está ativa
+  const isHome = pathname === "/homePage" || pathname === "/";
+  const isStories = pathname.includes("/Stories");
+  const isUser = pathname.includes("/User");
+
   return (
     <View style={styles.footerBar}>
+      {/* Botão Início */}
       <Pressable
         style={styles.footerButton}
         onPress={() => router.push("/homePage")}
       >
-        <Image source={globo} style={styles.icon} />
-        <Text style={styles.textos}>Início</Text>
+        <Earth
+          size={26}
+          color={isHome ? ACTIVE_COLOR : INACTIVE_COLOR}
+        />
+        <Text
+          style={[
+            styles.textos,
+            { color: isHome ? ACTIVE_COLOR : INACTIVE_COLOR },
+          ]}
+        >
+          Início
+        </Text>
       </Pressable>
 
+      
       <Pressable
         style={styles.footerButton}
         onPress={() => router.push("/Stories")}
       >
-        <Image source={castelo} style={styles.icon} />
-        <Text style={styles.textos}>Histórias</Text>
+        <Castle
+          size={26}
+          color={isStories ? ACTIVE_COLOR : INACTIVE_COLOR}
+        />
+        <Text
+          style={[
+            styles.textos,
+            { color: isStories ? ACTIVE_COLOR : INACTIVE_COLOR },
+          ]}
+        >
+          Histórias
+        </Text>
       </Pressable>
 
+      
       <Pressable
         style={styles.footerButton}
         onPress={() => router.push("/User")}
       >
-        <Image source={perfil} style={styles.icon} />
-        <Text style={styles.textos}>Perfil</Text>
+        <User
+          size={26}
+          color={isUser ? ACTIVE_COLOR : INACTIVE_COLOR}
+        />
+        <Text
+          style={[
+            styles.textos,
+            { color: isUser ? ACTIVE_COLOR : INACTIVE_COLOR },
+          ]}
+        >
+          Perfil
+        </Text>
       </Pressable>
     </View>
   );
@@ -46,19 +88,17 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
     alignItems: "center",
     paddingHorizontal: 20,
+   
+    borderTopColor: "#f0f0f0",
   },
   footerButton: {
     alignItems: "center",
     justifyContent: "center",
-  },
-  icon: {
-    width: 28,
-    height: 28,
-    marginBottom: 4,
+    gap: 4,
   },
   textos: {
     fontSize: 12,
     textAlign: "center",
-    color: "#000",
+   fontFamily:"Poppins_500Medium"
   },
 });

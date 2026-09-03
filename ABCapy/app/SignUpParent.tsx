@@ -6,6 +6,7 @@ import { Image, ImageBackground, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import BackgroundImage from "../src/assets/images/bg-login.png";
 import logoImage from "../src/assets/images/small-logo.png";
+import SmallLogo from "../src/assets/images/SmallLogo.svg"
 
 export default function Cadastro() {
   return (
@@ -15,7 +16,7 @@ export default function Cadastro() {
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         >
           <View style={{ justifyContent: "center", alignItems: "center" }}>
-            <Image source={logoImage} width={100} height={100} />
+            <SmallLogo width={100} height={100} />
             <Text
               style={{
                 fontSize: 24,

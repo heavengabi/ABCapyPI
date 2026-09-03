@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Accessory } from "./Accessories";
 import { Children } from "./Children";
 
@@ -7,12 +7,14 @@ export class ChildAccessory {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Children)
+  @ManyToOne(() => Children, { onDelete: "CASCADE" })
+  @JoinColumn({ name: "childId" })
   child: Children;
 
-  @ManyToOne(() => Accessory)
+  @ManyToOne(() => Accessory, { onDelete: "CASCADE" })
+  @JoinColumn({ name: "accessoryId" })
   accessory: Accessory;
 
   @Column({ default: false })
-  equipped: boolean; //ver se ta usando o acessorio
+  equipped: boolean;
 }

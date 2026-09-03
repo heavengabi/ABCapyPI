@@ -3,6 +3,7 @@ import { GameHistory } from "../models/GameHistory";
 
 const repo = AppDataSource.getRepository(GameHistory);
 
+<<<<<<< HEAD
 export const GameHistoryRepository = {
 
     async findById(id: number) {
@@ -51,4 +52,19 @@ export const GameHistoryRepository = {
         return repo.save(history);
 
     },
+=======
+export const gameHistoryRepository = {
+  async create(data: Partial<GameHistory>) {
+    const entry = repo.create(data);
+    return await repo.save(entry);
+  },
+
+  async listByChild(childId: number) {
+    return await repo.find({
+      where: { child: { id: childId } },
+      relations: ["game"],
+      order: { playedAt: "DESC" },
+    });
+  },
+>>>>>>> 10bdf21ead63713a7e9de0c80f86d3c7f1d9afdc
 };

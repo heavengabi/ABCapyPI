@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import {
   Column,
   Entity,
@@ -5,6 +6,9 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 
+=======
+import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+>>>>>>> 10bdf21ead63713a7e9de0c80f86d3c7f1d9afdc
 import { User } from "./User";
 
 @Entity("child")
@@ -22,6 +26,7 @@ export class Children {
   @Column({ default: 0, nullable: false })
   stars: number;
 
-  @OneToOne(() => User, (user) => user.child)
+  @OneToOne(() => User, (user) => user.child, { onDelete: "CASCADE" })
+  @JoinColumn({ name: "userId" })
   user: User;
 }

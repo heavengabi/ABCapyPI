@@ -5,12 +5,15 @@ export class Accessory {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ length: 100 })
-  nameAccessory: string;
+  @Column({ length: 100, nullable: false })
+  name: string;
 
-  @Column({ length: 100 })
-  typeAccessory: string;
+  @Column({ length: 255, nullable: false })
+  imageUrl: string;
 
-  @Column()
-  starsRequired: number;
+  @Column({ length: 50, nullable: true })
+  type: string; // ex: chapéu, óculos, roupa
+
+  @Column({ type: "int", default: 0 })
+  price: number;
 }

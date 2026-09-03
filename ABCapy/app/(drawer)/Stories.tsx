@@ -139,7 +139,7 @@ const Stories = () => {
       <ImageBackground
         source={historias}
         style={{ flex: 1 }}
-      >
+      />
         {/* MENU */}
 
         <Ionicons
@@ -354,7 +354,7 @@ const Stories = () => {
             </View>
           </View>
         </ScrollView>
-      </ImageBackground>
+     
 
       <Footer />
     </SafeAreaView>
@@ -375,13 +375,25 @@ const styles = StyleSheet.create({
     marginTop: 15,
     alignItems: "center",
   },
+   menuButton: {
+    
+    top: 0,
+    left: 15,
+    zIndex: 10,
+  },
+
+  menuIcon: {
+    width: 31,
+    height: 31,
+    resizeMode: "contain",
+  },
 
   text1: {
     color: "#297AB8",
-    fontWeight: "bold",
+    fontFamily:"Poppins_700Bold",
     fontSize: 25,
     textAlign: "center",
-    bottom: -30,
+    bottom: -10,
   },
 
   conteudo: {
