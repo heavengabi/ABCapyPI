@@ -1,59 +1,3 @@
-<<<<<<< HEAD
-import { ChildrenRepository } from "../repositories/ChildrenRepository";
-
-export const ChildrenService = {
-
-    async findAll() {
-        return ChildrenRepository.findAll();
-    },
-
-    async findById(id: number) {
-        return ChildrenRepository.findById(id);
-    },
-
-    async findByUserId(userId: number) {
-        return ChildrenRepository.findByUserId(userId);
-    },
-
-    async create(data: any) {
-        const child =
-            ChildrenRepository.create(data);
-
-        return ChildrenRepository.save(child);
-    },
-
-    async update(id: number, data: any) {
-
-        const child =
-            await ChildrenRepository.findById(id);
-
-        if (!child) {
-            return null;
-        }
-
-        Object.assign(child, data);
-
-        return ChildrenRepository.save(child);
-    },
-
-    async delete(id: number) {
-        return ChildrenRepository.delete(id);
-    },
-
-    async addStar(id: number) {
-
-        const child =
-            await ChildrenRepository.findById(id);
-
-        if (!child) {
-            return null;
-        }
-
-        child.stars += 1;
-
-        return ChildrenRepository.save(child);
-    },
-=======
 import { childrenRepository } from "../repositories/ChildrenRepository";
 import { userRepository } from "../repositories/UserRepository";
 import { BadRequestError, NotFoundError } from "../errors/AppError";
@@ -127,5 +71,4 @@ export const ChildrenService = {
       user: updated?.user ? ommitPassword(updated.user) : undefined,
     };
   }
->>>>>>> 10bdf21ead63713a7e9de0c80f86d3c7f1d9afdc
 };

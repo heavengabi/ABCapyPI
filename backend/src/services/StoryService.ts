@@ -1,21 +1,3 @@
-<<<<<<< HEAD
-import { StoryRepository } from "../repositories/StoryRepository";
-export const StoryService = {
-  async findAll() {
-    return StoryRepository.findAll();
-  },
-  async findById(id: number) {
-    return StoryRepository.findById(id);
-  },
-  async create(data: any) {
-    const story = StoryRepository.create(data);
-    return StoryRepository.save(story);
-  },
-  async delete(id: number) {
-    return StoryRepository.delete(id);
-  }
-};
-=======
 import { storyRepository } from "../repositories/StoryRepository";
 import { BadRequestError, NotFoundError } from "../errors/AppError";
 
@@ -59,4 +41,3 @@ export const StoryService = {
     }
   },
 };
->>>>>>> 10bdf21ead63713a7e9de0c80f86d3c7f1d9afdc

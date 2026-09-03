@@ -11,23 +11,23 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 
-import historias from "../src/assets/storiesImages/historias.png";
-import gramaa from "../src/assets/storiesImages/gramaa.png";
+import historias from "../../src/assets/storiesImages/historias.png"
+import gramaa from "../../src/assets/storiesImages/gramaa.png";
 
 import Caminho from "@/src/components/Story/Caminho";
 import Footer from "@/src/components/Footer/Footer";
 import Botao from "@/src/components/Story/Botao";
 import Recompensa from "@/src/components/Story/Recompensa";
 
-import a from "../src/assets/storiesImages/a.png";
-import b from "../src/assets/storiesImages/b.png";
-import c from "../src/assets/storiesImages/c.png";
-import d from "../src/assets/storiesImages/d.png";
-import e from "../src/assets/storiesImages/e.png";
-import f from "../src/assets/storiesImages/f.png";
-import g from "../src/assets/storiesImages/g.png";
+import a from "../../src/assets/storiesImages/a.png";
+import b from "../../src/assets/storiesImages/b.png";
+import c from "../../src/assets/storiesImages/c.png";
+import d from "../../src/assets/storiesImages/d.png";
+import e from "../../src/assets/storiesImages/e.png";
+import f from "../../src/assets/storiesImages/f.png";
+import g from "../../src/assets/storiesImages/g.png";
 
-import starStory from "../src/assets/storiesImages/starStory.png";
+import starStory from "../../src/assets/storiesImages/starStory.png";
 
 type Story = {
   id: number;
