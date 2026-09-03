@@ -23,7 +23,7 @@ const GamePages = () => {
       >
         <Header
           icon="arrow-back"
-          onPress={() => {router.push('/homePage')}}
+          onPress={() => { router.push('/homePage') }}
           headerStyle={{ backgroundColor: "#A8DAFF" }}
           buttonStyle={{ backgroundColor: "#69B9F7" }}
         />
@@ -41,6 +41,7 @@ const GamePages = () => {
               pathname: "/dificultyPages",
               params: {
                 game: "sequencingGame",
+                gameId: "1",
               },
             })
           }
@@ -54,6 +55,7 @@ const GamePages = () => {
               pathname: "/dificultyPages",
               params: {
                 game: "memoryGame",
+                gameId: "2",
               },
             })
           }
@@ -67,6 +69,7 @@ const GamePages = () => {
               pathname: "/dificultyPages",
               params: {
                 game: "equalityGame",
+                gameId: "3",
               },
             })
           }

@@ -1,0 +1,10 @@
+import { Router } from "express";
+import { ChildrenController } from "../controllers/ChildrenController";
+const router = Router();
+router.get("/", ChildrenController.findAll);
+router.get("/user/:userId", ChildrenController.findByUserId);
+router.get("/:id", ChildrenController.findById);
+router.post("/", ChildrenController.create);
+router.put("/:id", ChildrenController.update);
+router.delete("/:id", ChildrenController.delete);
+export default router;
