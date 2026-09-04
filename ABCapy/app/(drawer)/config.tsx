@@ -46,7 +46,7 @@ export default function ConfigPage() {
         <View style={style.headerContainer}>
           <TouchableOpacity
             style={style.backButton}
-            onPress={() => router.back()}
+            onPress={() => router.push("/(drawer)/homePage")}
           >
             <ChevronLeft size={28} color="#000" />
           </TouchableOpacity>

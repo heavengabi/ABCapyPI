@@ -45,7 +45,7 @@ const Faq = () => {
     <ScrollView contentContainerStyle={styles.container}>
       <Pressable
         style={styles.backButton}
-        onPress={() => router.back()}
+        onPress={() => router.push("/(drawer)/homePage")}
       >
         <Ionicons name="arrow-back" size={24} color="#000000" />
       </Pressable>
