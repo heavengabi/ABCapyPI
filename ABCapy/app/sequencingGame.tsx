@@ -24,8 +24,6 @@ import {
   terminouSequencia,
 } from "../src/logics/gamesLogic/sequencingLogic";
 
-import api from "../src/utils/api";
-
 type Cor = "verde" | "amarela" | "vermelha";
 type Nivel = "facil" | "medio" | "dificil";
 type Fase = "parado" | "mostrando" | "jogando" | "acertou" | "errou";
@@ -112,15 +110,14 @@ const estrelasPorNivel: Record<Nivel, number> = {
 };
 
 const SequencingGame = () => {
-  const { difficulty, gameId } = useLocalSearchParams<{
+  const { difficulty } = useLocalSearchParams<{
     difficulty?: string;
-    gameId?: string;
   }>();
 
   const nivel: Nivel =
     difficulty === "facil" ||
-      difficulty === "medio" ||
-      difficulty === "dificil"
+    difficulty === "medio" ||
+    difficulty === "dificil"
       ? difficulty
       : "facil";
 
@@ -141,24 +138,6 @@ const SequencingGame = () => {
     jogo.linhas * TAMANHO_BOLOTA +
     (jogo.linhas - 1) * ESPACO_ENTRE_BOLOTAS;
 
-  const registrarPartida = async () => {
-    const targetGameId = Number(gameId) ? Number(gameId) : 1;
-
-    try {
-      await api.post("/games/play", {
-        userId: 1, // Passando ID da criança para ambiente sem token
-        gameId: targetGameId,
-        difficulty: nivel,
-      });
-      console.log("Partida e estrelas salvas com sucesso no MySQL!");
-    } catch (error: any) {
-      console.error(
-        "Erro ao registrar partida no banco:",
-        error.response?.data || error.message
-      );
-    }
-  };
-
   const jogarNovaRodada = () => {
     const novaSequencia = gerarSequencia(
       jogo.bolotas.length,
@@ -173,7 +152,7 @@ const SequencingGame = () => {
     setFase("mostrando");
   };
 
-  const handleCliqueBolota = async (indiceClicado: number) => {
+  const handleCliqueBolota = (indiceClicado: number) => {
     if (
       fase !== "jogando" ||
       bolotasExplodidas.includes(indiceClicado)
@@ -199,8 +178,6 @@ const SequencingGame = () => {
     const novoIndice = proximaPosicao(indiceJogador);
 
     if (terminouSequencia(novoIndice, sequencia)) {
-      await registrarPartida();
-
       setTimeout(() => {
         setBolotaAtiva(null);
         setFase("acertou");
@@ -316,7 +293,7 @@ const SequencingGame = () => {
           visible={fase === "acertou" || fase === "errou"}
           transparent
           animationType="fade"
-          onRequestClose={() => { }}
+          onRequestClose={() => {}}
         >
           <View style={styles.modalOverlay}>
             <View style={styles.modalBox}>
