@@ -5,15 +5,13 @@ import {
   View,
   Pressable,
   ScrollView,
-  Image,
 } from "react-native";
 import { List } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
 import { router } from "expo-router";
-import FaqBoy from "../../src/assets/charactersImages/faqBoy.svg";
+import { Image } from "expo-image";
+
 const Faq = () => {
-  const navigation = useNavigation();
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
   const handlePress = (index: number) => {
@@ -49,7 +47,7 @@ const Faq = () => {
         style={styles.backButton}
         onPress={() => router.back()}
       >
-        <Ionicons name="arrow-back" size={24} color="#000000" onPress={() => navigation.goBack()} />
+        <Ionicons name="arrow-back" size={24} color="#000000" />
       </Pressable>
 
       <Text style={styles.title}>Principais dúvidas</Text>
@@ -93,8 +91,10 @@ const Faq = () => {
           </View>
         </View>
 
-        <FaqBoy
+        <Image
+          source={require("../../src/assets/charactersImages/faqBoy.svg")}
           style={styles.characterImage}
+          contentFit="contain"
         />
       </View>
     </ScrollView>
@@ -124,11 +124,10 @@ const styles = StyleSheet.create({
 
   title: {
     fontSize: 26,
-    fontFamily:"Poppins_600SemiBold",
+    fontFamily: "Poppins_600SemiBold",
     color: "#000000",
     textAlign: "center",
     marginBottom: 24,
-
   },
 
   accordionContainer: {
@@ -151,7 +150,7 @@ const styles = StyleSheet.create({
     color: "#000000",
     fontWeight: "600",
     fontSize: 14,
-    fontFamily:"Poppins_500Medium"
+    fontFamily: "Poppins_500Medium",
   },
 
   accordionContent: {
@@ -163,7 +162,7 @@ const styles = StyleSheet.create({
     color: "#000000",
     fontSize: 14,
     lineHeight: 20,
-    fontFamily:"Poppins_400Regular",
+    fontFamily: "Poppins_400Regular",
   },
 
   footer: {
@@ -199,15 +198,14 @@ const styles = StyleSheet.create({
   emailText: {
     color: "#FFF",
     fontSize: 14,
-    fontFamily:"Poppins_500Medium",
+    fontFamily: "Poppins_500Medium",
   },
 
   characterImage: {
     position: "absolute",
     width: 180,
     height: 180,
-    resizeMode: "contain",
-    right: -10  ,
+    right: -10,
     bottom: -10,
   },
 });

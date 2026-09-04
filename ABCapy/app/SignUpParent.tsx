@@ -1,7 +1,8 @@
-import { Button } from "@/src/components/ui/button";
+import { Button } from "@/src/components/ui/Button";
 import { router } from "expo-router";
 import { Lock, Mail } from "lucide-react-native";
 import React, { useState } from "react";
+import {Image} from "expo-image"
 import {
   Alert,
   ImageBackground,
@@ -12,11 +13,10 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import  api from "@/src/utils/api";
+import api from "@/src/utils/api";
 
 import BackgroundImage from "../src/assets/images/bg-login.png";
-import SmallLogo from "../src/assets/images/SmallLogo.svg";
-
+import { ReactComponent as SmallLogo } from "../src/assets/images/SmallLogo.svg";
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -39,7 +39,10 @@ export default function Login() {
       // Verifica se o usuário já tem um perfil de criança criado
       try {
         const childRes = await api.get("/children/me");
-        await AsyncStorage.setItem("@ABCapy:child", JSON.stringify(childRes.data));
+        await AsyncStorage.setItem(
+          "@ABCapy:child",
+          JSON.stringify(childRes.data),
+        );
         router.replace("/(drawer)/homePage");
       } catch (err: any) {
         if (err.response && err.response.status === 404) {
@@ -50,7 +53,8 @@ export default function Login() {
         }
       }
     } catch (error: any) {
-      const msg = error.response?.data?.message || "Erro ao conectar com o servidor.";
+      const msg =
+        error.response?.data?.message || "Erro ao conectar com o servidor.";
       Alert.alert("Falha no Login", msg);
     } finally {
       setLoading(false);
@@ -60,9 +64,16 @@ export default function Login() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ImageBackground style={{ flex: 1 }} source={BackgroundImage}>
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
+          <Image 
+          source={require("@/src/assets/images/small-logo.png")}
+  style={{ width: 100, height: 100 }}
+
+          
+          />
           <View style={{ justifyContent: "center", alignItems: "center" }}>
-            
             
             <Text
               style={{
@@ -74,7 +85,9 @@ export default function Login() {
             >
               LOGIN
             </Text>
-            <Text style={{ textAlign: "center", fontSize: 12, fontWeight: "700" }}>
+            <Text
+              style={{ textAlign: "center", fontSize: 12, fontWeight: "700" }}
+            >
               Entre para continuar sua jornada!
             </Text>
           </View>
@@ -124,12 +137,16 @@ export default function Login() {
             </View>
 
             {loading ? (
-              <ActivityIndicator size="large" color="#E59866" style={{ marginTop: 20 }} />
+              <ActivityIndicator
+                size="large"
+                color="#E59866"
+                style={{ marginTop: 20 }}
+              />
             ) : (
               <Button
                 title="Continuar"
                 onPress={handleLogin}
-                style={{ marginTop: 15, width:"100%" }}
+                style={{ marginTop: 15, width: "100%" }}
               />
             )}
 
