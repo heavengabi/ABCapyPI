@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -5,15 +6,14 @@ import {
   ScrollView,
   ImageBackground,
   Image,
-  TouchableOpacity,
   Pressable,
 } from "react-native";
-import menu from "../../src/assets/images/homeImages/menu.png";
 
-import React, { useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useNavigation } from "expo-router";
+
+import menu from "../../src/assets/images/homeImages/menu.png";
 
 import historias from "../../src/assets/storiesImages/historias.png";
 import gramaa from "../../src/assets/storiesImages/gramaa.png";
@@ -32,11 +32,8 @@ import f from "../../src/assets/storiesImages/f.png";
 import g from "../../src/assets/storiesImages/g.png";
 
 import starStory from "../../src/assets/storiesImages/starStory.png";
-<<<<<<< HEAD
-import api from "../../src/utils/api";
-=======
+
 import api from "@/src/utils/api";
->>>>>>> abc6c72f94a81609adc0d4ff9e970a7f29517c92
 
 type Story = {
   id: number;
@@ -44,47 +41,49 @@ type Story = {
   cover: string;
 };
 
-<<<<<<< HEAD
-const Stories = () => {
-=======
 export default function Stories() {
   const navigation = useNavigation<any>();
->>>>>>> abc6c72f94a81609adc0d4ff9e970a7f29517c92
+
   const [stories, setStories] = useState<Story[]>([]);
 
+  // =========================
+  // CARREGAR HISTÓRIAS
+  // =========================
   useEffect(() => {
-    async function carregar() {
+    const carregar = async () => {
       try {
-        const res = await api.get("/stories");
-        if (res.data) {
-          setStories(res.data);
-        }
-      } catch (e) {}
-    }
+        console.log("BUSCANDO HISTÓRIAS...");
+
+        const response = await api.get<Story[]>("/stories");
+
+        console.log("STATUS:", response.status);
+        console.log("HISTÓRIAS REGISTRADAS NO BANCO:", response.data);
+
+        setStories(response.data);
+      } catch (error: any) {
+        console.log(
+          "ERRO AO CARREGAR HISTÓRIAS:",
+          error?.response?.data || error?.message,
+        );
+      }
+    };
+
     carregar();
   }, []);
 
-<<<<<<< HEAD
-  const loadStories = async () => {
-    try {
-      console.log("BUSCANDO HISTÓRIAS...");
-
-      const response = await api.get<Story[]>("/api/stories");
-
-      console.log("STATUS:", response.status);
-      console.log("HISTÓRIAS REGISTRADAS NO BANCO:", response.data);
-
-      setStories(response.data);
-    } catch (error: any) {
-      console.log(
-        "ERRO AO CARREGAR HISTÓRIAS:",
-        error?.response?.data || error?.message
-      );
-    }
+  // =========================
+  // ABRIR MENU
+  // =========================
+  const openMenu = () => {
+    navigation.dispatch({
+      type: "OPEN_DRAWER",
+    });
   };
 
+  // =========================
+  // ABRIR HISTÓRIA
+  // =========================
   const abrirHistoria = (index: number) => {
-    // Busca a história no array retornado pela API pelo índice da posição
     const storyData = stories[index];
 
     if (!storyData) {
@@ -100,87 +99,30 @@ export default function Stories() {
         storyId: storyData.id.toString(),
       },
     });
-=======
-  const openMenu = () => {
-    navigation.dispatch({ type: "OPEN_DRAWER" });
-  };
-
-  const abrirHistoria = (index: number) => {
-    const story = stories[index];
-    if (story) {
-      router.push({
-        pathname: "/StoryPage",
-        params: { storyId: story.id.toString() },
-      });
-    }
->>>>>>> abc6c72f94a81609adc0d4ff9e970a7f29517c92
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-<<<<<<< HEAD
-      <ImageBackground
-        source={historias}
-        style={{ flex: 1 }}
-      />
+    <SafeAreaView style={styles.safeArea}>
+      <ImageBackground source={historias} style={styles.background}>
+        {/* MENU */}
+        <Pressable onPress={openMenu} style={styles.menuButton}>
+          <Image source={menu} style={styles.menuIcon} />
+        </Pressable>
 
-      <Ionicons
-        name="menu"
-        size={40}
-        color="black"
-        style={styles.menu}
-        onPress={() => { }}
-      />
-
-      <ScrollView>
-        <View style={styles.container}>
-          <Text style={styles.text1}>
-            Se aventure por essas histórias
-          </Text>
-        </View>
-
-        <View style={styles.conteudo}>
-          <Image
-            source={gramaa}
-            style={styles.grama}
-          />
-
-          <View style={styles.caminhoContainer}>
-            <Caminho />
-
-            <View
-              style={[
-                styles.btnContainer,
-                {
-                  top: -30,
-                  right: "64%",
-                },
-              ]}
-            >
-              <Botao
-                image={a}
-                onPress={() => abrirHistoria(0)}
-              />
-              <Recompensa
-                quantidade={3}
-                imagem={starStory}
-              />
-            </View>
-=======
-      <ImageBackground source={historias} style={{ flex: 1 }}>
-       <Pressable onPress={openMenu} style={{padding:10}}>
-                   <Image source={menu} style={styles.menuIcon} />
-                 </Pressable>
-
-        <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          {/* TÍTULO */}
           <View style={styles.container}>
             <Text style={styles.text1}>Se aventure por essas histórias</Text>
           </View>
 
+          {/* CAMINHO / HISTÓRIAS */}
           <View style={styles.conteudo}>
             <Image source={gramaa} style={styles.grama} />
->>>>>>> abc6c72f94a81609adc0d4ff9e970a7f29517c92
 
+            {/* HISTÓRIA 1 */}
             <View
               style={[
                 styles.btnContainer,
@@ -190,17 +132,12 @@ export default function Stories() {
                 },
               ]}
             >
-              <Botao
-                image={b}
-                onPress={() => abrirHistoria(1)}
-              />
-              <Recompensa
-                quantidade={3}
-                imagem={starStory}
-              />
+              <Botao image={b} onPress={() => abrirHistoria(0)} />
+
+              <Recompensa quantidade={3} imagem={starStory} />
             </View>
 
-<<<<<<< HEAD
+            {/* HISTÓRIA 2 */}
             <View
               style={[
                 styles.btnContainer,
@@ -210,16 +147,12 @@ export default function Stories() {
                 },
               ]}
             >
-              <Botao
-                image={c}
-                onPress={() => abrirHistoria(2)}
-              />
-              <Recompensa
-                quantidade={3}
-                imagem={starStory}
-              />
+              <Botao image={c} onPress={() => abrirHistoria(1)} />
+
+              <Recompensa quantidade={3} imagem={starStory} />
             </View>
 
+            {/* HISTÓRIA 3 */}
             <View
               style={[
                 styles.btnContainer,
@@ -229,16 +162,12 @@ export default function Stories() {
                 },
               ]}
             >
-              <Botao
-                image={d}
-                onPress={() => abrirHistoria(3)}
-              />
-              <Recompensa
-                quantidade={3}
-                imagem={starStory}
-              />
+              <Botao image={d} onPress={() => abrirHistoria(2)} />
+
+              <Recompensa quantidade={3} imagem={starStory} />
             </View>
 
+            {/* HISTÓRIA 4 */}
             <View
               style={[
                 styles.btnContainer,
@@ -248,16 +177,12 @@ export default function Stories() {
                 },
               ]}
             >
-              <Botao
-                image={e}
-                onPress={() => abrirHistoria(4)}
-              />
-              <Recompensa
-                quantidade={3}
-                imagem={starStory}
-              />
+              <Botao image={e} onPress={() => abrirHistoria(3)} />
+
+              <Recompensa quantidade={3} imagem={starStory} />
             </View>
 
+            {/* HISTÓRIA 5 */}
             <View
               style={[
                 styles.btnContainer,
@@ -267,16 +192,12 @@ export default function Stories() {
                 },
               ]}
             >
-              <Botao
-                image={f}
-                onPress={() => abrirHistoria(5)}
-              />
-              <Recompensa
-                quantidade={3}
-                imagem={starStory}
-              />
+              <Botao image={f} onPress={() => abrirHistoria(4)} />
+
+              <Recompensa quantidade={3} imagem={starStory} />
             </View>
 
+            {/* HISTÓRIA 6 */}
             <View
               style={[
                 styles.btnContainer,
@@ -286,81 +207,53 @@ export default function Stories() {
                 },
               ]}
             >
-              <Botao
-                image={g}
-                onPress={() => abrirHistoria(6)}
-              />
-              <Recompensa
-                quantidade={3}
-                imagem={starStory}
-              />
-            </View>
-          </View>
-        </View>
-      </ScrollView>
-=======
-              <View style={[styles.btnContainer, { top: -30, right: "64%" }]}>
-                <Botao image={a} onPress={() => abrirHistoria(0)} />
-                <Recompensa quantidade={3} imagem={starStory} />
-              </View>
+              <Botao image={g} onPress={() => abrirHistoria(5)} />
 
-              <View style={[styles.btnContainer, { top: 185, left: "50%" }]}>
-                <Botao image={b} onPress={() => abrirHistoria(1)} />
-                <Recompensa quantidade={3} imagem={starStory} />
-              </View>
-
-              <View style={[styles.btnContainer, { top: 340, right: "75%" }]}>
-                <Botao image={c} onPress={() => abrirHistoria(2)} />
-                <Recompensa quantidade={3} imagem={starStory} />
-              </View>
-
-              <View style={[styles.btnContainer, { top: 480, left: "55%" }]}>
-                <Botao image={d} onPress={() => abrirHistoria(3)} />
-                <Recompensa quantidade={3} imagem={starStory} />
-              </View>
-
-              <View style={[styles.btnContainer, { top: 650, right: "75%" }]}>
-                <Botao image={e} onPress={() => abrirHistoria(4)} />
-                <Recompensa quantidade={3} imagem={starStory} />
-              </View>
-
-              <View style={[styles.btnContainer, { top: 800, left: "55%" }]}>
-                <Botao image={f} onPress={() => abrirHistoria(5)} />
-                <Recompensa quantidade={3} imagem={starStory} />
-              </View>
-
-              <View style={[styles.btnContainer, { top: 950, right: "75%" }]}>
-                <Botao image={g} onPress={() => abrirHistoria(6)} />
-                <Recompensa quantidade={3} imagem={starStory} />
-              </View>
+              <Recompensa quantidade={3} imagem={starStory} />
             </View>
           </View>
         </ScrollView>
-      </ImageBackground>
->>>>>>> abc6c72f94a81609adc0d4ff9e970a7f29517c92
 
-      <Footer />
+        {/* FOOTER */}
+        <Footer />
+      </ImageBackground>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
+
+  background: {
+    flex: 1,
+  },
+
+  scrollContent: {
+    paddingBottom: 100,
+  },
+
   menuButton: {
     paddingHorizontal: 20,
     paddingTop: 10,
     alignSelf: "flex-start",
     zIndex: 10,
   },
+
+  menuIcon: {
+    width: 31,
+    height: 31,
+    resizeMode: "contain",
+  },
+
   container: {
     width: 300,
     alignSelf: "center",
     marginTop: 15,
     alignItems: "center",
   },
-<<<<<<< HEAD
 
-=======
->>>>>>> abc6c72f94a81609adc0d4ff9e970a7f29517c92
   text1: {
     color: "#297AB8",
     fontFamily: "Poppins_700Bold",
@@ -368,27 +261,20 @@ const styles = StyleSheet.create({
     textAlign: "center",
     bottom: -10,
   },
+
   conteudo: {
-    flex: 1,
     position: "relative",
+    minHeight: 1100,
   },
+
   grama: {
     width: "100%",
+    height: 1100,
     resizeMode: "cover",
   },
-  caminhoContainer: {
-    position: "absolute",
-    top: 190,
-    left: 0,
-    right: -100,
-    bottom: 0,
-  },
-  menuIcon: {
-    width: 31,
-    height: 31,
-    resizeMode: "contain",
-  },
+
   btnContainer: {
     position: "absolute",
+    alignItems: "center",
   },
 });

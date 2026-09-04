@@ -1,4 +1,4 @@
-import { Button } from "@/src/components/ui/Button";
+import {Button}  from "@/src/components/ui/Button";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";

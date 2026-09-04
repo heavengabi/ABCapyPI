@@ -45,32 +45,54 @@ export default function Cadastro() {
     try {
       setLoading(true);
 
-      // 1. Cadastra o usuário no backend
-      await api.post("/users", {
+      console.log("CADASTRANDO USUÁRIO...");
+      console.log({
+        nameUser,
+        email,
+      });
+
+      // 1. Cadastra o usuário
+      const registerResponse = await api.post("/users", {
         nameUser,
         email,
         password,
       });
 
-      // 2. Faz o login automático para obter o token JWT
+      console.log("USUÁRIO CADASTRADO:", registerResponse.data);
+
+      // 2. Faz login automático
+      console.log("FAZENDO LOGIN...");
+
       const loginResponse = await api.post("/login", {
         email,
         password,
       });
 
+      console.log("LOGIN REALIZADO:", loginResponse.data);
+
       const { token, user } = loginResponse.data;
 
-      // 3. Salva os dados na sessão
+      // 3. Salva token e usuário
       await AsyncStorage.setItem("@abcapy:token", token);
+
       await AsyncStorage.setItem("@abcapy:user", JSON.stringify(user));
+
+      // 4. Configura o token para as próximas requisições
       api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
-      // 4. Redireciona para a criação/seleção do personagem
+      // 5. Vai para seleção do personagem
       router.push("/CharacterSelection");
     } catch (error: any) {
+      console.log("ERRO NO CADASTRO:", error?.response?.status);
+
+      console.log("RESPOSTA DO BACKEND:", error?.response?.data);
+
+      console.log("ERRO:", error?.message);
+
       const message =
-        error.response?.data?.message ||
+        error?.response?.data?.message ||
         "Não foi possível criar sua conta. Tente novamente.";
+
       Alert.alert("Erro no Cadastro", message);
     } finally {
       setLoading(false);
@@ -88,9 +110,10 @@ export default function Cadastro() {
             paddingHorizontal: 30,
           }}
         >
-           <Image 
-                    source={require("@/src/assets/images/small-logo.png")}
-            style={{ width: 100, height: 100 }}/>
+          <Image
+            source={require("@/src/assets/images/small-logo.png")}
+            style={{ width: 100, height: 100 }}
+          />
           <Text
             style={{
               fontSize: 24,
@@ -213,7 +236,7 @@ export default function Cadastro() {
               />
             )}
 
-            <TouchableOpacity onPress={() => router.push("/Login")}>
+            <TouchableOpacity onPress={() => router.push("/SignUpParent")}>
               <Text style={{ textAlign: "center", marginTop: 10 }}>
                 Já tem uma conta?{" "}
                 <Text style={{ fontWeight: "bold" }}>Entre</Text>
