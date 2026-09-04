@@ -27,6 +27,10 @@ export const ChildrenService = {
       user,
     });
 
+    await userRepository.update(userId, {
+      child,
+    } as any);
+
     return {
       ...child,
       user: ommitPassword(child.user),
