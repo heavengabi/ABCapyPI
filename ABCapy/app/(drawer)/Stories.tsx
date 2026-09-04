@@ -5,11 +5,15 @@ import {
   ScrollView,
   ImageBackground,
   Image,
+  TouchableOpacity,
+  Pressable,
 } from "react-native";
+import menu from "../../src/assets/images/homeImages/menu.png";
+
 import React, { useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { router } from "expo-router";
+import { router, useNavigation } from "expo-router";
 
 import historias from "../../src/assets/storiesImages/historias.png";
 import gramaa from "../../src/assets/storiesImages/gramaa.png";
@@ -28,7 +32,11 @@ import f from "../../src/assets/storiesImages/f.png";
 import g from "../../src/assets/storiesImages/g.png";
 
 import starStory from "../../src/assets/storiesImages/starStory.png";
+<<<<<<< HEAD
 import api from "../../src/utils/api";
+=======
+import api from "@/src/utils/api";
+>>>>>>> abc6c72f94a81609adc0d4ff9e970a7f29517c92
 
 type Story = {
   id: number;
@@ -36,13 +44,27 @@ type Story = {
   cover: string;
 };
 
+<<<<<<< HEAD
 const Stories = () => {
+=======
+export default function Stories() {
+  const navigation = useNavigation<any>();
+>>>>>>> abc6c72f94a81609adc0d4ff9e970a7f29517c92
   const [stories, setStories] = useState<Story[]>([]);
 
   useEffect(() => {
-    loadStories();
+    async function carregar() {
+      try {
+        const res = await api.get("/stories");
+        if (res.data) {
+          setStories(res.data);
+        }
+      } catch (e) {}
+    }
+    carregar();
   }, []);
 
+<<<<<<< HEAD
   const loadStories = async () => {
     try {
       console.log("BUSCANDO HISTÓRIAS...");
@@ -78,10 +100,25 @@ const Stories = () => {
         storyId: storyData.id.toString(),
       },
     });
+=======
+  const openMenu = () => {
+    navigation.dispatch({ type: "OPEN_DRAWER" });
+  };
+
+  const abrirHistoria = (index: number) => {
+    const story = stories[index];
+    if (story) {
+      router.push({
+        pathname: "/StoryPage",
+        params: { storyId: story.id.toString() },
+      });
+    }
+>>>>>>> abc6c72f94a81609adc0d4ff9e970a7f29517c92
   };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
+<<<<<<< HEAD
       <ImageBackground
         source={historias}
         style={{ flex: 1 }}
@@ -129,6 +166,20 @@ const Stories = () => {
                 imagem={starStory}
               />
             </View>
+=======
+      <ImageBackground source={historias} style={{ flex: 1 }}>
+       <Pressable onPress={openMenu} style={{padding:10}}>
+                   <Image source={menu} style={styles.menuIcon} />
+                 </Pressable>
+
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <View style={styles.container}>
+            <Text style={styles.text1}>Se aventure por essas histórias</Text>
+          </View>
+
+          <View style={styles.conteudo}>
+            <Image source={gramaa} style={styles.grama} />
+>>>>>>> abc6c72f94a81609adc0d4ff9e970a7f29517c92
 
             <View
               style={[
@@ -149,6 +200,7 @@ const Stories = () => {
               />
             </View>
 
+<<<<<<< HEAD
             <View
               style={[
                 styles.btnContainer,
@@ -246,27 +298,69 @@ const Stories = () => {
           </View>
         </View>
       </ScrollView>
+=======
+              <View style={[styles.btnContainer, { top: -30, right: "64%" }]}>
+                <Botao image={a} onPress={() => abrirHistoria(0)} />
+                <Recompensa quantidade={3} imagem={starStory} />
+              </View>
+
+              <View style={[styles.btnContainer, { top: 185, left: "50%" }]}>
+                <Botao image={b} onPress={() => abrirHistoria(1)} />
+                <Recompensa quantidade={3} imagem={starStory} />
+              </View>
+
+              <View style={[styles.btnContainer, { top: 340, right: "75%" }]}>
+                <Botao image={c} onPress={() => abrirHistoria(2)} />
+                <Recompensa quantidade={3} imagem={starStory} />
+              </View>
+
+              <View style={[styles.btnContainer, { top: 480, left: "55%" }]}>
+                <Botao image={d} onPress={() => abrirHistoria(3)} />
+                <Recompensa quantidade={3} imagem={starStory} />
+              </View>
+
+              <View style={[styles.btnContainer, { top: 650, right: "75%" }]}>
+                <Botao image={e} onPress={() => abrirHistoria(4)} />
+                <Recompensa quantidade={3} imagem={starStory} />
+              </View>
+
+              <View style={[styles.btnContainer, { top: 800, left: "55%" }]}>
+                <Botao image={f} onPress={() => abrirHistoria(5)} />
+                <Recompensa quantidade={3} imagem={starStory} />
+              </View>
+
+              <View style={[styles.btnContainer, { top: 950, right: "75%" }]}>
+                <Botao image={g} onPress={() => abrirHistoria(6)} />
+                <Recompensa quantidade={3} imagem={starStory} />
+              </View>
+            </View>
+          </View>
+        </ScrollView>
+      </ImageBackground>
+>>>>>>> abc6c72f94a81609adc0d4ff9e970a7f29517c92
 
       <Footer />
     </SafeAreaView>
   );
-};
-
-export default Stories;
+}
 
 const styles = StyleSheet.create({
-  menu: {
-    marginTop: 10,
-    marginLeft: 20,
+  menuButton: {
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    alignSelf: "flex-start",
+    zIndex: 10,
   },
-
   container: {
     width: 300,
     alignSelf: "center",
     marginTop: 15,
     alignItems: "center",
   },
+<<<<<<< HEAD
 
+=======
+>>>>>>> abc6c72f94a81609adc0d4ff9e970a7f29517c92
   text1: {
     color: "#297AB8",
     fontFamily: "Poppins_700Bold",
@@ -274,17 +368,14 @@ const styles = StyleSheet.create({
     textAlign: "center",
     bottom: -10,
   },
-
   conteudo: {
     flex: 1,
     position: "relative",
   },
-
   grama: {
     width: "100%",
     resizeMode: "cover",
   },
-
   caminhoContainer: {
     position: "absolute",
     top: 190,
@@ -292,7 +383,11 @@ const styles = StyleSheet.create({
     right: -100,
     bottom: 0,
   },
-
+  menuIcon: {
+    width: 31,
+    height: 31,
+    resizeMode: "contain",
+  },
   btnContainer: {
     position: "absolute",
   },

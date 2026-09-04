@@ -2,11 +2,8 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// ⚠️ ATENÇÃO COM O IP:
-// Se você estiver testando no celular físico (Expo Go): coloque o IP local da sua máquina (ex: 'http://192.168.1.15:3000/api')
-// Se for no emulador Android: 'http://10.0.2.2:3000/api'
-// Se for no simulador iOS ou Web: 'http://localhost:3000/api'
-const baseURL = "http://localhost:3000/api"; // <-- Adicionado o /api aqui!
+
+const baseURL = "http://192.168.1.100:3000";
 
 const api = axios.create({
   baseURL,

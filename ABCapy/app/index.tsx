@@ -1,11 +1,11 @@
 import React from "react";
-
-import { Button } from "@/src/components/ui/button";
-import { View, Image, StyleSheet, ImageBackground } from "react-native";
-
+import {Image} from "expo-image";
+import { Button } from "@/src/components/ui/Button";
+import { View, StyleSheet, ImageBackground } from "react-native";
+import { ReactComponent as LogoImage } from "@/src/assets/images/logo.png";
 // Images
 
-import BackgroundImage from "../src/assets/images/bg-login.png"
+import BackgroundImage from "../src/assets/images/bg-login.png";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 
@@ -13,18 +13,29 @@ export default function Login() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ImageBackground style={{ flex: 1 }} source={BackgroundImage}>
-
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      
-      <View style={{ flexDirection: "column", gap: 20, marginTop: 120 }}>
-        <Button title="CADASTRAR" onPress={() => router.push("/Register")} />
-        <Button title="LOGIN" onPress={() => router.push("/SignUpParent")}  style={{backgroundColor: "white", borderColor: "#93CCF7", borderWidth: 3}} textStyle={{color: "#93CCF7"}} />
-      </View>   
-
-    </View>
-
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
+        <Image source={require("@/src/assets/images/logo.png")} style={styles.logo} />
+         
+          <View style={{ flexDirection: "column", gap: 20, marginTop: 120 }}>
+            <Button
+              title="CADASTRAR"
+              onPress={() => router.push("/Register")}
+            />
+            <Button
+              title="LOGIN"
+              onPress={() => router.push("/SignUpParent")}
+              style={{
+                backgroundColor: "white",
+                borderColor: "#93CCF7",
+                borderWidth: 3,
+              }}
+              textStyle={{ color: "#93CCF7" }}
+            />
+          </View>
+        </View>
       </ImageBackground>
-
     </SafeAreaView>
   );
 }
@@ -37,6 +48,8 @@ const styles = StyleSheet.create({
   },
   logo: {
     marginBottom: 20,
-  }
+    width: 200,
+    height: 200,
+    resizeMode: "contain",
+  },
 });
-

@@ -8,10 +8,11 @@ import {
   Image,
   Dimensions,
 } from "react-native";
-import { Ionicons, FontAwesome5 } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Speech from "expo-speech";
-import { DrawerActions, useNavigation } from "@react-navigation/native";
+import { useNavigation } from "expo-router";
+
 import Footer from "@/src/components/Footer/Footer";
 
 const CARDS = [
@@ -89,41 +90,31 @@ const CARDS = [
 ];
 
 export default function CAAScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const [selectedWords, setSelectedWords] = useState<string[]>([]);
 
-  // Handler do Menu
   const openMenu = () => {
-    navigation.dispatch(DrawerActions.openDrawer());
+    navigation.dispatch({ type: "OPEN_DRAWER" });
   };
 
-  // Adiciona palavra e fala individualmente (opcional)
   const handleCardPress = (title?: string) => {
     if (title) {
-      setSelectedWords((prev) => [...prev, title]);
-      // Exemplo de TTS ao clicar no card individual (opcional):
-      // Speech.speak(title, { language: 'pt-BR' });
+      setSelectedWords([...selectedWords, title]);
     }
   };
 
-  // Remove uma palavra específica clicando nela
   const handleRemoveWord = (indexToRemove: number) => {
-    setSelectedWords((prev) =>
-      prev.filter((_, index) => index !== indexToRemove),
-    );
+    setSelectedWords(selectedWords.filter((_, index) => index !== indexToRemove));
   };
 
-  // Limpa toda a frase
   const handleClear = () => {
     setSelectedWords([]);
     Speech.stop();
   };
 
-  // Fala a frase completa
   const handleSpeak = () => {
     if (selectedWords.length > 0) {
-      const phraseToSpeak = selectedWords.join(" ");
-      Speech.speak(phraseToSpeak, { language: "pt-BR" });
+      Speech.speak(selectedWords.join(" "), { language: "pt-BR" });
     }
   };
 
@@ -136,7 +127,6 @@ export default function CAAScreen() {
         <Text style={styles.headerTitle}>Monte sua frase</Text>
       </View>
 
-      {/* Área da Frase */}
       <View style={styles.phraseContainer}>
         <View style={styles.phraseBox}>
           {selectedWords.length === 0 ? (
@@ -164,7 +154,6 @@ export default function CAAScreen() {
           )}
         </View>
 
-        {/* Botões de Ação */}
         <View style={styles.actionButtonsRow}>
           <TouchableOpacity
             style={[
@@ -198,7 +187,6 @@ export default function CAAScreen() {
         </View>
       </View>
 
-      {/* Grid de Cartões */}
       <View style={styles.cardsContainer}>
         <ScrollView
           showsVerticalScrollIndicator={false}
@@ -235,8 +223,6 @@ export default function CAAScreen() {
           </View>
         </ScrollView>
       </View>
-
-      {/* NAVEGAÇÃO INFERIOR */}
 
       <Footer />
     </SafeAreaView>
@@ -374,26 +360,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#333333",
     textAlign: "center",
-  },
-  bottomNav: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-    backgroundColor: "#FFFFFF",
-    paddingVertical: 10,
-    borderTopWidth: 1,
-    borderTopColor: "#ECF0F1",
-  },
-  navItem: {
-    alignItems: "center",
-  },
-  navText: {
-    fontSize: 12,
-    color: "#7F8C8D",
-    marginTop: 4,
-  },
-  navTextActive: {
-    color: "#5D8AA8",
-    fontWeight: "bold",
   },
 });

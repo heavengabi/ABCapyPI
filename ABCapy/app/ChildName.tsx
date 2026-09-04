@@ -1,4 +1,4 @@
-import { Button } from "@/src/components/ui/button";
+import { Button } from "@/src/components/ui/Button";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import   api  from "@/src/utils/api";
+import api from "@/src/utils/api";
 
 import BackgroundImage from "../src/assets/images/bg-login.png";
 
@@ -40,11 +40,15 @@ export default function ChildName() {
       });
 
       // Salva o perfil da criança no cache local
-      await AsyncStorage.setItem("@ABCapy:child", JSON.stringify(response.data));
+      await AsyncStorage.setItem(
+        "@ABCapy:child",
+        JSON.stringify(response.data),
+      );
 
       router.replace("/homePage");
     } catch (error: any) {
-      const msg = error.response?.data?.message || "Não foi possível cadastrar o perfil.";
+      const msg =
+        error.response?.data?.message || "Não foi possível cadastrar o perfil.";
       Alert.alert("Erro", msg);
     } finally {
       setLoading(false);
@@ -84,7 +88,11 @@ export default function ChildName() {
           {loading ? (
             <ActivityIndicator size="large" color="#1565C0" />
           ) : (
-            <Button title="Continuar" onPress={handleContinuar} style={{width:"100%"}} />
+            <Button
+              title="Continuar"
+              onPress={handleContinuar}
+              style={{ width: "100%" }}
+            />
           )}
         </View>
       </ImageBackground>

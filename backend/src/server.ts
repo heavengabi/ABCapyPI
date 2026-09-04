@@ -41,7 +41,7 @@ AppDataSource.initialize()
   .then(() => {
     console.log("Banco de dados conectado com sucesso!");
 
-    app.listen(PORT, () => {
+    app.listen(PORT,"0.0.0.0", () => {
       console.log(`Servidor backend rodando na porta ${PORT}!`);
       console.log(`Rotas ativas em http://localhost:${PORT}/api/stories`);
     });

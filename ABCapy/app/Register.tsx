@@ -1,4 +1,4 @@
-import { Button } from "@/src/components/ui/button";
+import { Button } from "@/src/components/ui/Button";
 import React, { useState } from "react";
 import {
   ImageBackground,
@@ -17,7 +17,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { Lock, User as UserIcon, Mail } from "lucide-react-native";
 import { router } from "expo-router";
-import api from "@/src/utils/api"; 
+import api from "@/src/utils/api";
 
 export default function Cadastro() {
   const [nameUser, setNameUser] = useState("");
@@ -88,7 +88,9 @@ export default function Cadastro() {
             paddingHorizontal: 30,
           }}
         >
-          
+           <Image 
+                    source={require("@/src/assets/images/small-logo.png")}
+            style={{ width: 100, height: 100 }}/>
           <Text
             style={{
               fontSize: 24,
@@ -99,7 +101,9 @@ export default function Cadastro() {
           >
             CADASTRO
           </Text>
-          <Text style={{ textAlign: "center", fontSize: 12, fontWeight: "800" }}>
+          <Text
+            style={{ textAlign: "center", fontSize: 12, fontWeight: "800" }}
+          >
             Junte-se à aventura com a Capy
           </Text>
 
