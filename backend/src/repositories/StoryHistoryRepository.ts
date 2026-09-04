@@ -4,11 +4,18 @@ import { StoryHistory } from "../models/StoryHistory";
 const repo = AppDataSource.getRepository(StoryHistory);
 
 export const storyHistoryRepository = {
-  async findByChildAndStory(childId: number, storyId: number) {
+  async findByChildAndStory(
+    childId: number,
+    storyId: number
+  ) {
     return await repo.findOne({
       where: {
-        child: { id: childId },
-        story: { id: storyId },
+        child: {
+          id: childId,
+        },
+        story: {
+          id: storyId,
+        },
       },
       relations: ["story", "child"],
     });
@@ -16,14 +23,34 @@ export const storyHistoryRepository = {
 
   async listByChild(childId: number) {
     return await repo.find({
-      where: { child: { id: childId } },
+      where: {
+        child: {
+          id: childId,
+        },
+      },
       relations: ["story"],
-      order: { updatedAt: "DESC" },
+      order: {
+        updatedAt: "DESC",
+      },
     });
   },
 
-  async save(data: Partial<StoryHistory>) {
+  async create(data: Partial<StoryHistory>) {
     const history = repo.create(data);
+
     return await repo.save(history);
+  },
+
+  async save(history: StoryHistory) {
+    return await repo.save(history);
+  },
+
+  async findById(id: number) {
+    return await repo.findOne({
+      where: {
+        id,
+      },
+      relations: ["story", "child"],
+    });
   },
 };

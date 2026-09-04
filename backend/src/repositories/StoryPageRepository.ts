@@ -1,23 +1,27 @@
 import { AppDataSource } from "../config/data-source";
 import { StoryPage } from "../models/StoryPage";
 
-const repo = AppDataSource.getRepository(StoryPage)
+const repo =
+    AppDataSource.getRepository(StoryPage);
 
 export const StoryPageRepository = {
     async findAll() {
-        return repo.find({
-            relations: ["story"]
-        })
+        return await repo.find({
+            relations: ["story"],
+        });
     },
+
     async findById(id: number) {
-        return repo.findOne({
-            where: { id },
-            relations: ["story"]
-        })
+        return await repo.findOne({
+            where: {
+                id,
+            },
+            relations: ["story"],
+        });
     },
 
     async findByStoryId(storyId: number) {
-        return repo.find({
+        return await repo.find({
             where: {
                 story: {
                     id: storyId,
@@ -30,15 +34,15 @@ export const StoryPageRepository = {
         });
     },
 
-    create(data: {}) {
+    create(data: Partial<StoryPage>) {
         return repo.create(data);
     },
 
     async save(page: StoryPage) {
-        return repo.save(page);
+        return await repo.save(page);
     },
 
     async delete(id: number) {
-        return repo.delete(id);
+        return await repo.delete(id);
     },
 };

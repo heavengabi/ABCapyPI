@@ -1,102 +1,92 @@
-import { StoryHistoryRepository } from "../repositories/StoryHistoryRepository";
-import { StoryPageRepository } from "../repositories/StoryPageRepository";
-import { ChildrenService } from "./ChildrenService";
-import { StoryService } from "./StoryService";
+import { storyHistoryRepository } from "../repositories/StoryHistoryRepository";
+import { childrenRepository } from "../repositories/ChildrenRepository";
+import { storyRepository } from "../repositories/StoryRepository";
 import { NotFoundError, BadRequestError } from "../errors/AppError";
 
 export const StoryHistoryService = {
+  async saveProgress(
+    userId: number,
+    data: {
+      storyId: number;
+      currentPage: number;
+      completed?: boolean;
+      starsEarned?: number;
+    }
+  ) {
+    if (!data.storyId || data.currentPage < 0) {
+      throw new BadRequestError("Dados da história inválidos!");
+    }
 
-  async findById(id: number) {
-    const history =
-      await StoryHistoryRepository.findById(id);
+    const child = await childrenRepository.findByUserId(userId);
+    if (!child) {
+      throw new NotFoundError("Perfil infantil não encontrado!");
+    }
+
+    const story = await storyRepository.findById(data.storyId);
+    if (!story) {
+      throw new NotFoundError("História não encontrada!");
+    }
+
+    // Busca se já existe um histórico de leitura desta história para esta criança
+    let history = await storyHistoryRepository.findByChildAndStory(
+      child.id,
+      data.storyId
+    );
+
+    // REGRA DE OURO: Só ganha estrela se for a PRIMEIRA VEZ concluindo a história
+    const wasAlreadyCompleted = history?.completed === true;
+    const isNowCompleting = data.completed === true;
+    const isFirstTimeCompletion = isNowCompleting && !wasAlreadyCompleted;
+
+    // Se é a primeira conclusão, ganha a quantidade de estrelas (padrão 1), caso contrário ganha 0
+    const starsToAdd = isFirstTimeCompletion ? (data.starsEarned ?? 1) : 0;
 
     if (!history) {
-      throw new NotFoundError(
-        "Histórico da história não encontrado"
-      );
-    }
-
-    return history;
-  },
-
-  async findByChildAndStory(
-    childId: number,
-    storyId: number
-  ) {
-    return StoryHistoryRepository.findByChildAndStory(
-      childId,
-      storyId
-    );
-  },
-
-  async findByChild(childId: number) {
-    return StoryHistoryRepository.findByChild(childId);
-  },
-
-  async complete(
-    childId: number,
-    storyId: number
-  ) {
-
-    // Verifica se a criança existe
-    const child =
-      await ChildrenService.findById(childId);
-
-    if (!child) {
-      throw new NotFoundError(
-        "Criança não encontrada"
-      );
-    }
-
-    // Verifica se a história existe
-    const story =
-      await StoryService.findById(storyId);
-
-    if (!story) {
-      throw new NotFoundError(
-        "História não encontrada"
-      );
-    }
-
-    // Procura se essa criança já concluiu essa história
-    const existing =
-      await StoryHistoryRepository.findByChildAndStory(
-        childId,
-        storyId
-      );
-
-    // Se já concluiu anteriormente,
-    // não ganha outra estrela
-    if (existing && existing.completed) {
-      return existing;
-    }
-
-    // Cria o histórico SOMENTE AGORA,
-    // quando a criança clicou em concluir
-    const history =
-      existing ??
-      StoryHistoryRepository.create({
+      // Primeira leitura da história
+      history = await storyHistoryRepository.create({
         child,
         story,
-        currentPage: 0,
-        completed: true,
-        starsEarned: 1,
+        currentPage: data.currentPage,
+        completed: data.completed ?? false,
+        starsEarned: starsToAdd,
       });
+    } else {
+      // Releitura da história
+      history.currentPage = data.currentPage;
 
-    // Se por algum motivo existia histórico
-    // mas ainda não estava concluído
-    if (!existing) {
-      await ChildrenService.addStar(childId);
+      // Mantém 'completed' como true se já foi concluída anteriormente
+      if (data.completed !== undefined) {
+        history.completed = history.completed || data.completed;
+      }
 
-      return StoryHistoryRepository.save(history);
+      // Atualiza o registro do histórico com estrelas apenas na 1ª conclusão
+      if (isFirstTimeCompletion) {
+        history.starsEarned = starsToAdd;
+      }
+
+      history = await storyHistoryRepository.save(history);
     }
 
-    // Histórico existente, mas não concluído
-    history.completed = true;
-    history.starsEarned = 1;
+    // Só incrementa as estrelas no perfil da criança se for a PRIMEIRA VEZ completando
+    if (starsToAdd > 0) {
+      await childrenRepository.update(child.id, {
+        stars: (child.stars ?? 0) + starsToAdd,
+      });
+    }
 
-    await ChildrenService.addStar(childId);
+    return {
+      ...history,
+      alreadyCompleted: wasAlreadyCompleted, // Retorna flag para o frontend tratar avisos se necessário
+      starsEarned: starsToAdd,
+    };
+  },
 
-    return StoryHistoryRepository.save(history);
+  async getChildHistory(userId: number) {
+    const child = await childrenRepository.findByUserId(userId);
+    if (!child) {
+      throw new NotFoundError("Perfil infantil não encontrado!");
+    }
+
+    return await storyHistoryRepository.listByChild(child.id);
   },
 };

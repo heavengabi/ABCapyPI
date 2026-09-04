@@ -7,56 +7,48 @@ import {
   ActivityIndicator,
   Modal,
 } from "react-native";
-
 import React, { useEffect, useState } from "react";
-
 import { Volume2 } from "lucide-react-native";
-
 import { SafeAreaView } from "react-native-safe-area-context";
-
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, router } from "expo-router";
 
 import storysBack from "../src/assets/storiesImages/storysBack.png";
-
 import CardStory from "@/src/components/Story/CardStory";
+import api from "../src/utils/api";
 
 type StoryPageData = {
   id: number;
   pageNumber: number;
-  illustration: string | null;
   text: string;
+  illustration: string | null;
   audioUrl: string | null;
 };
 
-type StoryHistory = {
+type Story = {
   id: number;
-  currentPage: number;
-  completed: boolean;
-  starsEarned: number;
+  title: string;
+  cover: string;
 };
-
-const API_URL = "http://192.168.100.22:3000/api";
 
 const StoryPage = () => {
   const { storyId } = useLocalSearchParams();
 
+  const [story, setStory] = useState<Story | null>(null);
   const [pages, setPages] = useState<StoryPageData[]>([]);
-
-  const [history, setHistory] =
-    useState<StoryHistory | null>(null);
-
+  const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
 
-  const [loadingNext, setLoadingNext] =
-    useState(false);
+  // Modais de Conclusão
+  const [showModalFirstTime, setShowModalFirstTime] = useState(false); // Primeira vez (Ganha Estrela)
+  const [showModalReplayed, setShowModalReplayed] = useState(false);   // Já leu antes (Sem Estrela)
 
-  const [showModal, setShowModal] =
-    useState(false);
-
-  const childId = 1;
+  const [completed, setCompleted] = useState(false);
+  const [loadingComplete, setLoadingComplete] = useState(false);
 
   useEffect(() => {
-    loadStory();
+    if (storyId) {
+      loadStory();
+    }
   }, [storyId]);
 
   const loadStory = async () => {
@@ -65,510 +57,226 @@ const StoryPage = () => {
 
       const id = Number(storyId);
 
-      if (!id) {
-        console.log("Story ID inválido");
+      if (!id || isNaN(id)) {
+        console.log("Story ID inválido:", storyId);
         return;
       }
 
-      // =========================
-      // BUSCAR PÁGINAS
-      // =========================
+      const storyResponse = await api.get<Story>(`/api/stories/${id}`);
+      setStory(storyResponse.data);
 
-      const pagesResponse = await fetch(
-        `${API_URL}/stories/${id}/pages`
+      const pagesResponse = await api.get<StoryPageData[]>(
+        `/api/stories/${id}/pages`
       );
 
-      if (!pagesResponse.ok) {
-        throw new Error(
-          "Erro ao buscar páginas"
-        );
-      }
-
-      const pagesData =
-        await pagesResponse.json();
-
-      const orderedPages =
-        pagesData.sort(
-          (
-            a: StoryPageData,
-            b: StoryPageData
-          ) =>
-            a.pageNumber -
-            b.pageNumber
-        );
+      const orderedPages = [...pagesResponse.data].sort(
+        (a, b) => a.pageNumber - b.pageNumber
+      );
 
       setPages(orderedPages);
-
-      // =========================
-      // BUSCAR HISTÓRICO
-      // =========================
-
-      const historyResponse =
-        await fetch(
-          `${API_URL}/story-history/child/${childId}/story/${id}`
-        );
-
-      if (historyResponse.ok) {
-        const historyData =
-          await historyResponse.json();
-
-        setHistory({
-          id: historyData.id,
-          currentPage:
-            historyData.currentPage,
-          completed:
-            historyData.completed,
-          starsEarned:
-            historyData.starsEarned,
-        });
-      } else {
-        // Ainda não possui histórico
-        // Começa na página 1
-        setHistory(null);
-      }
-    } catch (error) {
+      setCurrentPage(1);
+    } catch (error: any) {
       console.log(
-        "Erro ao carregar história:",
-        error
+        "ERRO AO CARREGAR HISTÓRIA:",
+        error?.response?.data || error?.message
       );
     } finally {
       setLoading(false);
     }
   };
 
-  // =========================
-  // PÁGINA ANTERIOR
-  // =========================
+  const saveProgress = async (page: number, finished = false) => {
+    try {
+      const id = Number(storyId);
+      if (!id) return null;
+
+      const response = await api.post("/api/stories/progress", {
+        storyId: id,
+        currentPage: page,
+        completed: finished,
+      });
+
+      return response.data;
+    } catch (error: any) {
+      console.log(
+        "ERRO AO SALVAR PROGRESSO:",
+        error?.response?.data || error?.message
+      );
+      return null;
+    }
+  };
 
   const previousPage = () => {
-    if (!history) {
-      return;
-    }
-
-    if (history.currentPage <= 1) {
-      return;
-    }
-
-    setHistory({
-      ...history,
-      currentPage:
-        history.currentPage - 1,
-    });
+    if (currentPage <= 1) return;
+    setCurrentPage((page) => page - 1);
   };
 
-  // =========================
-  // PRÓXIMA PÁGINA
-  // =========================
+  const nextPage = async () => {
+    if (currentPage >= pages.length) return;
 
-  const nextPage = () => {
-    if (loadingNext) {
-      return;
-    }
-
-    if (currentPageNumber >= pages.length) {
-      return;
-    }
-
-    if (history) {
-      setHistory({
-        ...history,
-        currentPage:
-          history.currentPage + 1,
-      });
-    } else {
-      setHistory({
-        id: 0,
-        currentPage: 2,
-        completed: false,
-        starsEarned: 0,
-      });
-    }
+    const nextPageNumber = currentPage + 1;
+    setCurrentPage(nextPageNumber);
+    await saveProgress(nextPageNumber, false);
   };
-
-  // =========================
-  // CONCLUIR HISTÓRIA
-  // =========================
 
   const completeStory = async () => {
-    if (loadingNext) {
-      return;
-    }
+    if (loadingComplete || completed) return;
 
     try {
-      setLoadingNext(true);
+      setLoadingComplete(true);
+      const progressData = await saveProgress(pages.length, true);
+      setCompleted(true);
 
-      // Se já existe histórico
-      if (history && history.id !== 0) {
-        const response = await fetch(
-          `${API_URL}/story-history/${history.id}/complete`,
-          {
-            method: "PATCH",
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
-          }
-        );
-
-        const responseText =
-          await response.text();
-
-        console.log(
-          "STATUS CONCLUIR:",
-          response.status
-        );
-
-        console.log(
-          "RESPOSTA:",
-          responseText
-        );
-
-        if (!response.ok) {
-          throw new Error(
-            `Erro ao concluir: ${response.status}`
-          );
-        }
-
-        const updatedHistory =
-          JSON.parse(responseText);
-
-        setHistory({
-          id: updatedHistory.id,
-          currentPage:
-            updatedHistory.currentPage,
-          completed:
-            updatedHistory.completed,
-          starsEarned:
-            updatedHistory.starsEarned,
-        });
-
-        setShowModal(true);
-
-        return;
+      // Checa pelo retorno do backend se ela já tinha completado antes
+      if (progressData?.alreadyCompleted) {
+        setShowModalReplayed(true); // Abre modal de releitura
+      } else {
+        setShowModalFirstTime(true); // Abre modal de 1ª vez com estrela
       }
-
-      // =========================
-      // SE NÃO EXISTE HISTÓRICO
-      // CRIA E CONCLUI
-      // =========================
-
-      const createResponse =
-        await fetch(
-          `${API_URL}/story-history`,
-          {
-            method: "POST",
-
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
-
-            body: JSON.stringify({
-              childId,
-              storyId: Number(storyId),
-            }),
-          }
-        );
-
-      if (!createResponse.ok) {
-        const errorText =
-          await createResponse.text();
-
-        console.log(
-          "ERRO AO CRIAR HISTÓRICO:",
-          errorText
-        );
-
-        throw new Error(
-          "Erro ao criar histórico"
-        );
-      }
-
-      const newHistory =
-        await createResponse.json();
-
-      // Agora conclui
-      const completeResponse =
-        await fetch(
-          `${API_URL}/story-history/${newHistory.id}/complete`,
-          {
-            method: "PATCH",
-
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
-          }
-        );
-
-      if (!completeResponse.ok) {
-        throw new Error(
-          "Erro ao concluir história"
-        );
-      }
-
-      const completedHistory =
-        await completeResponse.json();
-
-      setHistory({
-        id: completedHistory.id,
-        currentPage:
-          completedHistory.currentPage,
-        completed:
-          completedHistory.completed,
-        starsEarned:
-          completedHistory.starsEarned,
-      });
-
-      setShowModal(true);
-    } catch (error) {
+    } catch (error: any) {
       console.log(
         "ERRO AO CONCLUIR:",
-        error
+        error?.response?.data || error?.message
       );
     } finally {
-      setLoadingNext(false);
+      setLoadingComplete(false);
     }
   };
 
-  // =========================
-  // LOADING
-  // =========================
+  const voltarParaHistorias = () => {
+    setShowModalFirstTime(false);
+    setShowModalReplayed(false);
+    router.replace("/Stories"); // Volta para a tela principal do mapa de histórias
+  };
 
   if (loading) {
     return (
-      <SafeAreaView
-        style={styles.safeArea}
-      >
+      <SafeAreaView style={styles.safeArea}>
         <View style={styles.loading}>
-          <ActivityIndicator
-            size="large"
-          />
-
-          <Text>
-            Carregando história...
-          </Text>
+          <ActivityIndicator size="large" color="#297AB8" />
+          <Text>Carregando história...</Text>
         </View>
       </SafeAreaView>
     );
   }
 
-  // =========================
-  // SEM PÁGINAS
-  // =========================
-
-  if (pages.length === 0) {
+  if (!story || pages.length === 0) {
     return (
-      <SafeAreaView
-        style={styles.safeArea}
-      >
+      <SafeAreaView style={styles.safeArea}>
         <View style={styles.loading}>
-          <Text>
-            Essa história não possui
-            páginas.
-          </Text>
+          <Text>História ou páginas não encontradas.</Text>
         </View>
       </SafeAreaView>
     );
   }
 
-  // =========================
-  // PÁGINA ATUAL
-  // =========================
-
-  const currentPageNumber =
-    history?.currentPage || 1;
-
-  const currentPage =
-    pages[currentPageNumber - 1];
-
-  if (!currentPage) {
-    return (
-      <SafeAreaView
-        style={styles.safeArea}
-      >
-        <View style={styles.loading}>
-          <Text>
-            Página não encontrada.
-          </Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
-
-  const isLastPage =
-    currentPageNumber ===
-    pages.length;
+  const page = pages[currentPage - 1];
+  const isLastPage = currentPage === pages.length;
 
   return (
-    <SafeAreaView
-      style={styles.safeArea}
-    >
+    <SafeAreaView style={styles.safeArea}>
       <ImageBackground
         source={storysBack}
         style={styles.background}
         resizeMode="cover"
       >
         <View style={styles.container}>
-
-          {/* MICROFONE */}
-
-          <View
-            style={styles.micContainer}
-          >
-            <Pressable
-              style={styles.btnMic}
-            >
-              <Volume2
-                size={28}
-                color="#2699D6"
-              />
+          <View style={styles.micContainer}>
+            <Pressable style={styles.btnMic}>
+              <Volume2 size={28} color="#2699D6" />
             </Pressable>
           </View>
 
-          {/* HISTÓRIA */}
+          <View style={styles.titleContainer}>
+            <Text style={styles.title}>{story.title}</Text>
+          </View>
 
-          <View
-            style={styles.cardContainer}
-          >
+          <View style={styles.cardContainer}>
             <CardStory
-              imagem={{
-                uri:
-                  currentPage.illustration ||
-                  "",
-              }}
-              subtitulo={
-                currentPage.text
-              }
-              paragrafo={
-                currentPage.text
-              }
+              imagem={{ uri: page.illustration || "" }}
+              subtitulo={page.text}
+              paragrafo={page.text}
             />
           </View>
 
-          {/* BOTÕES */}
-
-          <View
-            style={styles.containerBtn}
-          >
-            {/* ANTERIOR */}
-
+          <View style={styles.containerBtn}>
             <Pressable
               style={[
                 styles.btn,
-                currentPageNumber <=
-                  1 &&
-                  styles.btnDisabled,
+                currentPage <= 1 && styles.btnDisabled,
               ]}
-              onPress={
-                previousPage
-              }
-              disabled={
-                currentPageNumber <= 1
-              }
+              onPress={previousPage}
+              disabled={currentPage <= 1}
             >
-              <Text
-                style={styles.text1}
-              >
-                Anterior
-              </Text>
+              <Text style={styles.text1}>Anterior</Text>
             </Pressable>
 
-            {/* NÚMERO */}
-
-            <Text
-              style={styles.text2}
-            >
-              {currentPageNumber}
-            </Text>
-
-            {/* PRÓXIMA / CONCLUIR */}
+            <Text style={styles.text2}>{currentPage}</Text>
 
             <Pressable
               style={[
                 styles.btn,
-                loadingNext &&
-                  styles.btnDisabled,
+                loadingComplete && styles.btnDisabled,
               ]}
-              onPress={
-                isLastPage
-                  ? completeStory
-                  : nextPage
-              }
-              disabled={loadingNext}
+              onPress={isLastPage ? completeStory : nextPage}
+              disabled={loadingComplete}
             >
-              <Text
-                style={styles.text1}
-              >
-                {isLastPage
-                  ? "Concluir"
-                  : "Próxima"}
+              <Text style={styles.text1}>
+                {isLastPage ? "Concluir" : "Próxima"}
               </Text>
             </Pressable>
           </View>
 
-          {/* =========================
-              MODAL
-          ========================= */}
-
+          {/* 1º MODAL: PRIMEIRA VEZ CONCLUINDO (GANHA ESTRELA) */}
           <Modal
-            visible={showModal}
+            visible={showModalFirstTime}
             transparent
             animationType="fade"
-            onRequestClose={() =>
-              setShowModal(false)
-            }
+            onRequestClose={voltarParaHistorias}
           >
-            <View
-              style={styles.modalOverlay}
-            >
-              <View
-                style={styles.modal}
-              >
-                <Text
-                  style={styles.modalStar}
-                >
-                  ⭐
+            <View style={styles.modalOverlay}>
+              <View style={styles.modal}>
+                <Text style={styles.modalStar}>⭐</Text>
+                <Text style={styles.modalTitle}>História Concluída!</Text>
+                <Text style={styles.modalText}>
+                  Parabéns! Você concluiu a história pela primeira vez e ganhou uma estrela!
                 </Text>
-
-                <Text
-                  style={styles.modalTitle}
-                >
-                  História concluída!
-                </Text>
-
-                <Text
-                  style={styles.modalText}
-                >
-                  Parabéns! Você ganhou
-                  uma estrela!
-                </Text>
-
-                <Text
-                  style={styles.modalReward}
-                >
-                  +1 ⭐
-                </Text>
-
+                <Text style={styles.modalReward}>+1 ⭐</Text>
                 <Pressable
-                  style={
-                    styles.modalButton
-                  }
-                  onPress={() =>
-                    setShowModal(false)
-                  }
+                  style={styles.modalButton}
+                  onPress={voltarParaHistorias}
                 >
-                  <Text
-                    style={
-                      styles.modalButtonText
-                    }
-                  >
-                    Continuar
-                  </Text>
+                  <Text style={styles.modalButtonText}>Voltar às Histórias</Text>
                 </Pressable>
               </View>
             </View>
           </Modal>
+
+          {/* 2º MODAL: RELEITURA (MENSAGEM DE PARABÉNS SEM GANHAR ESTRELA + BOTÃO VOLTAR) */}
+          <Modal
+            visible={showModalReplayed}
+            transparent
+            animationType="fade"
+            onRequestClose={voltarParaHistorias}
+          >
+            <View style={styles.modalOverlay}>
+              <View style={styles.modal}>
+                <Text style={styles.modalStar}>📖</Text>
+                <Text style={styles.modalTitle}>Muito Bem!</Text>
+                <Text style={styles.modalText}>
+                  Você leu essa história novamente! Como você já concluiu ela antes, não há novas estrelas desta vez.
+                </Text>
+
+                <Pressable
+                  style={[styles.modalButton, { marginTop: 15 }]}
+                  onPress={voltarParaHistorias}
+                >
+                  <Text style={styles.modalButtonText}>Voltar às Histórias</Text>
+                </Pressable>
+              </View>
+            </View>
+          </Modal>
+
         </View>
       </ImageBackground>
     </SafeAreaView>
@@ -578,30 +286,22 @@ const StoryPage = () => {
 export default StoryPage;
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-  },
-
-  background: {
-    flex: 1,
-    width: "100%",
-    height: "100%",
-  },
-
+  safeArea: { flex: 1 },
+  background: { flex: 1, width: "100%", height: "100%" },
   container: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 20,
   },
-
+  titleContainer: { width: "100%", alignItems: "center", marginBottom: 10 },
+  title: { fontSize: 24, fontWeight: "bold", color: "#297AB8", textAlign: "center" },
   cardContainer: {
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
     bottom: -40,
   },
-
   containerBtn: {
     width: "100%",
     flexDirection: "row",
@@ -611,7 +311,6 @@ const styles = StyleSheet.create({
     marginTop: 40,
     bottom: -50,
   },
-
   btn: {
     width: 107,
     height: 38,
@@ -620,34 +319,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
+    shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.18,
     shadowRadius: 3,
     elevation: 4,
   },
-
-  btnDisabled: {
-    opacity: 0.5,
-  },
-
-  text1: {
-    textAlign: "center",
-  },
-
-  text2: {
-    fontSize: 30,
-  },
-
+  btnDisabled: { opacity: 0.5 },
+  text1: { textAlign: "center" },
+  text2: { fontSize: 30 },
   micContainer: {
     width: "100%",
     alignItems: "flex-end",
     paddingRight: 5,
     marginBottom: -20,
   },
-
   btnMic: {
     backgroundColor: "#A7DAFF",
     width: 50,
@@ -656,21 +341,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-
-  loading: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-  },
-
+  loading: { flex: 1, alignItems: "center", justifyContent: "center", gap: 10 },
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.45)",
     alignItems: "center",
     justifyContent: "center",
   },
-
   modal: {
     width: "80%",
     backgroundColor: "#FFFFFF",
@@ -679,12 +356,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     elevation: 10,
   },
-
-  modalStar: {
-    fontSize: 60,
-    marginBottom: 10,
-  },
-
+  modalStar: { fontSize: 60, marginBottom: 10 },
   modalTitle: {
     fontSize: 24,
     fontWeight: "bold",
@@ -692,30 +364,15 @@ const styles = StyleSheet.create({
     color: "#297AB8",
     marginBottom: 10,
   },
-
-  modalText: {
-    fontSize: 17,
-    textAlign: "center",
-    marginBottom: 10,
-  },
-
-  modalReward: {
-    fontSize: 25,
-    fontWeight: "bold",
-    marginBottom: 20,
-  },
-
+  modalText: { fontSize: 16, textAlign: "center", color: "#555", marginBottom: 10 },
+  modalReward: { fontSize: 25, fontWeight: "bold", color: "#E5A900", marginBottom: 20 },
   modalButton: {
-    width: 150,
-    height: 45,
+    width: "100%",
+    height: 48,
     borderRadius: 12,
-    backgroundColor: "#A7DAFF",
+    backgroundColor: "#297AB8",
     alignItems: "center",
     justifyContent: "center",
   },
-
-  modalButtonText: {
-    fontSize: 17,
-    fontWeight: "bold",
-  },
+  modalButtonText: { fontSize: 16, fontWeight: "bold", color: "#FFFFFF" },
 });

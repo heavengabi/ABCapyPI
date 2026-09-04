@@ -5,11 +5,14 @@ export class GameHistoryController {
   async record(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = (req as any).userId;
-      const { gameId, starsEarned } = req.body;
-      const session = await GameHistoryService.recordGameSession(userId, {
-        gameId: Number(gameId),
-        starsEarned: Number(starsEarned),
-      });
+      const { gameId, difficulty } = req.body; // Recebe também a dificuldade
+
+      const session = await GameHistoryService.recordGameSession(
+        userId,
+        Number(gameId),
+        difficulty
+      );
+
       return res.status(201).json(session);
     } catch (error) {
       next(error);

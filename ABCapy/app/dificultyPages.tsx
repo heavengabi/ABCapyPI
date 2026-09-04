@@ -1,26 +1,38 @@
-import { View, Text, Image, ImageBackground, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  ImageBackground,
+  StyleSheet,
+} from "react-native";
+
 import { SafeAreaView } from "react-native-safe-area-context";
 import React from "react";
+
 import wallpaper2 from "../src/assets/images/gameImages/wallpaper2.png";
-import Header from "@/src/components/Header/Header";
 import Capy2 from "../src/assets/images/gameImages/Capy2.png.png";
+
 import CardDificulty from "@/src/components/gameComponents/gameDificulty/cardDificulty";
+
 import dific1 from "../src/assets/images/gameImages/dific1.png";
 import dific2 from "../src/assets/images/gameImages/dific2.png";
 import dific3 from "../src/assets/images/gameImages/dific3.png";
+
+import Header from "@/src/components/Header/Header";
 import { router, useLocalSearchParams } from "expo-router";
 
+type Difficulty = "facil" | "medio" | "dificil";
+
 const DificultyPages = () => {
-  const { game, gameId } = useLocalSearchParams();
+  const { game, gameId } = useLocalSearchParams<{
+    game?: string;
+    gameId?: string;
+  }>();
 
-  const goToGame = (
-    difficulty: "facil" | "medio" | "dificil"
-  ) => {
-
+  const goToGame = (difficulty: Difficulty) => {
     let pathname = "";
 
     switch (game) {
-
       case "equalityGame":
         pathname = "/equalityGame";
         break;
@@ -35,16 +47,19 @@ const DificultyPages = () => {
 
       default:
         pathname = "/equalityGame";
+        break;
     }
 
     router.push({
       pathname: pathname as any,
       params: {
         difficulty,
-        gameId,
+        // Garante envio de fallback caso o gameId chegue undefined/vazio
+        gameId: gameId || "1",
       },
     });
   };
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ImageBackground
@@ -54,35 +69,51 @@ const DificultyPages = () => {
       >
         <Header
           icon="arrow-back"
-          onPress={() => { router.push("/gamePages") }}
-          headerStyle={{ backgroundColor: "#A8DAFF" }}
-          buttonStyle={{ backgroundColor: "#69B9F7" }}
+          onPress={() => router.push("/gamePages")}
+          headerStyle={{
+            backgroundColor: "#A8DAFF",
+          }}
+          buttonStyle={{
+            backgroundColor: "#69B9F7",
+          }}
         />
 
         <View style={styles.containerImg}>
-          <Text style={styles.textStyle}>Escolha a dificuldade</Text>
-          <Image source={Capy2} style={styles.imgStyle} />
+          <Text style={styles.textStyle}>
+            Escolha a dificuldade
+          </Text>
+
+          <Image
+            source={Capy2}
+            style={styles.imgStyle}
+          />
         </View>
 
         <CardDificulty
           text="Fácil"
           image={dific1}
           onPress={() => goToGame("facil")}
-          style={{ backgroundColor: "#A8E6A3" }}
+          style={{
+            backgroundColor: "#A8E6A3",
+          }}
         />
 
         <CardDificulty
           text="Médio"
           image={dific2}
           onPress={() => goToGame("medio")}
-          style={{ backgroundColor: "#FFD97D" }}
+          style={{
+            backgroundColor: "#FFD97D",
+          }}
         />
 
         <CardDificulty
           text="Difícil"
           image={dific3}
           onPress={() => goToGame("dificil")}
-          style={{ backgroundColor: "#FF9E9E" }}
+          style={{
+            backgroundColor: "#FF9E9E",
+          }}
         />
       </ImageBackground>
     </SafeAreaView>
@@ -96,16 +127,19 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#D7ECFB",
   },
+
   imgStyle: {
     height: 169,
     width: 298,
     marginTop: 20,
   },
+
   containerImg: {
     justifyContent: "center",
     alignItems: "center",
     marginTop: 20,
   },
+
   textStyle: {
     fontSize: 24,
     fontFamily: "Poppins",
