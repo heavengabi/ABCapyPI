@@ -7,12 +7,16 @@ export const errorMiddleware = (
   res: Response,
   next: NextFunction
 ) => {
+  // Imprime o erro completo com stack trace no terminal do VS Code
+  console.error(">>> ERRO DETALHADO NO BACKEND:", error);
+
   const statusCode = error.statusCode ?? 500;
-  const message = error.statusCode ? error.message : "Erro interno do servidor";
+  const message = error.message || "Erro interno do servidor";
 
   return res.status(statusCode).json({
     status: "error",
     statusCode,
     message,
+    stack: error.stack, // Retorna o rastro do erro no Insomnia para diagnóstico rápido
   });
 };
