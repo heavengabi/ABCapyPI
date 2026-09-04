@@ -38,7 +38,7 @@ const HomePage = () => {
         <Text style={styles.texto}>Olá!</Text>
 
        
-        <CapyImage width={260} height={170} style={styles.capy} />
+       
 
         <Pressable
           style={styles.menuButton}

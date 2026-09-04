@@ -1,19 +1,55 @@
 import { Button } from "@/src/components/ui/button";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import {
+  Alert,
   Image,
   ImageBackground,
   StyleSheet,
   Text,
   TextInput,
   View,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import   api  from "@/src/utils/api";
+
 import BackgroundImage from "../src/assets/images/bg-login.png";
+
 export default function ChildName() {
+  const params = useLocalSearchParams<{ capy?: string }>();
+  const personagem = params.capy || "sabida";
+
   const [nome, setNome] = useState("");
-  const [personagem, setPersonagem] = useState("sabida");
+  const [loading, setLoading] = useState(false);
+
+  async function handleContinuar() {
+    if (!nome.trim()) {
+      Alert.alert("Atenção", "Por favor, digite o nome da criança!");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const response = await api.post("/children", {
+        childName: nome.trim(),
+        capy: personagem,
+        stars: 0,
+      });
+
+      // Salva o perfil da criança no cache local
+      await AsyncStorage.setItem("@ABCapy:child", JSON.stringify(response.data));
+
+      router.replace("/homePage");
+    } catch (error: any) {
+      const msg = error.response?.data?.message || "Não foi possível cadastrar o perfil.";
+      Alert.alert("Erro", msg);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -44,8 +80,12 @@ export default function ChildName() {
           underlineColorAndroid="transparent"
         />
 
-        <View style={{ flexDirection: "column", gap: 20, marginTop: 150 }}>
-          <Button title="Continuar" onPress={() => router.push("/homePage")} />
+        <View style={{ width: "90%", marginTop: 40 }}>
+          {loading ? (
+            <ActivityIndicator size="large" color="#1565C0" />
+          ) : (
+            <Button title="Continuar" onPress={handleContinuar} style={{width:"100%"}} />
+          )}
         </View>
       </ImageBackground>
     </SafeAreaView>
@@ -97,20 +137,6 @@ const styles = StyleSheet.create({
     elevation: 1,
     borderColor: "#93CCF7",
     borderWidth: 3,
-    marginBottom: 40,
-  },
-  botao: {
-    backgroundColor: "#2575B7",
-    paddingVertical: 14,
-    paddingHorizontal: 50,
-    borderRadius: 25,
-    position: "absolute",
-    bottom: 40,
-  },
-  textoBotao: {
-    color: "#FFF",
-    fontWeight: "bold",
-    fontSize: 16,
-    letterSpacing: 0.5,
+    marginBottom: 20,
   },
 });
