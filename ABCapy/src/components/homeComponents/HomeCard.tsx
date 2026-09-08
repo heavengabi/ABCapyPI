@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
 
     titleStyle: {
         fontSize: 20,
-        fontWeight: "bold",
+        fontFamily: "Poppins_600SemiBold",
         color: "#297AB8",
         textAlign: "center",
     },
@@ -70,6 +70,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: "#000000",
         textAlign: "center",
+        fontFamily:"Poppins_400Regular"
     },
 
 })

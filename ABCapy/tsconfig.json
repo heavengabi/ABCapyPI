@@ -4,16 +4,16 @@
     "jsx": "react",
     "strict": true,
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"]
     }
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts", "metro.config.js",
-    
+    "expo-env.d.ts",
+    "../backend/metro.config.js",
+    "metro.config.ts",
+    "../metro.config.cjs"
   ]
 }

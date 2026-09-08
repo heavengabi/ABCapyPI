@@ -1,120 +1,134 @@
-import React from "react";
+import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   View,
   Pressable,
   Text,
-  Image,
+  Image as RNImage,
   StyleSheet,
   ImageBackground,
-  ScrollView,
 } from "react-native";
-import { router, useNavigation } from "expo-router";
-import { DrawerActions } from "@react-navigation/native";
+import { router, useNavigation, useFocusEffect } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Image } from "expo-image";
+import api from "@/src/utils/api";
 
-// Componentes
 import HomeCard from "@/src/components/homeComponents/HomeCard";
 import Footer from "@/src/components/Footer/Footer";
 
-// Assets
-import capyHome from "../../src/assets/images/homeImages/capyHome.png";
 import gradiente from "../../src/assets/images/homeImages/gradiente.png";
 import speechBubble from "../../src/assets/images/homeImages/speechBubble.png";
 import book from "../../src/assets/images/homeImages/book.png";
 import estrela from "../../src/assets/images/homeImages/estrela.png";
 import menu from "../../src/assets/images/homeImages/menu.png";
 
-const HomePage = () => {
-  const navigation = useNavigation();
+const CAPY_AVATARS: Record<string, any> = {
+  aventureira: require("../../src/assets/charactersImages/AdventureCapy.png"),
+  sabida: require("../../src/assets/charactersImages/StudentCapy.png"),
+};
+
+export default function HomePage() {
+  const navigation = useNavigation<any>();
+  const [childData, setChildData] = useState<{ childName: string; capy: string } | null>(null);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      async function carregar() {
+        try {
+          const cache = await AsyncStorage.getItem("@ABCapy:child");
+          if (cache) {
+            setChildData(JSON.parse(cache));
+          }
+
+          const res = await api.get("/children/me");
+          if (res.data) {
+            setChildData(res.data);
+            await AsyncStorage.setItem("@ABCapy:child", JSON.stringify(res.data));
+          }
+        } catch (e) {}
+      }
+
+      carregar();
+    }, [])
+  );
 
   const openMenu = () => {
-    navigation.dispatch(DrawerActions.openDrawer());
+    navigation.dispatch({ type: "OPEN_DRAWER" });
   };
+
+  const capyImg =
+    childData?.capy && CAPY_AVATARS[childData.capy]
+      ? CAPY_AVATARS[childData.capy]
+      : CAPY_AVATARS.sabida;
 
   return (
     <SafeAreaView style={styles.container}>
-      
-      <Pressable style={styles.menuButton} onPress={openMenu} hitSlop={10}>
-        <Image source={menu} style={styles.menuIcon} />
-      </Pressable>
-
-      
       <ImageBackground source={gradiente} style={styles.gradiente}>
-        <Text style={styles.texto}>Olá!</Text>
-        <Image source={capyHome} style={styles.capy} />
+        <Text style={styles.texto}>
+          {childData?.childName ? `Olá, ${childData.childName}!` : "Olá!"}
+        </Text>
+
+        <Image source={capyImg} style={styles.capy} contentFit="contain" />
+
+        <Pressable style={styles.menuButton} onPress={openMenu} hitSlop={10}>
+          <RNImage source={menu} style={styles.menuIcon} />
+        </Pressable>
       </ImageBackground>
 
-      
       <View style={styles.containerCards}>
         <Text style={styles.texto2}>O que vamos fazer?</Text>
-        
-        <ScrollView 
-          contentContainerStyle={styles.scrollCards}
-          showsVerticalScrollIndicator={false}
-        >
-          <HomeCard
-            title="Comunicação"
-            text="monte frases e se comunique"
-            image={speechBubble}
-            onPress={() => router.push("/caa")} // Ajuste para a rota real da sua tela CAA
-          />
-          <HomeCard
-            title="Jogos"
-            text="aprenda brincando"
-            image={estrela}
-            onPress={() => router.push("/gamePages")}
-          />
-          <HomeCard
-            title="Histórias"
-            text="Explore novas Histórias"
-            image={book}
-            onPress={() => router.push("/StoryPages")} // Ajuste para a rota de histórias
-          />
-        </ScrollView>
+
+        <HomeCard
+          title="Comunicação"
+          text="Monte frases e se comunique"
+          image={speechBubble}
+          onPress={() => router.push("/caa")}
+        />
+
+        <HomeCard
+          title="Jogos"
+          text="Aprenda brincando"
+          image={estrela}
+          onPress={() => router.push("/gamePages")}
+        />
+
+        <HomeCard
+          title="Histórias"
+          text="Explore novas histórias"
+          image={book}
+          onPress={() => router.push("/Stories")}
+        />
       </View>
 
       <Footer />
     </SafeAreaView>
   );
-};
-
-export default HomePage;
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#85ccffc9",
-  },
-  menuButton: {
-    position: "absolute",
-    top: 50,
-    left: 20,
-    zIndex: 10,
-  },
-  menuIcon: {
-    width: 31,
-    height: 31,
-    resizeMode: "contain",
+    backgroundColor: "#ffffffc9",
   },
   gradiente: {
     width: "100%",
-    height: 250,
+    height: 290,
     justifyContent: "center",
     alignItems: "center",
+    position: "relative",
   },
   texto: {
     color: "#297AB8",
-    fontSize: 24,
-    fontWeight: "bold",
+    fontSize: 22,
     position: "absolute",
-    top: 30,
+    fontFamily: "Poppins_700Bold",
+    top: 50,
   },
   capy: {
-    width: 240,
+    width: 150,
     height: 150,
-    resizeMode: "contain",
     position: "absolute",
-    bottom: 15,
+    bottom: 20,
   },
   containerCards: {
     flex: 1,
@@ -122,20 +136,24 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFF",
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
-    borderColor: "#CDE9FF",
-    borderWidth: 4,
-    borderBottomWidth: 0,
+    alignItems: "center",
     paddingTop: 18,
   },
   texto2: {
-    fontSize: 26,
-    fontWeight: "bold",
+    fontSize: 28,
+    fontFamily: "Poppins_700Bold",
     color: "#6ABFEF",
-    marginBottom: 10,
-    textAlign: "center",
+    marginBottom: 15,
   },
-  scrollCards: {
-    alignItems: "center",
-    paddingBottom: 20,
+  menuButton: {
+    position: "absolute",
+    top: 15,
+    left: 15,
+    zIndex: 10,
+  },
+  menuIcon: {
+    width: 31,
+    height: 31,
+    resizeMode: "contain",
   },
 });

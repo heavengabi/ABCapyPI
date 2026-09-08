@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "#fff",
-    fontWeight: "bold",
+    fontFamily:"Poppins_500Medium",
     textAlign: "center",
     fontSize:20
   },
