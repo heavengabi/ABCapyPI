@@ -7,9 +7,7 @@ const userRoutes = Router();
 
 const userController = new UserController();
 
-// ========================================
-// ROTAS PÚBLICAS
-// ========================================
+
 
 userRoutes.post("/users", (req, res, next) =>
   userController.create(req, res, next),

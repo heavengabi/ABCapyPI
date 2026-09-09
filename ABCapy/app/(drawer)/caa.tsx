@@ -104,7 +104,9 @@ export default function CAAScreen() {
   };
 
   const handleRemoveWord = (indexToRemove: number) => {
-    setSelectedWords(selectedWords.filter((_, index) => index !== indexToRemove));
+    setSelectedWords(
+      selectedWords.filter((_, index) => index !== indexToRemove),
+    );
   };
 
   const handleClear = () => {
@@ -112,10 +114,18 @@ export default function CAAScreen() {
     Speech.stop();
   };
 
-  const handleSpeak = () => {
+  const handleSpeak = async () => {
     if (selectedWords.length > 0) {
-      Speech.speak(selectedWords.join(" "), { language: "pt-BR" });
+      Speech.speak(selectedWords.join(" "), {
+        language: "pt-BR",
+        voice:"Microsoft Daniel - Portuguese (Brazil)"
+      });
     }
+    //Listar voices disponivies
+    // Microsoft Maria - Portuguese (Brazil)
+    // urn:moz-tts:sapi:Microsoft Zira Desktop - English (United States)?en-US
+    const vozes = await Speech.getAvailableVoicesAsync();
+    console.log("VOZES DISPONÍVEIS:", vozes);
   };
 
   return (
@@ -341,7 +351,7 @@ const styles = StyleSheet.create({
   },
   card: {
     width: "100%",
-    height: CARD_WIDTH,
+    height: 200,
     backgroundColor: "#D9D9D9",
     borderRadius: 18,
     alignItems: "center",
