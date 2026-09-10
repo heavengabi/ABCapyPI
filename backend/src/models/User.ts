@@ -15,7 +15,7 @@ export class User {
   @Column({ nullable: false, length:255, select:false })
   password: string;
   
-  @OneToOne(() => Children)
+  @OneToOne(() => Children, {onDelete:"CASCADE"})
   @JoinColumn()
   child: Children;
 }
