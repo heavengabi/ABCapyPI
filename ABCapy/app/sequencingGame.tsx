@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -17,16 +17,11 @@ import easySeq from "../src/assets/images/gameImages/easySeq.png";
 import mediumSeq from "../src/assets/images/gameImages/mediumSeq.png";
 import hardSeq from "../src/assets/images/gameImages/hardSeq.png";
 
-import {
-  gerarSequencia,
-  verificarClique,
-  proximaPosicao,
-  terminouSequencia,
-} from "../src/logics/gamesLogic/sequencingLogic";
+// Importa o Hook de lógica estruturado
+import { useSequencingGame } from "../src/hooks/sequencingHook"
 
 type Cor = "verde" | "amarela" | "vermelha";
 type Nivel = "facil" | "medio" | "dificil";
-type Fase = "parado" | "mostrando" | "jogando" | "acertou" | "errou";
 
 type BolotaConfig = {
   top: number;
@@ -48,25 +43,18 @@ type NivelConfig = {
 const TAMANHO_BOLOTA = 105;
 const ESPACO_ENTRE_BOLOTAS = 20;
 const PASSO = TAMANHO_BOLOTA + ESPACO_ENTRE_BOLOTAS;
-const TEMPO_ACESO = 600;
 
 const gerarGrade = (
   linhas: number,
   colunas: number,
-  cor: Cor
+  cor: Cor,
 ): BolotaConfig[] => {
   const grade: BolotaConfig[] = [];
-
   for (let linha = 0; linha < linhas; linha++) {
     for (let coluna = 0; coluna < colunas; coluna++) {
-      grade.push({
-        top: linha * PASSO,
-        left: coluna * PASSO,
-        cor,
-      });
+      grade.push({ top: linha * PASSO, left: coluna * PASSO, cor });
     }
   }
-
   return grade;
 };
 
@@ -110,121 +98,37 @@ const estrelasPorNivel: Record<Nivel, number> = {
 };
 
 const SequencingGame = () => {
-  const { difficulty } = useLocalSearchParams<{
-    difficulty?: string;
-  }>();
+  const { difficulty } = useLocalSearchParams<{ difficulty?: string }>();
 
   const nivel: Nivel =
-    difficulty === "facil" ||
-    difficulty === "medio" ||
-    difficulty === "dificil"
+    difficulty === "facil" || difficulty === "medio" || difficulty === "dificil"
       ? difficulty
       : "facil";
 
   const jogo = settings[nivel];
 
-  const [sequencia, setSequencia] = useState<number[]>([]);
-  const [indiceMostrando, setIndiceMostrando] = useState(-1);
-  const [bolotaAtiva, setBolotaAtiva] = useState<number | null>(null);
-  const [indiceJogador, setIndiceJogador] = useState(0);
-  const [bolotasExplodidas, setBolotasExplodidas] = useState<number[]>([]);
-  const [fase, setFase] = useState<Fase>("parado");
+  // Conexão com o Custom Hook de lógica
+  const {
+    fase,
+    bolotaAtiva,
+    bolotasExplodidas,
+    jogarNovaRodada,
+    handleCliqueBolota,
+    pararJogo,
+  } = useSequencingGame({
+    totalBolotas: jogo.bolotas.length,
+    tamanhoSequencia: jogo.tamanhoSequencia,
+  });
 
   const larguraContainer =
-    jogo.colunas * TAMANHO_BOLOTA +
-    (jogo.colunas - 1) * ESPACO_ENTRE_BOLOTAS;
-
+    jogo.colunas * TAMANHO_BOLOTA + (jogo.colunas - 1) * ESPACO_ENTRE_BOLOTAS;
   const alturaContainer =
-    jogo.linhas * TAMANHO_BOLOTA +
-    (jogo.linhas - 1) * ESPACO_ENTRE_BOLOTAS;
-
-  const jogarNovaRodada = () => {
-    const novaSequencia = gerarSequencia(
-      jogo.bolotas.length,
-      jogo.tamanhoSequencia
-    );
-
-    setSequencia(novaSequencia);
-    setIndiceJogador(0);
-    setIndiceMostrando(0);
-    setBolotaAtiva(null);
-    setBolotasExplodidas([]);
-    setFase("mostrando");
-  };
-
-  const handleCliqueBolota = (indiceClicado: number) => {
-    if (
-      fase !== "jogando" ||
-      bolotasExplodidas.includes(indiceClicado)
-    ) {
-      return;
-    }
-
-    const acertou = verificarClique(
-      sequencia,
-      indiceJogador,
-      indiceClicado
-    );
-
-    if (!acertou) {
-      setBolotaAtiva(null);
-      setFase("errou");
-      return;
-    }
-
-    setBolotaAtiva(indiceClicado);
-    setBolotasExplodidas((prev) => [...prev, indiceClicado]);
-
-    const novoIndice = proximaPosicao(indiceJogador);
-
-    if (terminouSequencia(novoIndice, sequencia)) {
-      setTimeout(() => {
-        setBolotaAtiva(null);
-        setFase("acertou");
-      }, 300);
-
-      return;
-    }
-
-    setTimeout(() => {
-      setBolotaAtiva(null);
-    }, 300);
-
-    setIndiceJogador(novoIndice);
-  };
+    jogo.linhas * TAMANHO_BOLOTA + (jogo.linhas - 1) * ESPACO_ENTRE_BOLOTAS;
 
   const handleVoltarMenu = () => {
-    setFase("parado");
+    pararJogo();
     router.push("/gamePages");
   };
-
-  useEffect(() => {
-    if (fase !== "mostrando") {
-      return;
-    }
-
-    if (indiceMostrando >= sequencia.length) {
-      setBolotaAtiva(null);
-      setFase("jogando");
-      return;
-    }
-
-    const bolotaDaVez = sequencia[indiceMostrando];
-
-    const acende = setTimeout(() => {
-      setBolotaAtiva(bolotaDaVez);
-    }, 50);
-
-    const apaga = setTimeout(() => {
-      setBolotaAtiva(null);
-      setIndiceMostrando((prev) => prev + 1);
-    }, TEMPO_ACESO);
-
-    return () => {
-      clearTimeout(acende);
-      clearTimeout(apaga);
-    };
-  }, [fase, indiceMostrando, sequencia]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -237,26 +141,18 @@ const SequencingGame = () => {
           title="Siga a Ordem"
           icon="arrow-back"
           onPress={() => router.back()}
-          headerStyle={{
-            backgroundColor: jogo.header,
-          }}
-          buttonStyle={{
-            backgroundColor: jogo.button,
-          }}
+          headerStyle={{ backgroundColor: jogo.header }}
+          buttonStyle={{ backgroundColor: jogo.button }}
         />
 
         <Text style={styles.text1}>{jogo.titulo}</Text>
-
         <Text style={styles.text2}>SIGA A SEQUÊNCIA DAS BOLHAS</Text>
 
         <View style={styles.gameArea}>
           <View
             style={[
               styles.bolotasContainer,
-              {
-                width: larguraContainer,
-                height: alturaContainer,
-              },
+              { width: larguraContainer, height: alturaContainer },
             ]}
           >
             {jogo.bolotas.map((bolota, index) => (
@@ -276,12 +172,7 @@ const SequencingGame = () => {
         {fase === "parado" && (
           <View style={styles.divBtn}>
             <Pressable
-              style={[
-                styles.btnStyle,
-                {
-                  backgroundColor: jogo.header,
-                },
-              ]}
+              style={[styles.btnStyle, { backgroundColor: jogo.header }]}
               onPress={jogarNovaRodada}
             >
               <Text style={styles.textBtn}>COMEÇAR</Text>
@@ -325,13 +216,10 @@ const SequencingGame = () => {
                 </Pressable>
 
                 <Pressable
-                  style={[
-                    styles.btnStyleModal,
-                    { backgroundColor: "#297AB8" },
-                  ]}
+                  style={[styles.btnStyleModal, { backgroundColor: "#888" }]}
                   onPress={handleVoltarMenu}
                 >
-                  <Text style={styles.textBtn}>MENU JOGOS</Text>
+                  <Text style={styles.textBtn}>SAIR</Text>
                 </Pressable>
               </View>
             </View>
@@ -345,93 +233,73 @@ const SequencingGame = () => {
 export default SequencingGame;
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-  },
-  container: {
-    flex: 1,
-  },
+  safeArea: { flex: 1, backgroundColor: "#000" },
+  container: { flex: 1 },
   text1: {
-    fontSize: 35,
-    textAlign: "center",
+    fontSize: 32,
     fontWeight: "bold",
-    marginTop: 10,
-    color: "white",
+    textAlign: "center",
+    color: "#FFF",
+    marginTop: 16,
   },
   text2: {
-    fontSize: 24,
+    fontSize: 16,
+    fontWeight: "600",
     textAlign: "center",
-    fontWeight: "bold",
-    marginTop: 30,
-    color: "white",
+    color: "#FFF",
+    marginTop: 8,
+    letterSpacing: 0.5,
   },
-  gameArea: {
-    width: "100%",
-    height: 360,
-    marginTop: 20,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  bolotasContainer: {
-    position: "relative",
-  },
-  divBtn: {
-    width: "100%",
-    alignItems: "center",
-    marginTop: 10,
-  },
+  gameArea: { flex: 1, justifyContent: "center", alignItems: "center" },
+  bolotasContainer: { position: "relative" },
+  divBtn: { paddingBottom: 40, alignItems: "center" },
   btnStyle: {
-    width: 150,
-    height: 48,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 9,
+    paddingVertical: 14,
+    paddingHorizontal: 48,
+    borderRadius: 12,
+    elevation: 4,
   },
   textBtn: {
-    textAlign: "center",
-    fontSize: 14,
+    color: "#FFF",
+    fontSize: 18,
     fontWeight: "bold",
-    color: "white",
+    textTransform: "uppercase",
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
     justifyContent: "center",
+    alignItems: "center",
   },
   modalBox: {
-    width: 320,
-    backgroundColor: "white",
-    borderRadius: 16,
-    paddingVertical: 24,
-    paddingHorizontal: 20,
+    width: "80%",
+    backgroundColor: "#FFF",
+    borderRadius: 20,
+    padding: 24,
     alignItems: "center",
-    gap: 16,
   },
   modalTitulo: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: "bold",
-    textAlign: "center",
     color: "#333",
+    marginBottom: 8,
   },
   modalSubtitulo: {
     fontSize: 16,
+    color: "#666",
+    marginBottom: 24,
     textAlign: "center",
-    color: "#555",
   },
   modalActions: {
     flexDirection: "row",
-    gap: 12,
-    marginTop: 10,
     width: "100%",
-    justifyContent: "center",
+    justifyContent: "space-between",
+    gap: 12,
   },
   btnStyleModal: {
     flex: 1,
-    height: 48,
+    paddingVertical: 12,
+    borderRadius: 10,
     alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 9,
-    paddingHorizontal: 8,
   },
 });
