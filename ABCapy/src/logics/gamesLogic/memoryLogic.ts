@@ -73,7 +73,6 @@ export const useMemoryGame = ({
         isFlipped: false,
         isMatched: false,
       });
-
       listaOriginal.push({
         id: i * 2,
         valorOriginal: i,

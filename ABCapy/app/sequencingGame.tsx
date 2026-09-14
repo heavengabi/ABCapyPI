@@ -1,5 +1,5 @@
-import React from "react";
 
+import React from "react";
 import {
   View,
   Text,
@@ -11,20 +11,22 @@ import {
 } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
-import { View, Text, Pressable, ImageBackground, StyleSheet } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
+
 import Header from "@/src/components/Header/Header";
+
 import easySeq from "../src/assets/images/gameImages/easySeq.png";
 import mediumSeq from "../src/assets/images/gameImages/mediumSeq.png";
 import hardSeq from "../src/assets/images/gameImages/hardSeq.png";
 import capivarafeliz from "../src/assets/images/gameImages/capivarafeliz.png";
 
-// Hook de lógica
 import { useSequencingGame } from "../src/hooks/sequencingHook";
 
-type Cor = "verde" | "amarela" | "vermelha";
+import Bolota from "../src/components/gameComponents/SequencingGame/Bolota";
 
 type Nivel = "facil" | "medio" | "dificil";
+
+type Cor = "verde" | "amarela" | "vermelha";
 
 type BolotaConfig = {
   top: number;
@@ -44,15 +46,13 @@ type NivelConfig = {
 };
 
 const TAMANHO_BOLOTA = 105;
-
 const ESPACO_ENTRE_BOLOTAS = 20;
-
 const PASSO = TAMANHO_BOLOTA + ESPACO_ENTRE_BOLOTAS;
 
 const gerarGrade = (
   linhas: number,
   colunas: number,
-  cor: Cor,
+  cor: Cor
 ): BolotaConfig[] => {
   const grade: BolotaConfig[] = [];
 
@@ -111,33 +111,15 @@ const estrelasPorNivel: Record<Nivel, number> = {
 };
 
 const SequencingGame = () => {
-    const { difficulty } = useLocalSearchParams();
+  const { difficulty } = useLocalSearchParams();
 
-    const settings = {
-        facil: {
-            titulo: "FÁCIL",
-            header: "#5DBB63",
-            button: "#A9E79E",
-            wallpaper: easySeq,
-        },
-        medio: {
-            titulo: "MÉDIO",
-            header: "#F8C84E",
-            button: "#FFD96B",
-            wallpaper: mediumSeq,
-        },
-        dificil: {
-            titulo: "DIFÍCIL",
-            header: "#F47A7A",
-            button: "#F8A4A4",
-            wallpaper: hardSeq,
-        },
-    };
+  const nivel: Nivel =
+    difficulty === "medio" || difficulty === "dificil"
+      ? difficulty
+      : "facil";
 
-    const jogo =
-        settings[(difficulty as keyof typeof settings) ?? "facil"];
+  const jogo = settings[nivel];
 
-  // Hook de lógica do jogo
   const {
     fase,
     bolotaAtiva,
@@ -151,10 +133,12 @@ const SequencingGame = () => {
   });
 
   const larguraContainer =
-    jogo.colunas * TAMANHO_BOLOTA + (jogo.colunas - 1) * ESPACO_ENTRE_BOLOTAS;
+    jogo.colunas * TAMANHO_BOLOTA +
+    (jogo.colunas - 1) * ESPACO_ENTRE_BOLOTAS;
 
   const alturaContainer =
-    jogo.linhas * TAMANHO_BOLOTA + (jogo.linhas - 1) * ESPACO_ENTRE_BOLOTAS;
+    jogo.linhas * TAMANHO_BOLOTA +
+    (jogo.linhas - 1) * ESPACO_ENTRE_BOLOTAS;
 
   const handleVoltarMenu = () => {
     pararJogo();
@@ -172,7 +156,10 @@ const SequencingGame = () => {
         <Header
           title="Siga a Ordem"
           icon="arrow-back"
-          onPress={() => router.back()}
+          onPress={() => {
+            pararJogo();
+            router.back();
+          }}
           headerStyle={{
             backgroundColor: jogo.header,
           }}
@@ -184,7 +171,9 @@ const SequencingGame = () => {
         {/* TÍTULO */}
         <Text style={styles.text1}>{jogo.titulo}</Text>
 
-        <Text style={styles.text2}>SIGA A SEQUÊNCIA DAS BOLHAS</Text>
+        <Text style={styles.text2}>
+          SIGA A SEQUÊNCIA DAS BOLHAS
+        </Text>
 
         {/* ÁREA DO JOGO */}
         <View style={styles.gameArea}>
@@ -223,22 +212,25 @@ const SequencingGame = () => {
               ]}
               onPress={jogarNovaRodada}
             >
-                <Header
-                    title="Siga a Ordem"
-                    icon="arrow-back"
-                    onPress={() => {router.back()}}
-                    headerStyle={{ backgroundColor: jogo.header }}
-                    buttonStyle={{ backgroundColor: jogo.button }}
-                />
+              <Text style={styles.textBtn}>
+                COMEÇAR
+              </Text>
+            </Pressable>
+          </View>
+        )}
 
         {/* MODAL */}
         <Modal
-          visible={fase === "acertou" || fase === "errou"}
-          transparent={true}
+          visible={
+            fase === "acertou" ||
+            fase === "errou"
+          }
+          transparent
           animationType="fade"
           onRequestClose={() => {}}
         >
           <View style={styles.modalOverlay}>
+
             {/* CAPIVARA */}
             <Image
               source={capivarafeliz}
@@ -255,13 +247,13 @@ const SequencingGame = () => {
                 },
               ]}
             >
-              {/* ========================= */}
-              {/* ACERTOU */}
-              {/* ========================= */}
 
+              {/* ACERTOU */}
               {fase === "acertou" && (
                 <>
-                  <Text style={styles.modalTitle}> Perfeito! </Text>
+                  <Text style={styles.modalTitle}>
+                    Perfeito!
+                  </Text>
 
                   <Text style={styles.modalSubtitle}>
                     Você acertou a sequência!
@@ -275,7 +267,9 @@ const SequencingGame = () => {
                       },
                     ]}
                   >
-                    <Text style={styles.scoreLabel}>Estrelas da rodada</Text>
+                    <Text style={styles.scoreLabel}>
+                      Estrelas da rodada
+                    </Text>
 
                     <Text
                       style={[
@@ -285,7 +279,7 @@ const SequencingGame = () => {
                         },
                       ]}
                     >
-                      {estrelasPorNivel[nivel]}
+                      ⭐ {estrelasPorNivel[nivel]}
                     </Text>
                   </View>
 
@@ -298,25 +292,28 @@ const SequencingGame = () => {
                     ]}
                     onPress={jogarNovaRodada}
                   >
-                    <Text style={styles.modalButtonText}>Repetir</Text>
+                    <Text style={styles.modalButtonText}>
+                      Repetir
+                    </Text>
                   </Pressable>
 
                   <Pressable
                     style={styles.backButton}
                     onPress={handleVoltarMenu}
                   >
-                    <Text style={styles.backButtonText}>Sair</Text>
+                    <Text style={styles.backButtonText}>
+                      Sair
+                    </Text>
                   </Pressable>
                 </>
               )}
 
-              {/* ========================= */}
               {/* ERROU */}
-              {/* ========================= */}
-
               {fase === "errou" && (
                 <>
-                  <Text style={styles.modalTitle}>OPA, ERROU!</Text>
+                  <Text style={styles.modalTitle}>
+                    OPA, ERROU!
+                  </Text>
 
                   <Text style={styles.modalSubtitle}>
                     Não tem problema! Vamos tentar de novo?
@@ -331,20 +328,26 @@ const SequencingGame = () => {
                     ]}
                     onPress={jogarNovaRodada}
                   >
-                    <Text style={styles.modalButtonText}>Tentar Novamente</Text>
+                    <Text style={styles.modalButtonText}>
+                      Tentar Novamente
+                    </Text>
                   </Pressable>
 
                   <Pressable
                     style={styles.backButton}
                     onPress={handleVoltarMenu}
                   >
-                    <Text style={styles.backButtonText}>Sair</Text>
+                    <Text style={styles.backButtonText}>
+                      Sair
+                    </Text>
                   </Pressable>
                 </>
               )}
+
             </View>
           </View>
         </Modal>
+
       </ImageBackground>
     </SafeAreaView>
   );
@@ -353,8 +356,6 @@ const SequencingGame = () => {
 export default SequencingGame;
 
 const styles = StyleSheet.create({
-
-
   safeArea: {
     flex: 1,
     backgroundColor: "#000",

@@ -35,6 +35,7 @@ const MemoryGame = () => {
       header: "#5DBB63",
       button: "#A9E79E",
       wallpaper: easy,
+      totalCartas: 6,
     },
     medio: {
       titulo: "MÉDIO",
@@ -252,7 +253,7 @@ const MemoryGame = () => {
 
       <ImageBackground
         source={jogo.wallpaper}
-        style={styles.container}
+        style={styles.background}
         resizeMode="cover"
       >
         <Header
@@ -325,20 +326,10 @@ const styles = StyleSheet.create({
   nivelText: {
     fontSize: 20,
     fontWeight: "bold",
-    marginTop: 10,
-    color: "white",
-  },
-
-  text2: {
-    fontSize: 24,
-    textAlign: "center",
-    fontWeight: "bold",
-    marginTop: 30,
     color: "white",
     textTransform: "uppercase",
     letterSpacing: 1,
   },
-
   gridWrapper: {
     flex: 1,
     justifyContent: "center",
@@ -357,7 +348,6 @@ const styles = StyleSheet.create({
   gridDificil: {
     paddingHorizontal: 5,
   },
-
   grid: {
     width: "100%",
     maxWidth: 360,
