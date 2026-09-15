@@ -1,40 +1,122 @@
-import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
-import React from "react";
+import React, { useRef, useEffect } from "react";
+
+import {
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  Image,
+  ImageSourcePropType,
+  Animated,
+} from "react-native";
 
 type Props = {
   id: number;
-  valorOriginal: number; // Identificador do par
+  valorOriginal: number;
+  imagem: ImageSourcePropType;
   isFlipped: boolean;
   isMatched: boolean;
   onPress: () => void;
+  tamanho: number;
+  corVerso: string;
 };
 
 const CardMemory = ({
-  valorOriginal,
+  imagem,
   isFlipped,
   isMatched,
   onPress,
+  tamanho,
+  corVerso,
 }: Props) => {
-  // Se a carta já foi combinada ou está virada, mostra o conteúdo interno
+  const animatedValue = useRef(new Animated.Value(0)).current;
+
   const deveMostrarFrente = isFlipped || isMatched;
+
+  useEffect(() => {
+    Animated.timing(animatedValue, {
+      toValue: deveMostrarFrente ? 180 : 0,
+
+      duration: 300,
+
+      useNativeDriver: true,
+    }).start();
+  }, [deveMostrarFrente]);
+
+  const frontInterpolate = animatedValue.interpolate({
+    inputRange: [0, 180],
+    outputRange: ["180deg", "360deg"],
+  });
+
+  const backInterpolate = animatedValue.interpolate({
+    inputRange: [0, 180],
+    outputRange: ["0deg", "180deg"],
+  });
+
+  const frontAnimatedStyle = {
+    transform: [
+      {
+        rotateY: frontInterpolate,
+      },
+    ],
+  };
+
+  const backAnimatedStyle = {
+    transform: [
+      {
+        rotateY: backInterpolate,
+      },
+    ],
+  };
 
   return (
     <TouchableOpacity
-      style={[
-        styles.card,
-        deveMostrarFrente ? styles.cardFront : styles.cardBack,
-        isMatched && styles.cardMatched,
-      ]}
       onPress={onPress}
-      disabled={deveMostrarFrente} // Desabilita o clique se já estiver virada
+      disabled={deveMostrarFrente}
+      activeOpacity={0.8}
+      style={[
+        styles.touchable,
+        {
+          width: tamanho,
+          height: tamanho * 1.25,
+        },
+      ]}
     >
-      {deveMostrarFrente ? (
-        // Aqui futuramente será o <Image source={imagem real} />
-        <Text style={styles.cardText}>Item {valorOriginal}</Text>
-      ) : (
-        // Aqui será o verso da sua carta (ex: imagem da logo ou interrogação)
+      {/* FRENTE */}
+      <Animated.View
+        style={[
+          styles.card,
+          styles.cardFront,
+          isMatched && styles.cardMatched,
+
+          frontAnimatedStyle,
+          styles.cardAbsolute,
+
+          {
+            width: tamanho,
+            height: tamanho * 1.25,
+          },
+        ]}
+      >
+        <Image source={imagem} style={styles.cardImage} resizeMode="contain" />
+      </Animated.View>
+
+      {/* VERSO */}
+      <Animated.View
+        style={[
+          styles.card,
+          styles.cardBack,
+          backAnimatedStyle,
+          styles.cardAbsolute,
+
+          {
+            width: tamanho,
+            height: tamanho * 1.25,
+            backgroundColor: corVerso,
+          },
+        ]}
+      >
         <Text style={styles.cardTextBack}>?</Text>
-      )}
+      </Animated.View>
     </TouchableOpacity>
   );
 };
@@ -42,39 +124,68 @@ const CardMemory = ({
 export default CardMemory;
 
 const styles = StyleSheet.create({
+  touchable: {
+    position: "relative",
+  },
+
+  cardAbsolute: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    backfaceVisibility: "hidden",
+  },
+
   card: {
-    width: 80,
-    height: 100,
-    borderRadius: 8,
+    borderRadius: 10,
+
     justifyContent: "center",
     alignItems: "center",
+
     elevation: 3,
+
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
+
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+
     shadowOpacity: 0.2,
+
     shadowRadius: 1.41,
   },
+
   cardBack: {
-    backgroundColor: "#2B3A42",
+    backgroundColor: "#F8C84E",
+    borderWidth: 7,
+    borderColor: "#FFFFFF",
+    borderRadius: 16,
   },
+
   cardFront: {
     backgroundColor: "#FFFFFF",
+
     borderWidth: 2,
+
     borderColor: "#4A90E2",
   },
+
   cardMatched: {
     backgroundColor: "#E8F5E9",
+
     borderColor: "#81C784",
+
     opacity: 0.6,
   },
-  cardText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#333",
+
+  cardImage: {
+    width: "75%",
+    height: "75%",
   },
+
   cardTextBack: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: "bold",
-    color: "#FFF",
+    color: "#FFFFFF",
   },
 });

@@ -1,10 +1,4 @@
-import {
-  View,
-  Text,
-  Image,
-  ImageBackground,
-  StyleSheet,
-} from "react-native";
+import { View, Text, Image, ImageBackground, StyleSheet } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
 import React from "react";
@@ -79,14 +73,9 @@ const DificultyPages = () => {
         />
 
         <View style={styles.containerImg}>
-          <Text style={styles.textStyle}>
-            Escolha a dificuldade
-          </Text>
+          <Text style={styles.textStyle}>Escolha a dificuldade</Text>
 
-          <Image
-            source={Capy2}
-            style={styles.imgStyle}
-          />
+          <Image source={Capy2} style={styles.imgStyle} />
         </View>
 
         <CardDificulty
