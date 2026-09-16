@@ -23,15 +23,30 @@ export class ChildrenController {
     }
   }
 
-  async update(req: Request, res: Response, next: NextFunction) {
-    try {
-      const userId = (req as any).userId;
-      const child = await ChildrenService.update(userId, req.body);
-      return res.status(200).json(child);
-    } catch (error) {
-      next(error);
+async update(req: Request, res: Response, next: NextFunction) {
+  try {
+    // Tenta pegar o id tanto de req.user.id quanto req.userId (depende de como seu middleware injeta)
+    const rawUserId = (req as any).user?.id ?? (req as any).userId;
+
+    if (!rawUserId) {
+      return res.status(401).json({ message: "Usuário não autenticado." });
     }
+
+    const userId = Number(rawUserId); // Certifique-se de que é um número!
+    const { childName, capy, stars } = req.body;
+
+    const updatedChild = await ChildrenService.update(userId, {
+      childName,
+      capy,
+      stars,
+    });
+
+    return res.status(200).json(updatedChild);
+  } catch (error) {
+    console.error("ERRO NO UPDATE CHILDREN:", error); // <-- Adicione esse log para ver o erro exato no terminal do back-end!
+    next(error);
   }
+}
 
   async addStars(req: Request, res: Response, next: NextFunction) {
     try {

@@ -9,11 +9,17 @@ import {
   Modal,
   TouchableWithoutFeedback,
   Pressable,
+  TextInput,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Pencil, Lock, X } from "lucide-react-native";
-import { DrawerActions, useNavigation } from "@react-navigation/native";
-import menu from "../../src/assets/images/homeImages/menu.png";import Footer from "@/src/components/Footer/Footer";
+import { Pencil, Lock, X, User } from "lucide-react-native";
+import { useNavigation, useFocusEffect } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import {Image} from "expo-image";
+import api from "@/src/utils/api";
+import Footer from "@/src/components/Footer/Footer";
 
 const StarsNumber: number = 3;
 
@@ -33,11 +39,18 @@ const ITEMS = [
   { id: "104", image: require("../../src/assets/characterAccessories/FarmerCapy.png") },
 ];
 
+const NAME_SUGGESTIONS = ["Capy", "Paçoca", "Pipoca"];
+
 interface ActionModalProps {
   handleClose: () => void;
 }
 
+<<<<<<< HEAD
 function ActionModalContent({ handleClose }: ActionModalProps) {
+=======
+// Modal de Personalização de Acessórios
+function ActionModalContent({ handleClose, userName }: ActionModalProps) {
+>>>>>>> 59ca9df17321e0cdad1e2e7cfa1107ec45fc13f5
   const [selectedCategory, setSelectedCategory] = useState("2");
   const [selectedItem, setSelectedItem] = useState("103");
 
@@ -117,9 +130,162 @@ function ActionModalContent({ handleClose }: ActionModalProps) {
   );
 }
 
+// Modal de Alteração de Nome
+interface EditNameModalProps {
+  visible: boolean;
+  currentName: string;
+  onClose: () => void;
+  onSave: (newName: string) => Promise<void>;
+}
+
+function EditNameModal({ visible, currentName, onClose, onSave }: EditNameModalProps) {
+  const [name, setName] = useState(currentName);
+  const [loading, setLoading] = useState(false);
+
+  React.useEffect(() => {
+    setName(currentName);
+  }, [currentName, visible]);
+
+  async function handleConfirm() {
+    if (!name.trim()) {
+      Alert.alert("Atenção", "O nome não pode ficar em branco.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await onSave(name.trim());
+      onClose();
+    } catch (err: any) {
+      Alert.alert(
+        "Erro",
+        err.response?.data?.message || "Não foi possível atualizar o nome."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <TouchableWithoutFeedback onPress={onClose}>
+        <View style={nameModalStyle.overlay}>
+          <TouchableWithoutFeedback>
+            <View style={nameModalStyle.sheetContainer}>
+             
+              {/* Ícone circular do perfil */}
+              <View style={nameModalStyle.userAvatarBadge}>
+                <User size={22} color="#297AB8" />
+              </View>
+
+              {/* Cabeçalho */}
+              <Text style={nameModalStyle.title}>mudar dados</Text>
+              <Text style={nameModalStyle.subtitle}>como voce quer ser chamado?</Text>
+
+              {/* Campo de Texto */}
+              <View style={nameModalStyle.inputShadowWrapper}>
+                <TextInput
+                  style={nameModalStyle.input}
+                  value={name}
+                  onChangeText={(val) => {
+                    if (val.length <= 20) setName(val);
+                  }}
+                  placeholder="Nome"
+                  placeholderTextColor="#A0AEC0"
+                  maxLength={20}
+                  textAlign="center"
+                />
+              </View>
+
+              <Text style={nameModalStyle.counterText}>{name.length}/20 caracteres</Text>
+
+              {/* Sugestões de nomes */}
+              <Text style={nameModalStyle.suggestionsLabel}>Sujestões</Text>
+              <View style={nameModalStyle.suggestionsRow}>
+                {NAME_SUGGESTIONS.map((item, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={nameModalStyle.suggestionChip}
+                    onPress={() => setName(item)}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={nameModalStyle.suggestionText}>{item}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              {/* Botões de Ação */}
+              <View style={nameModalStyle.actionsRow}>
+                <TouchableOpacity
+                  style={[nameModalStyle.actionBtn, nameModalStyle.cancelBtn]}
+                  onPress={onClose}
+                  disabled={loading}
+                >
+                  <Text style={nameModalStyle.actionBtnText}>cancelar</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[nameModalStyle.actionBtn, nameModalStyle.confirmBtn]}
+                  onPress={handleConfirm}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <ActivityIndicator size="small" color="#297AB8" />
+                  ) : (
+                    <Text style={nameModalStyle.actionBtnText}>confirmar</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </View>
+          </TouchableWithoutFeedback>
+        </View>
+      </TouchableWithoutFeedback>
+    </Modal>
+  );
+}
+
 export default function UserPage() {
   const [visibleModal, setVisibleModal] = useState(false);
-  const navigation = useNavigation();
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [childData, setChildData] = useState<{
+    childName: string;
+    capy: string;
+    stars: number;
+  } | null>(null);
+
+  const navigation = useNavigation<any>();
+
+  useFocusEffect(
+    React.useCallback(() => {
+      async function carregar() {
+        try {
+          const cache = await AsyncStorage.getItem("@ABCapy:child");
+          if (cache) {
+            setChildData(JSON.parse(cache));
+          }
+
+          const res = await api.get("/children/me");
+          if (res.data) {
+            setChildData(res.data);
+            await AsyncStorage.setItem("@ABCapy:child", JSON.stringify(res.data));
+          }
+        } catch (e) {
+          console.error("Erro ao carregar dados do usuário:", e);
+        }
+      }
+
+      carregar();
+    }, [])
+  );
+
+  // Requisição PUT integrada com o back-end e atualização do cache local
+  const handleUpdateName = async (newName: string) => {
+    const res = await api.put("/children/me", { childName: newName });
+    const updatedData = { ...childData, ...res.data, childName: newName };
+
+    setChildData(updatedData);
+    await AsyncStorage.setItem("@ABCapy:child", JSON.stringify(updatedData));
+  };
 
   const openMenu = () => {
     navigation.dispatch(DrawerActions.openDrawer());
@@ -149,8 +315,12 @@ export default function UserPage() {
 
         <Text style={style.pageTitle}>Perfil</Text>
 
-        {/* Avatar */}
-        <View style={style.avatarWrapper}>
+        {/* Tocar no avatar abre a troca de acessórios */}
+        <TouchableOpacity
+          style={style.avatarWrapper}
+          activeOpacity={0.8}
+          onPress={() => setVisibleModal(true)}
+        >
           <View style={style.circuloOpcao}>
             <Image
               source={require("../../src/assets/charactersImages/StudentCapy.png")}
@@ -164,14 +334,15 @@ export default function UserPage() {
               style={{ width: 52, height: 32, resizeMode: "cover" }}
             />
           </View>
-        </View>
+        </TouchableOpacity>
 
-        {/* Nome do Usuário */}
+        {/* Linha do nome com lápis abrindo o modal de edição */}
         <View style={style.userNameRow}>
           <Text style={style.userNameText}>{UserName}</Text>
           <TouchableOpacity
             style={style.editButton}
-            onPress={() => setVisibleModal(true)}
+            onPress={() => setIsEditingName(true)}
+            hitSlop={10}
           >
             <Pencil color="#0284C7" size={16} />
           </TouchableOpacity>
@@ -181,7 +352,12 @@ export default function UserPage() {
         <View style={style.progressSection}>
           <View style={style.progressBarContainer}>
             <View style={style.progressBarBackground}>
-              <View style={[style.progressBarFill, { width: "70%" }]} />
+              <View
+                style={[
+                  style.progressBarFill,
+                  { width: `${Math.min(displayStars * 10, 100)}%` },
+                ]}
+              />
             </View>
 
             <View style={style.rewardContainer}>
@@ -232,7 +408,7 @@ export default function UserPage() {
         </View>
       </ScrollView>
 
-      {/* Modal Acessórios */}
+      {/* Modal de Acessórios */}
       <Modal
         visible={visibleModal}
         transparent={true}
@@ -251,6 +427,15 @@ export default function UserPage() {
           </View>
         </TouchableWithoutFeedback>
       </Modal>
+
+      {/* Modal de Edição de Nome */}
+      <EditNameModal
+        visible={isEditingName}
+        currentName={displayName}
+        onClose={() => setIsEditingName(false)}
+        onSave={handleUpdateName}
+      />
+
       <Footer />
     </SafeAreaView>
   );
@@ -591,3 +776,151 @@ const modalStyle = StyleSheet.create({
     fontSize: 16,
   },
 });
+<<<<<<< HEAD
+=======
+
+const nameModalStyle = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.25)",
+    justifyContent: "flex-end",
+  },
+  sheetContainer: {
+    backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 36,
+    borderTopRightRadius: 36,
+    borderWidth: 4,
+    borderBottomWidth: 0,
+    borderColor: "#88D48E",
+    paddingHorizontal: 24,
+    paddingTop: 24,
+    paddingBottom: 40,
+    alignItems: "center",
+    position: "relative",
+  },
+  leavesContainer: {
+    position: "absolute",
+    top: -18,
+    left: 45,
+    right: 45,
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  leafIcon: {
+    fontSize: 22,
+    transform: [{ rotate: "15deg" }],
+  },
+  userAvatarBadge: {
+    position: "absolute",
+    left: 20,
+    top: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#E2F2FD",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#297AB8",
+    textAlign: "center",
+    marginTop: 6,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: "#99A8B6",
+    textAlign: "center",
+    marginTop: 6,
+    marginBottom: 16,
+  },
+  inputShadowWrapper: {
+    width: "80%",
+    borderRadius: 16,
+    backgroundColor: "#F2F6F8",
+    borderWidth: 1.5,
+    borderColor: "#B4DBF7",
+    shadowColor: "#297AB8",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.18,
+    shadowRadius: 5,
+    elevation: 3,
+  },
+  input: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#607485",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+  },
+  counterText: {
+    fontSize: 13,
+    color: "#99A8B6",
+    marginTop: 6,
+    marginBottom: 26,
+  },
+  suggestionsLabel: {
+    alignSelf: "flex-start",
+    fontSize: 15,
+    fontWeight: "bold",
+    color: "#297AB8",
+    marginBottom: 10,
+  },
+  suggestionsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    gap: 12,
+    marginBottom: 32,
+  },
+  suggestionChip: {
+    flex: 1,
+    height: 46,
+    backgroundColor: "#F2F6F8",
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  suggestionText: {
+    color: "#4A5568",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  actionsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    gap: 16,
+  },
+  actionBtn: {
+    flex: 1,
+    backgroundColor: "#F3F7FA",
+    borderRadius: 18,
+    paddingVertical: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#E5ECF0",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  cancelBtn: {},
+  confirmBtn: {},
+  actionBtnText: {
+    color: "#297AB8",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+});
+>>>>>>> 59ca9df17321e0cdad1e2e7cfa1107ec45fc13f5

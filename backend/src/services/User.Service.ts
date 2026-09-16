@@ -28,13 +28,27 @@ export const UserService = {
     return ommitPassword(user);
   },
 
-  async delete(id: number) {
-    const result = await userRepository.delete(id);
-    if (result.affected === 0) {
-      throw new NotFoundError("Usuário não existe!");
-    }
-  },
+  async delete(id: number, passwordConfirm?: string) {
+  if (!passwordConfirm) {
+    throw new BadRequestError("A senha é obrigatória para confirmar a exclusão!");
+  }
 
+  const user = await userRepository.findByIdWithPassword(id);
+  if (!user) {
+    throw new NotFoundError("Usuário não encontrado!");
+  }
+
+  const isValidPassword = await bcrypt.compare(passwordConfirm, user.password);
+  if (!isValidPassword) {
+    throw new UnauthorizedError("Senha incorreta!");
+  }
+
+  // Com o onDelete: "CASCADE" na entidade, o TypeORM remove o vínculo automaticamente
+  const result = await userRepository.delete(id);
+  if (result.affected === 0) {
+    throw new NotFoundError("Usuário não existe!");
+  }
+},
   async listAll() {
     const users = await userRepository.findAll();
     return users.map(user => ommitPassword(user));

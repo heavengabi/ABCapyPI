@@ -43,14 +43,32 @@ export class UserController {
   }
 
   async delete(req: Request, res: Response, next: NextFunction) {
-    try {
-      const id = Number(req.params.id);
-      await UserService.delete(id);
-      return res.status(204).send();
-    } catch (error) {
-      next(error);
-    }
+  try {
+    const id = Number((req as any).user?.id ?? req.params.id);
+    const { password } = req.body;
+
+    await UserService.delete(id, password);
+    return res.status(204).send();
+  } catch (error) {
+    next(error);
   }
+}
+async deleteMe(req: Request, res: Response, next: NextFunction) {
+  try {
+    const userId = Number((req as any).userId);
+
+    if (!userId || Number.isNaN(userId)) {
+      return res.status(401).json({ message: "Usuário não autenticado." });
+    }
+
+    const { password } = req.body;
+    await UserService.delete(userId, password);
+
+    return res.status(204).send();
+  } catch (error) {
+    next(error);
+  }
+}
 
   async login(req: Request, res: Response, next: NextFunction) {
     try {
