@@ -25,7 +25,7 @@ export class ChildrenController {
 
 async update(req: Request, res: Response, next: NextFunction) {
   try {
-    // Tenta pegar o id tanto de req.user.id quanto req.userId (depende de como seu middleware injeta)
+    
     const rawUserId = (req as any).user?.id ?? (req as any).userId;
 
     if (!rawUserId) {
@@ -43,7 +43,7 @@ async update(req: Request, res: Response, next: NextFunction) {
 
     return res.status(200).json(updatedChild);
   } catch (error) {
-    console.error("ERRO NO UPDATE CHILDREN:", error); // <-- Adicione esse log para ver o erro exato no terminal do back-end!
+    console.error("ERRO NO UPDATE CHILDREN:", error);
     next(error);
   }
 }
