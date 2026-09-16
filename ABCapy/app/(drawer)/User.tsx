@@ -5,25 +5,20 @@ import {
   View,
   StyleSheet,
   TouchableOpacity,
-  Image as RNImage,
+  Image,
   Modal,
   TouchableWithoutFeedback,
   Pressable,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Pencil, Lock, X } from "lucide-react-native";
-import { useNavigation, useFocusEffect } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Image } from "expo-image";
-import api from "@/src/utils/api";
+import { DrawerActions, useNavigation } from "@react-navigation/native";
+import menu from "../../src/assets/images/homeImages/menu.png";import Footer from "@/src/components/Footer/Footer";
 
-import menu from "../../src/assets/images/homeImages/menu.png";
-import Footer from "@/src/components/Footer/Footer";
+const StarsNumber: number = 3;
 
-const CAPY_AVATARS: Record<string, any> = {
-  aventureira: require("../../src/assets/charactersImages/AdventureCapy.png"),
-  sabida: require("../../src/assets/charactersImages/StudentCapy.png"),
-};
+const UserName: string = "Paçoco";
+const TotalStars: number = 39;
 
 const CATEGORIES = [
   { id: "1", name: "nenhum" },
@@ -40,10 +35,9 @@ const ITEMS = [
 
 interface ActionModalProps {
   handleClose: () => void;
-  userName: string;
 }
 
-function ActionModalContent({ handleClose, userName }: ActionModalProps) {
+function ActionModalContent({ handleClose }: ActionModalProps) {
   const [selectedCategory, setSelectedCategory] = useState("2");
   const [selectedItem, setSelectedItem] = useState("103");
 
@@ -54,56 +48,68 @@ function ActionModalContent({ handleClose, userName }: ActionModalProps) {
       </TouchableOpacity>
 
       <Text style={modalStyle.title}>Acessórios</Text>
-      <Text style={modalStyle.subtitle}>Personalize {userName}</Text>
+      <Text style={modalStyle.subtitle}>Personalize {UserName}</Text>
 
+     
       <View style={modalStyle.categoriesRow}>
-        {CATEGORIES.map((cat) => (
-          <TouchableOpacity
-            key={cat.id}
-            onPress={() => setSelectedCategory(cat.id)}
-            style={[
-              modalStyle.categoryTab,
-              selectedCategory === cat.id && modalStyle.categoryTabSelected,
-            ]}
-          >
-            {cat.icon && <Text style={{ marginRight: 6 }}>{cat.icon}</Text>}
-            <Text
+        {CATEGORIES.map((cat) => {
+          const isSelected = selectedCategory === cat.id;
+          return (
+            <TouchableOpacity
+              key={cat.id}
+              onPress={() => setSelectedCategory(cat.id)}
               style={[
-                modalStyle.categoryText,
-                selectedCategory === cat.id && modalStyle.categoryTextSelected,
+                modalStyle.categoryTab,
+                isSelected && modalStyle.categoryTabSelected,
               ]}
             >
-              {cat.name}
-            </Text>
-          </TouchableOpacity>
-        ))}
+              {cat.icon && <Text style={{ marginRight: 6 }}>{cat.icon}</Text>}
+              <Text
+                style={[
+                  modalStyle.categoryText,
+                  isSelected && modalStyle.categoryTextSelected,
+                ]}
+              >
+                {cat.name}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
 
+      {/* Grid de Itens */}
       <View style={modalStyle.gridContainer}>
-        {ITEMS.map((item) => (
-          <TouchableOpacity
-            key={item.id}
-            onPress={() => setSelectedItem(item.id)}
-            style={[
-              modalStyle.itemCard,
-              selectedItem === item.id && modalStyle.itemCardSelected,
-            ]}
-          >
-            <RNImage source={item.image} style={modalStyle.itemImage} />
-          </TouchableOpacity>
-        ))}
+        {ITEMS.map((item) => {
+          const isSelected = selectedItem === item.id;
+          return (
+            <TouchableOpacity
+              key={item.id}
+              onPress={() => setSelectedItem(item.id)}
+              style={[
+                modalStyle.itemCard,
+                isSelected && modalStyle.itemCardSelected,
+              ]}
+            >
+              <Image source={item.image} style={modalStyle.itemImage} />
+            </TouchableOpacity>
+          );
+        })}
       </View>
 
+      
       <View style={modalStyle.footer}>
         <View style={modalStyle.starPriceRow}>
-          <RNImage
+          <Image
             source={require("../../src/assets/images/solar_star-bold-duotone.png")}
             style={{ width: 22, height: 22 }}
           />
           <Text style={modalStyle.starPriceText}>50</Text>
         </View>
 
-        <TouchableOpacity style={modalStyle.confirmButton} onPress={handleClose}>
+        <TouchableOpacity
+          style={modalStyle.confirmButton}
+          onPress={handleClose}
+        >
           <Text style={modalStyle.confirmButtonText}>confirmar</Text>
         </TouchableOpacity>
       </View>
@@ -113,45 +119,11 @@ function ActionModalContent({ handleClose, userName }: ActionModalProps) {
 
 export default function UserPage() {
   const [visibleModal, setVisibleModal] = useState(false);
-  const [childData, setChildData] = useState<{
-    childName: string;
-    capy: string;
-    stars: number;
-  } | null>(null);
-
-  const navigation = useNavigation<any>();
-
-  useFocusEffect(
-    React.useCallback(() => {
-      async function carregar() {
-        try {
-          const cache = await AsyncStorage.getItem("@ABCapy:child");
-          if (cache) {
-            setChildData(JSON.parse(cache));
-          }
-
-          const res = await api.get("/children/me");
-          if (res.data) {
-            setChildData(res.data);
-            await AsyncStorage.setItem("@ABCapy:child", JSON.stringify(res.data));
-          }
-        } catch (e) {}
-      }
-
-      carregar();
-    }, [])
-  );
+  const navigation = useNavigation();
 
   const openMenu = () => {
-    navigation.dispatch({ type: "OPEN_DRAWER" });
+    navigation.dispatch(DrawerActions.openDrawer());
   };
-
-  const displayName = childData?.childName || "Amiguinho";
-  const displayStars = childData?.stars ?? 0;
-  const avatarSource =
-    childData?.capy && CAPY_AVATARS[childData.capy]
-      ? CAPY_AVATARS[childData.capy]
-      : CAPY_AVATARS.sabida;
 
   return (
     <SafeAreaView edges={["top", "bottom"]} style={style.safeArea}>
@@ -160,41 +132,43 @@ export default function UserPage() {
         contentContainerStyle={style.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        {/* Header Superior reorganizado */}
         <View style={style.topBar}>
           <Pressable onPress={openMenu} hitSlop={10}>
-            <RNImage source={menu} style={style.menuIcon} />
+            <Image source={menu} style={style.menuIcon} />
           </Pressable>
 
           <View style={style.headerStars}>
-            <RNImage
+            <Image
               source={require("../../src/assets/images/solar_star-bold-duotone.png")}
               style={{ width: 24, height: 24 }}
             />
-            <Text style={style.starsText}>{displayStars}</Text>
+            <Text style={style.starsText}>{StarsNumber}</Text>
           </View>
         </View>
 
         <Text style={style.pageTitle}>Perfil</Text>
 
+        {/* Avatar */}
         <View style={style.avatarWrapper}>
           <View style={style.circuloOpcao}>
             <Image
-              source={avatarSource}
+              source={require("../../src/assets/charactersImages/StudentCapy.png")}
               style={style.imagemPersonagem}
-              contentFit="contain"
             />
           </View>
 
           <View style={style.badgeAcessorio}>
-            <RNImage
+            <Image
               source={require("../../src/assets/characterAccessories/FarmerCapy.png")}
               style={{ width: 52, height: 32, resizeMode: "cover" }}
             />
           </View>
         </View>
 
+        {/* Nome do Usuário */}
         <View style={style.userNameRow}>
-          <Text style={style.userNameText}>{displayName}</Text>
+          <Text style={style.userNameText}>{UserName}</Text>
           <TouchableOpacity
             style={style.editButton}
             onPress={() => setVisibleModal(true)}
@@ -203,14 +177,15 @@ export default function UserPage() {
           </TouchableOpacity>
         </View>
 
+        
         <View style={style.progressSection}>
           <View style={style.progressBarContainer}>
             <View style={style.progressBarBackground}>
-              <View style={[style.progressBarFill, { width: `${Math.min(displayStars * 10, 100)}%` }]} />
+              <View style={[style.progressBarFill, { width: "70%" }]} />
             </View>
 
             <View style={style.rewardContainer}>
-              <RNImage
+              <Image
                 source={require("../../src/assets/characterAccessories/PirateCapy.png")}
                 style={style.rewardImageLocked}
               />
@@ -219,10 +194,11 @@ export default function UserPage() {
           </View>
 
           <Text style={style.progressSubtext}>
-            Faltam {Math.max(0, 10 - (displayStars % 10))} estrelas para a próxima recompensa
+            Faltam 3 estrelas para a próxima recompensa
           </Text>
         </View>
 
+       
         <View style={style.gamesCard}>
           <View style={style.gamesTitleBadge}>
             <Text style={style.gamesTitleText}>jogos mais jogados</Text>
@@ -232,22 +208,23 @@ export default function UserPage() {
 
           <View style={style.statsRow}>
             <View style={style.statBox}>
-              <Text style={style.statNumber}>0</Text>
+              <Text style={style.statNumber}>27</Text>
               <Text style={style.statLabel}>total de jogadas</Text>
             </View>
 
             <View style={style.statBox}>
-              <Text style={style.statNumber}>0</Text>
+              <Text style={style.statNumber}>3</Text>
               <Text style={style.statLabel}>Jogos experimentados</Text>
             </View>
           </View>
         </View>
 
+        {/* Estrelas Conquistadas */}
         <View style={style.finalCard}>
           <Text style={style.finalCardLabel}>estrelas conquistadas</Text>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-            <Text style={style.finalCardValue}>{displayStars}</Text>
-            <RNImage
+            <Text style={style.finalCardValue}>{TotalStars}</Text>
+            <Image
               source={require("../../src/assets/images/solar_star-bold-duotone.png")}
               style={{ width: 22, height: 22 }}
             />
@@ -255,6 +232,7 @@ export default function UserPage() {
         </View>
       </ScrollView>
 
+      {/* Modal Acessórios */}
       <Modal
         visible={visibleModal}
         transparent={true}
@@ -267,14 +245,12 @@ export default function UserPage() {
               <View style={{ width: "100%" }}>
                 <ActionModalContent
                   handleClose={() => setVisibleModal(false)}
-                  userName={displayName}
                 />
               </View>
             </TouchableWithoutFeedback>
           </View>
         </TouchableWithoutFeedback>
       </Modal>
-
       <Footer />
     </SafeAreaView>
   );
@@ -315,7 +291,7 @@ const style = StyleSheet.create({
   pageTitle: {
     color: "#297AB8",
     fontSize: 34,
-    fontFamily: "Poppins_700Bold",
+    fontFamily:"Poppins_700Bold",
     marginTop: 10,
     marginBottom: 20,
   },
@@ -337,6 +313,7 @@ const style = StyleSheet.create({
   imagemPersonagem: {
     width: "85%",
     height: "85%",
+    resizeMode: "contain",
   },
   badgeAcessorio: {
     position: "absolute",
@@ -360,7 +337,7 @@ const style = StyleSheet.create({
   },
   userNameText: {
     fontSize: 24,
-    fontFamily: "Poppins_600SemiBold",
+    fontFamily:"Poppins_600SemiBold",
     color: "#297AB8",
   },
   editButton: {
@@ -443,7 +420,7 @@ const style = StyleSheet.create({
   gamesTitleText: {
     color: "#297AB8",
     fontSize: 16,
-    fontFamily: "Poppins_700Bold",
+    fontFamily:"Poppins_700Bold"
   },
   podiumPlaceholder: {
     height: 120,
@@ -460,13 +437,13 @@ const style = StyleSheet.create({
   },
   statNumber: {
     fontSize: 18,
-    fontFamily: "Poppins_700Bold",
+    fontFamily:"Poppins_700Bold",
     color: "#000",
   },
   statLabel: {
     fontSize: 12,
     color: "#297AB8",
-    fontFamily: "Poppins_400Regular",
+    fontFamily:"Poppins_400Regular",
     marginTop: 2,
   },
   finalCard: {
@@ -486,11 +463,11 @@ const style = StyleSheet.create({
     fontSize: 14,
     color: "#297AB8",
     marginBottom: 4,
-    fontFamily: "Poppins_400Regular",
+    fontFamily:"Poppins_400Regular"
   },
   finalCardValue: {
     fontSize: 20,
-    fontFamily: "Poppins_700Bold",
+    fontFamily:"Poppins_700Bold",
     color: "#000",
   },
   modalOverlay: {
