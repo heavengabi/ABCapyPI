@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Button } from "@/src/components/ui/button";
+import { Button } from "@/src/components/ui/Button";
 import { View, Image, StyleSheet, ImageBackground } from "react-native";
 import LogoImage from "../src/assets/images/logo-abcapy.svg";
 // Images

@@ -1,4 +1,4 @@
-import { Button } from "@/src/components/ui/button";
+import { Button } from "@/src/components/ui/Button";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {

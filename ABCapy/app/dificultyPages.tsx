@@ -1,8 +1,4 @@
 import { View, Text, Image, ImageBackground, StyleSheet } from "react-native";
-<<<<<<< HEAD
-=======
-
->>>>>>> c362fba (feat:adiciona arquivos do jogo da memoria)
 import { SafeAreaView } from "react-native-safe-area-context";
 import React from "react";
 import wallpaper2 from "../src/assets/images/gameImages/wallpaper2.png";
@@ -60,10 +56,6 @@ const DificultyPages = () => {
 
         <View style={styles.containerImg}>
           <Text style={styles.textStyle}>Escolha a dificuldade</Text>
-<<<<<<< HEAD
-=======
-
->>>>>>> c362fba (feat:adiciona arquivos do jogo da memoria)
           <Image source={Capy2} style={styles.imgStyle} />
         </View>
 

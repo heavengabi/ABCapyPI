@@ -1,4 +1,4 @@
-import { Button } from "@/src/components/ui/button";
+import { Button } from "@/src/components/ui/Button";
 import { router } from "expo-router";
 import { Lock, Mail } from "lucide-react-native";
 import React from "react";
