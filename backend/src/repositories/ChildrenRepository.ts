@@ -23,10 +23,10 @@ export const childrenRepository = {
     });
   },
 
-  async update(id: number, data: Partial<Children>) {
-    await repo.update(id, data);
-    return await repo.findOneBy({ id });
-  },
+async update(id: number, data: Partial<Children>) {
+  await repo.update(id, data);
+  return await repo.findOne({ where: { id }, relations: ["user"] });
+},
 
   async delete(id: number) {
     return await repo.delete(id);

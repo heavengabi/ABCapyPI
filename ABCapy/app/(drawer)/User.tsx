@@ -160,16 +160,16 @@ function EditNameModal({ visible, currentName, onClose, onSave }: EditNameModalP
           <TouchableWithoutFeedback>
             <View style={nameModalStyle.sheetContainer}>
              
-              {/* Ícone circular do perfil */}
+           
               <View style={nameModalStyle.userAvatarBadge}>
                 <User size={22} color="#297AB8" />
               </View>
 
-              {/* Cabeçalho */}
+             
               <Text style={nameModalStyle.title}>mudar dados</Text>
               <Text style={nameModalStyle.subtitle}>como voce quer ser chamado?</Text>
 
-              {/* Campo de Texto */}
+             
               <View style={nameModalStyle.inputShadowWrapper}>
                 <TextInput
                   style={nameModalStyle.input}
@@ -186,7 +186,7 @@ function EditNameModal({ visible, currentName, onClose, onSave }: EditNameModalP
 
               <Text style={nameModalStyle.counterText}>{name.length}/20 caracteres</Text>
 
-              {/* Sugestões de nomes */}
+           
               <Text style={nameModalStyle.suggestionsLabel}>Sujestões</Text>
               <View style={nameModalStyle.suggestionsRow}>
                 {NAME_SUGGESTIONS.map((item, index) => (
@@ -420,7 +420,7 @@ export default function UserPage() {
         </TouchableWithoutFeedback>
       </Modal>
 
-      {/* Modal de Edição de Nome */}
+    
       <EditNameModal
         visible={isEditingName}
         currentName={displayName}
