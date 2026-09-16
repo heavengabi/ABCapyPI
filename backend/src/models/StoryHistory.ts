@@ -7,11 +7,13 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from "typeorm";
+
 import { Children } from "./Children";
 import { Story } from "./Story";
 
 @Entity("story_history")
 export class StoryHistory {
+
   @PrimaryGeneratedColumn()
   id: number;
 

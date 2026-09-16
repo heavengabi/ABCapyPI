@@ -3,6 +3,7 @@ import { User } from "./User";
 
 @Entity("child")
 export class Children {
+
   @PrimaryGeneratedColumn()
   id: number;
 

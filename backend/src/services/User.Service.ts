@@ -49,27 +49,32 @@ export const UserService = {
   },
 
 async login(data: { email: string; password: string }) {
-    const user = await userRepository.findByEmail(data.email);
-    if (!user) {
-      throw new UnauthorizedError("E-mail ou senha inválidos!");
-    }
+  if (!data.email || !data.password) {
+    throw new BadRequestError("E-mail e senha são obrigatórios!");
+  }
 
-    const isValidPassword = await bcrypt.compare(data.password, user.password);
-    if (!isValidPassword) {
-      throw new UnauthorizedError("E-mail ou senha inválidos!");
-    }
+  
+  const user = await userRepository.findByEmailWithPassword(data.email);
+  if (!user) {
+    throw new UnauthorizedError("E-mail ou senha inválidos!");
+  }
 
-    const token = jwt.sign(
-      { id: user.id, email: user.email },
-      JWT_SECRET,
-      { expiresIn: "1d" }
-    );
+  const isValidPassword = await bcrypt.compare(data.password, user.password);
+  if (!isValidPassword) {
+    throw new UnauthorizedError("E-mail ou senha inválidos!");
+  }
 
-    return {
-      user: ommitPassword(user),
-      token,
-    };
-  },
+  const token = jwt.sign(
+    { id: user.id, email: user.email },
+    JWT_SECRET,
+    { expiresIn: "1d" }
+  );
+
+  return {
+    user: ommitPassword(user),
+    token,
+  };
+},
 
   async update(id: number, data: { nameUser?: string; email?: string; password?: string }) {
     const user = await userRepository.findById(id);

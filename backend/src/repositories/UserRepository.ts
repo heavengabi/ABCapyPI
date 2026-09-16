@@ -21,6 +21,16 @@ export const userRepository = {
     return repo.findOneBy({ email });
   },
 
+ 
+  async findByEmailWithPassword(email: string) {
+    return repo
+      .createQueryBuilder("user")
+      .addSelect("user.password")
+      .leftJoinAndSelect("user.child", "child")
+      .where("user.email = :email", { email })
+      .getOne();
+  },
+
   async delete(id: number) {
     return repo.delete(id);
   },

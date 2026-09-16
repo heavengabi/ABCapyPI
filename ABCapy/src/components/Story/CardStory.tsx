@@ -9,19 +9,16 @@ import React from "react";
 
 type Props = {
   imagem: ImageSourcePropType;
-  subtitulo:string
+  subtitulo: string;
   paragrafo: string;
-
 };
 
-const CardStory = ({ imagem, paragrafo,subtitulo }: Props) => {
+const CardStory = ({ imagem, paragrafo, subtitulo }: Props) => {
   return (
     <View style={styles.card}>
       <Image source={imagem} style={styles.imagem} />
-      <Text>{subtitulo}</Text>
-      <Text style={styles.paragrafo}>
-        {paragrafo}
-      </Text>
+      <Text style={styles.subtitulo}>{subtitulo}</Text>
+      <Text style={styles.paragrafo}>{paragrafo}</Text>
     </View>
   );
 };
@@ -40,7 +37,7 @@ const styles = StyleSheet.create({
 
   imagem: {
     width: 250,
-    height: 150,
+    height: 190,
     resizeMode: "contain",
   },
 
@@ -49,7 +46,9 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "#297AB8",
     fontWeight: "bold",
+    bottom: -80,
   },
-
-
+  subtitulo: {
+    bottom: -50,
+  },
 });
