@@ -1,4 +1,3 @@
-
 import React from "react";
 
 import {
@@ -53,8 +52,7 @@ const MemoryGame = () => {
     },
   };
 
-  const difficultyKey =
-    typeof difficulty === "string" ? difficulty : "facil";
+  const difficultyKey = typeof difficulty === "string" ? difficulty : "facil";
 
   const jogo =
     settings[difficultyKey as keyof typeof settings] ?? settings.facil;
@@ -65,7 +63,6 @@ const MemoryGame = () => {
       : difficultyKey === "medio"
         ? "medio"
         : "facil";
-
   const {
     modalVisivel,
     statusJogo,
@@ -78,8 +75,8 @@ const MemoryGame = () => {
   } = useMemoryGame({
     totalCartas: jogo.totalCartas,
     dificuldade: dificuldadeHook,
+    gameId: 2,
   });
-
   const handleVoltarMenu = () => {
     router.replace("/gamePages");
   };
@@ -89,11 +86,7 @@ const MemoryGame = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={modalVisivel}
-      >
+      <Modal animationType="fade" transparent={true} visible={modalVisivel}>
         <View style={styles.modalOverlay}>
           <Image
             source={capivarafeliz}
@@ -113,9 +106,7 @@ const MemoryGame = () => {
               <>
                 <Text style={styles.modalTitle}>Jogo da Memória</Text>
 
-                <Text style={styles.modalSubtitle}>
-                  Vamos brincar?
-                </Text>
+                <Text style={styles.modalSubtitle}>Vamos brincar?</Text>
 
                 <View
                   style={[
@@ -151,9 +142,7 @@ const MemoryGame = () => {
                   onPress={iniciarContagem}
                   activeOpacity={0.8}
                 >
-                  <Text style={styles.modalButtonText}>
-                    Começar
-                  </Text>
+                  <Text style={styles.modalButtonText}>Começar</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -161,9 +150,7 @@ const MemoryGame = () => {
                   onPress={handleVoltarMenu}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.backButtonText}>
-                    Voltar ao Menu
-                  </Text>
+                  <Text style={styles.backButtonText}>Voltar ao Menu</Text>
                 </TouchableOpacity>
               </>
             )}
@@ -181,17 +168,13 @@ const MemoryGame = () => {
                   {contagem === 0 ? "VAI!" : contagem}
                 </Text>
 
-                <Text style={styles.contagemSubtexto}>
-                  Prepare-se!
-                </Text>
+                <Text style={styles.contagemSubtexto}>Prepare-se!</Text>
               </View>
             )}
 
             {statusJogo === "vitoria" && (
               <>
-                <Text style={styles.modalTitle}>
-                  🎉 Perfeito! 🎉
-                </Text>
+                <Text style={styles.modalTitle}>🎉 Perfeito! 🎉</Text>
 
                 <Text style={styles.modalSubtitle}>
                   Você encontrou todos os pares!
@@ -205,9 +188,7 @@ const MemoryGame = () => {
                     },
                   ]}
                 >
-                  <Text style={styles.scoreLabel}>
-                    Pontos da rodada
-                  </Text>
+                  <Text style={styles.scoreLabel}>Pontos da rodada</Text>
 
                   <Text
                     style={[
@@ -231,9 +212,7 @@ const MemoryGame = () => {
                   onPress={reiniciarJogo}
                   activeOpacity={0.8}
                 >
-                  <Text style={styles.modalButtonText}>
-                    Jogar Novamente
-                  </Text>
+                  <Text style={styles.modalButtonText}>Jogar Novamente</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -241,9 +220,7 @@ const MemoryGame = () => {
                   onPress={handleVoltarMenu}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.backButtonText}>
-                    Voltar ao Menu
-                  </Text>
+                  <Text style={styles.backButtonText}>Voltar ao Menu</Text>
                 </TouchableOpacity>
               </>
             )}
@@ -269,9 +246,7 @@ const MemoryGame = () => {
         />
 
         <View style={styles.infoContainer}>
-          <Text style={styles.nivelText}>
-            Nível: {jogo.titulo}
-          </Text>
+          <Text style={styles.nivelText}>Nível: {jogo.titulo}</Text>
         </View>
 
         <View

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+
 import { ImageSourcePropType } from "react-native";
 
 import img1 from "../../assets/images/gameImages/img1.png";
@@ -6,6 +7,8 @@ import img2 from "../../assets/images/gameImages/img2.png";
 import img3 from "../../assets/images/gameImages/img3.png";
 import img4 from "../../assets/images/gameImages/img4.png";
 import img5 from "../../assets/images/gameImages/img5.png";
+
+import { registrarPartida } from "../../services/gameService";
 
 const imagensCartas: Record<number, ImageSourcePropType> = {
   1: img1,
@@ -28,6 +31,7 @@ export type CartaType = {
 type UseMemoryGameProps = {
   totalCartas: number;
   dificuldade?: DificuldadeType;
+  gameId: number;
 };
 
 const TABELA_PONTOS: Record<DificuldadeType, number> = {
@@ -39,6 +43,7 @@ const TABELA_PONTOS: Record<DificuldadeType, number> = {
 export const useMemoryGame = ({
   totalCartas,
   dificuldade = "facil",
+  gameId,
 }: UseMemoryGameProps) => {
   const [modalVisivel, setModalVisivel] = useState(true);
 
@@ -56,9 +61,7 @@ export const useMemoryGame = ({
 
   const [bloquearCliques, setBloquearCliques] = useState(false);
 
-  // =========================
-  // CRIAR CARTAS
-  // =========================
+  const [salvandoPartida, setSalvandoPartida] = useState(false);
 
   const inicializarCartas = () => {
     const quantidadePares = totalCartas / 2;
@@ -90,9 +93,20 @@ export const useMemoryGame = ({
     setCartas(cartasEmbaralhadas);
   };
 
-  // =========================
-  // CONTAGEM REGRESSIVA
-  // =========================
+  const salvarResultado = async (estrelas: number) => {
+    try {
+      setSalvandoPartida(true);
+
+      await registrarPartida(gameId, estrelas);
+
+      console.log("Partida registrada com sucesso!");
+      console.log("Estrelas ganhas:", estrelas);
+    } catch (error) {
+      console.error("Erro ao registrar partida:", error);
+    } finally {
+      setSalvandoPartida(false);
+    }
+  };
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
@@ -104,9 +118,7 @@ export const useMemoryGame = ({
         }, 1000);
       } else {
         setStatusJogo("jogando");
-
         setModalVisivel(false);
-
         inicializarCartas();
       }
     }
@@ -117,10 +129,6 @@ export const useMemoryGame = ({
       }
     };
   }, [statusJogo, contagem]);
-
-  // =========================
-  // CLIQUE NA CARTA
-  // =========================
 
   const tratarCliqueCarta = (indexClicado: number) => {
     if (
@@ -146,10 +154,6 @@ export const useMemoryGame = ({
 
       const [primeiroIndex, segundoIndex] = novasSelecionadas;
 
-      // =========================
-      // ACERTO
-      // =========================
-
       if (
         novasCartas[primeiroIndex].valorOriginal ===
         novasCartas[segundoIndex].valorOriginal
@@ -158,85 +162,55 @@ export const useMemoryGame = ({
           const cartasComMatch = [...novasCartas];
 
           cartasComMatch[primeiroIndex].isMatched = true;
-
           cartasComMatch[segundoIndex].isMatched = true;
 
           setCartas(cartasComMatch);
-
           setCartasSelecionadas([]);
-
           setBloquearCliques(false);
 
           const todasCombinadas = cartasComMatch.every(
             (carta) => carta.isMatched,
           );
 
-          // =========================
-          // VITÓRIA
-          // =========================
-
           if (todasCombinadas) {
             const pontosGanhos = TABELA_PONTOS[dificuldade];
 
             setPontosGanhosRodada(pontosGanhos);
-
             setStatusJogo("vitoria");
-
             setModalVisivel(true);
+
+            // Salva no banco
+            salvarResultado(pontosGanhos);
           }
         }, 500);
-      }
-
-      // =========================
-      // ERRO
-      // =========================
-      else {
+      } else {
         setTimeout(() => {
           const cartasDesviradas = [...novasCartas];
 
           cartasDesviradas[primeiroIndex].isFlipped = false;
-
           cartasDesviradas[segundoIndex].isFlipped = false;
 
           setCartas(cartasDesviradas);
-
           setCartasSelecionadas([]);
-
           setBloquearCliques(false);
         }, 1000);
       }
     }
   };
 
-  // =========================
-  // COMEÇAR
-  // =========================
-
   const iniciarContagem = () => {
     setContagem(3);
-
     setStatusJogo("contagem");
-
     setModalVisivel(true);
   };
 
-  // =========================
-  // JOGAR NOVAMENTE
-  // =========================
-
   const reiniciarJogo = () => {
     setCartas([]);
-
     setCartasSelecionadas([]);
-
     setBloquearCliques(false);
-
     setPontosGanhosRodada(0);
-
     setContagem(3);
-
     setStatusJogo("contagem");
-
     setModalVisivel(true);
   };
 
@@ -249,5 +223,6 @@ export const useMemoryGame = ({
     tratarCliqueCarta,
     iniciarContagem,
     reiniciarJogo,
+    salvandoPartida,
   };
 };
