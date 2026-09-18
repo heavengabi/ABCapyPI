@@ -8,7 +8,7 @@ import jogo2 from "../src/assets/images/gameImages/jogo2.png";
 import jogo3 from "../src/assets/images/gameImages/jogo3.png";
 import Capy1 from "../src/assets/images/gameImages/Capy1.png";
 import CardGame from "@/src/components/gameComponents/cardGames/cardGames";
-import CapyGames from "../src/assets/images/capyImages/capyGames.svg"
+import CapyGames from "../src/assets/images/capyImages/capyGames.svg";
 import Header from "@/src/components/Header/Header";
 import { router } from "expo-router";
 import { StyleSheet } from "react-native";
@@ -23,14 +23,16 @@ const GamePages = () => {
       >
         <Header
           icon="arrow-back"
-          onPress={() => {router.push('/homePage')}}
+          onPress={() => {
+            router.push("/homePage");
+          }}
           headerStyle={{ backgroundColor: "#A8DAFF" }}
           buttonStyle={{ backgroundColor: "#69B9F7" }}
         />
 
         <View style={styles.containerImg}>
           <Text style={styles.textStyle}>O que vamos jogar?</Text>
-          <CapyGames    style={styles.imgStyle} />
+          <CapyGames style={styles.imgStyle} />
         </View>
 
         <CardGame
@@ -78,14 +80,11 @@ const GamePages = () => {
 
 export default GamePages;
 
-
 const styles = StyleSheet.create({
-  
   container: {
     flex: 1,
     backgroundColor: "#D7ECFB",
   },
-
 
   header: {
     height: 70,
@@ -95,7 +94,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
 
-
   botao: {
     backgroundColor: "#69B9F7",
     width: 40,
@@ -104,7 +102,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-
 
   btnText: {
     color: "white",
@@ -119,16 +116,15 @@ const styles = StyleSheet.create({
   containerImg: {
     justifyContent: "center",
     alignItems: "center",
-    marginTop:20
-    
+    marginTop: 20,
   },
 
-  textStyle:{
-    fontSize:24,
-    fontFamily:'Poppins',
-    fontWeight:'bold',
-    textTransform:'uppercase',
-    color:'#297AB8',
-    marginTop:20
-  }
-})
+  textStyle: {
+    fontSize: 24,
+    fontFamily: "Poppins",
+    fontWeight: "bold",
+    textTransform: "uppercase",
+    color: "#297AB8",
+    marginTop: 20,
+  },
+});

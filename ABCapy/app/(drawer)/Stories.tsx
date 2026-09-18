@@ -23,72 +23,65 @@ import d from "../../src/assets/storiesImages/d.png";
 import e from "../../src/assets/storiesImages/e.png";
 import f from "../../src/assets/storiesImages/f.png";
 import g from "../../src/assets/storiesImages/g.png";
-import CapyStory from "../../src/assets/images/capyImages/capyStory.svg"
+import CapyStory from "../../src/assets/images/capyImages/capyStory.svg";
 import Recompensa from "@/src/components/Story/Recompensa";
 import starStory from "../../src/assets/storiesImages/starStory.png";
 import { router, useNavigation } from "expo-router";
-import { DrawerActions } from "@react-navigation/native";
+import { DrawerActions } from "expo-router/react-navigation";
 const Stories = () => {
-   const navigation = useNavigation();
-  
-    const openMenu = () => {
-      navigation.dispatch(DrawerActions.openDrawer());
-    };
+  const navigation = useNavigation();
+
+  const openMenu = () => {
+    navigation.dispatch(DrawerActions.openDrawer());
+  };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor:"#D7ECFB" }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#D7ECFB" }}>
+      <ScrollView>
+        <Pressable style={styles.menuButton} onPress={openMenu} hitSlop={10}>
+          <Image source={menu} style={styles.menuIcon} />
+        </Pressable>
+        <View style={styles.container}>
+          <Text style={styles.text1}>Se aventure por essas histórias</Text>
+        </View>
 
+        <View style={styles.conteudo}>
+          <Image source={gramaa} style={styles.grama} />
 
-        <ScrollView>
-       <Pressable
-                 style={styles.menuButton}
-                 onPress={openMenu}
-                 hitSlop={10}
-               >
-                 <Image source={menu} style={styles.menuIcon} />
-               </Pressable>
-          <View style={styles.container}>
-            <Text style={styles.text1}>Se aventure por essas histórias</Text>
-          </View>
+          <View style={styles.caminhoContainer}>
+            <Caminho />
 
-          <View style={styles.conteudo}>
-            <Image source={gramaa} style={styles.grama} />
-
-            <View style={styles.caminhoContainer}>
-              <Caminho />
-
-              <View style={[styles.btnContainer, { top: -30, right: "64%" }]}>
-                <Botao image={a} onPress={() => router.push("/StoryPage")} />
-                <Recompensa quantidade={3} imagem={starStory} />
-              </View>
-              <View style={[styles.btnContainer, { top: 185, left: "50%" }]}>
-                <Botao image={b} onPress={() => router.push("/StoryPage")} />
-                <Recompensa quantidade={3} imagem={starStory} />
-              </View>
-              <View style={[styles.btnContainer, { top: 340, right: "75%" }]}>
-                <Botao image={c} onPress={() => router.push("/StoryPage")} />
-                <Recompensa quantidade={3} imagem={starStory} />
-              </View>
-              <View style={[styles.btnContainer, { top: 480, left: "55%" }]}>
-                <Botao image={d} onPress={() => router.push("/StoryPage")} />
-                <Recompensa quantidade={3} imagem={starStory} />
-              </View>
-              <View style={[styles.btnContainer, { top: 650, right: "75%" }]}>
-                <Botao image={e} onPress={() => router.push("/StoryPage")} />
-                <Recompensa quantidade={3} imagem={starStory} />
-              </View>
-              <View style={[styles.btnContainer, { top: 800, left: "55%" }]}>
-                <Botao image={f} onPress={() => router.push("/StoryPage")} />
-                <Recompensa quantidade={3} imagem={starStory} />
-              </View>
-              <View style={[styles.btnContainer, { top: 950, right: "75%" }]}>
-                <Botao image={g} onPress={() => router.push("/StoryPage")} />
-                <Recompensa quantidade={3} imagem={starStory} />
-              </View>
+            <View style={[styles.btnContainer, { top: -30, right: "64%" }]}>
+              <Botao image={a} onPress={() => router.push("/StoryPage")} />
+              <Recompensa quantidade={3} imagem={starStory} />
+            </View>
+            <View style={[styles.btnContainer, { top: 185, left: "50%" }]}>
+              <Botao image={b} onPress={() => router.push("/StoryPage")} />
+              <Recompensa quantidade={3} imagem={starStory} />
+            </View>
+            <View style={[styles.btnContainer, { top: 340, right: "75%" }]}>
+              <Botao image={c} onPress={() => router.push("/StoryPage")} />
+              <Recompensa quantidade={3} imagem={starStory} />
+            </View>
+            <View style={[styles.btnContainer, { top: 480, left: "55%" }]}>
+              <Botao image={d} onPress={() => router.push("/StoryPage")} />
+              <Recompensa quantidade={3} imagem={starStory} />
+            </View>
+            <View style={[styles.btnContainer, { top: 650, right: "75%" }]}>
+              <Botao image={e} onPress={() => router.push("/StoryPage")} />
+              <Recompensa quantidade={3} imagem={starStory} />
+            </View>
+            <View style={[styles.btnContainer, { top: 800, left: "55%" }]}>
+              <Botao image={f} onPress={() => router.push("/StoryPage")} />
+              <Recompensa quantidade={3} imagem={starStory} />
+            </View>
+            <View style={[styles.btnContainer, { top: 950, right: "75%" }]}>
+              <Botao image={g} onPress={() => router.push("/StoryPage")} />
+              <Recompensa quantidade={3} imagem={starStory} />
             </View>
           </View>
-        </ScrollView>
-     
+        </View>
+      </ScrollView>
 
       <Footer />
     </SafeAreaView>
@@ -109,8 +102,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
     alignItems: "center",
   },
-   menuButton: {
-    
+  menuButton: {
     top: 0,
     left: 15,
     zIndex: 10,
@@ -124,7 +116,7 @@ const styles = StyleSheet.create({
 
   text1: {
     color: "#297AB8",
-    fontFamily:"Poppins_700Bold",
+    fontFamily: "Poppins_700Bold",
     fontSize: 25,
     textAlign: "center",
     bottom: -10,

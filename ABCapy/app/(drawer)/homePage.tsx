@@ -9,7 +9,7 @@ import {
   ImageBackground,
 } from "react-native";
 import { router, useNavigation } from "expo-router";
-import { DrawerActions } from "@react-navigation/native";
+import { DrawerActions } from "expo-router/react-navigation";
 
 
 import CapyImage from "../../src/assets/images/capyImages/Group 338.svg";

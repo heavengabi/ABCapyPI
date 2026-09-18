@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { List } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation } from "expo-router/react-navigation";
 import { router } from "expo-router";
 import FaqBoy from "../../src/assets/charactersImages/faqBoy.svg";
 const Faq = () => {

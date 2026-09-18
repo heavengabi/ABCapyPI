@@ -11,7 +11,7 @@ import {
 import { Ionicons, FontAwesome5 } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Speech from "expo-speech";
-import { DrawerActions, useNavigation } from "@react-navigation/native";
+import { DrawerActions, useNavigation } from "expo-router/react-navigation";
 import Footer from "@/src/components/Footer/Footer";
 
 const CARDS = [
