@@ -188,15 +188,19 @@ function EditNameModal({
         <View style={nameModalStyle.overlay}>
           <TouchableWithoutFeedback>
             <View style={nameModalStyle.sheetContainer}>
+             
+           
               <View style={nameModalStyle.userAvatarBadge}>
                 <User size={22} color="#297AB8" />
               </View>
 
+             
               <Text style={nameModalStyle.title}>mudar dados</Text>
               <Text style={nameModalStyle.subtitle}>
                 como voce quer ser chamado?
               </Text>
 
+             
               <View style={nameModalStyle.inputShadowWrapper}>
                 <TextInput
                   style={nameModalStyle.input}
@@ -215,6 +219,7 @@ function EditNameModal({
                 {name.length}/20 caracteres
               </Text>
 
+           
               <Text style={nameModalStyle.suggestionsLabel}>Sujestões</Text>
               <View style={nameModalStyle.suggestionsRow}>
                 {NAME_SUGGESTIONS.map((item, index) => (
@@ -452,6 +457,7 @@ export default function UserPage() {
         </TouchableWithoutFeedback>
       </Modal>
 
+    
       <EditNameModal
         visible={isEditingName}
         currentName={displayName}

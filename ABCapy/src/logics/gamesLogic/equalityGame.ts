@@ -6,9 +6,15 @@ import img3 from "@/src/assets/images/gameImages/img3.png";
 import img4 from "@/src/assets/images/gameImages/img4.png";
 import img5 from "@/src/assets/images/gameImages/img5.png";
 
-// =====================================================
-// TIPOS
-// =====================================================
+import { registrarPartida } from "./gameHistoryLogic";
+
+const imagens: GameImage[] = [
+  { id: 1, image: img1 },
+  { id: 2, image: img2 },
+  { id: 3, image: img3 },
+  { id: 4, image: img4 },
+  { id: 5, image: img5 },
+];
 
 export type GameImage = {
   id: number;
@@ -16,58 +22,39 @@ export type GameImage = {
 };
 
 export type GameOption = {
-  // ID único da opção na tela
-  // É diferente do ID da imagem porque podemos
-  // ter a mesma imagem aparecendo duas vezes.
   optionId: string;
-
-  // ID da imagem
   imageId: number;
-
   image: ImageSourcePropType;
-
-  // Define se essa opção é uma resposta correta
   correta: boolean;
 };
 
 export type GameRound = {
-  // Imagens que aparecem como referência
   corretas: GameImage[];
-
-  // Todas as opções que aparecem para clicar
   opcoes: GameOption[];
 };
 
-// =====================================================
-// IMAGENS DISPONÍVEIS
-// =====================================================
+export type DificuldadeEquality =
+  | "facil"
+  | "medio"
+  | "dificil";
 
-export const imagens: GameImage[] = [
-  {
-    id: 1,
-    image: img1,
-  },
-  {
-    id: 2,
-    image: img2,
-  },
-  {
-    id: 3,
-    image: img3,
-  },
-  {
-    id: 4,
-    image: img4,
-  },
-  {
-    id: 5,
-    image: img5,
-  },
-];
+export const ESTRELAS_EQUALITY: Record<
+  DificuldadeEquality,
+  number
+> = {
+  facil: 3,
+  medio: 5,
+  dificil: 10,
+};
 
-// =====================================================
-// EMBARALHAR
-// =====================================================
+export const RODADAS_EQUALITY: Record<
+  DificuldadeEquality,
+  number
+> = {
+  facil: 3,
+  medio: 5,
+  dificil: 10,
+};
 
 export const embaralhar = <T>(array: T[]): T[] => {
   const copia = [...array];
@@ -81,64 +68,45 @@ export const embaralhar = <T>(array: T[]): T[] => {
   return copia;
 };
 
-// =====================================================
-// GERAR RODADA
-// =====================================================
-
 export const gerarRodada = (
   quantidadeOpcoes: number,
   quantidadeCorretas: number,
 ): GameRound => {
-  // ---------------------------------------------------
-  // Escolhe as imagens corretas
-  // ---------------------------------------------------
-
   const imagensEmbaralhadas = embaralhar(imagens);
 
-  const corretas = imagensEmbaralhadas.slice(0, quantidadeCorretas);
-
-  // ---------------------------------------------------
-  // Cria as opções corretas
-  // ---------------------------------------------------
-
-  const opcoesCorretas: GameOption[] = corretas.map((imagem) => ({
-    optionId: `correta-${imagem.id}-${Math.random()}`,
-    imageId: imagem.id,
-    image: imagem.image,
-    correta: true,
-  }));
-
-  // ---------------------------------------------------
-  // Imagens erradas
-  //
-  // São as imagens que NÃO estão entre as corretas.
-  // ---------------------------------------------------
-
-  const imagensErradas = imagens.filter(
-    (imagem) => !corretas.some((correta) => correta.id === imagem.id),
+  const corretas = imagensEmbaralhadas.slice(
+    0,
+    quantidadeCorretas,
   );
 
-  // ---------------------------------------------------
-  // Cria as opções erradas
-  //
-  // Pode repetir imagem caso não existam imagens
-  // suficientes.
-  //
-  // Isso é necessário no DIFÍCIL:
-  //
-  // 3 corretas + 3 erradas = 6 opções
-  //
-  // Como temos apenas 5 imagens, algumas erradas
-  // podem aparecer repetidas.
-  // ---------------------------------------------------
+  const opcoesCorretas: GameOption[] = corretas.map(
+    (imagem) => ({
+      optionId: `correta-${imagem.id}-${Math.random()}`,
+      imageId: imagem.id,
+      image: imagem.image,
+      correta: true,
+    }),
+  );
 
-  const quantidadeErradas = quantidadeOpcoes - quantidadeCorretas;
+  const imagensErradas = imagens.filter(
+    (imagem) =>
+      !corretas.some(
+        (correta) => correta.id === imagem.id,
+      ),
+  );
+
+  const quantidadeErradas =
+    quantidadeOpcoes - quantidadeCorretas;
 
   const opcoesErradas: GameOption[] = [];
 
   for (let i = 0; i < quantidadeErradas; i++) {
     const imagem =
-      imagensErradas[Math.floor(Math.random() * imagensErradas.length)];
+      imagensErradas[
+      Math.floor(
+        Math.random() * imagensErradas.length,
+      )
+      ];
 
     opcoesErradas.push({
       optionId: `errada-${imagem.id}-${i}-${Math.random()}`,
@@ -148,35 +116,31 @@ export const gerarRodada = (
     });
   }
 
-  // ---------------------------------------------------
-  // Junta corretas + erradas
-  // ---------------------------------------------------
-
-  const opcoes = embaralhar([...opcoesCorretas, ...opcoesErradas]);
-
-  // ---------------------------------------------------
-  // Retorna a rodada
-  // ---------------------------------------------------
-
   return {
     corretas,
-    opcoes,
+    opcoes: embaralhar([
+      ...opcoesCorretas,
+      ...opcoesErradas,
+    ]),
   };
 };
-
-// =====================================================
-// VERIFICAR RESPOSTA
-// =====================================================
 
 export const verificarResposta = (
   optionId: string,
   opcoes: GameOption[],
-): boolean => {
-  const opcao = opcoes.find((item) => item.optionId === optionId);
+) => {
+  const opcao = opcoes.find(
+    (item) => item.optionId === optionId,
+  );
 
-  if (!opcao) {
-    return false;
-  }
+  return opcao?.correta ?? false;
+};
 
-  return opcao.correta;
+export const registrarVitoriaEquality = (
+  dificuldade: DificuldadeEquality,
+) => {
+  return registrarPartida(
+    3,
+    ESTRELAS_EQUALITY[dificuldade],
+  );
 };

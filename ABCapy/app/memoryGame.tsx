@@ -1,5 +1,4 @@
-
-import React from "react";
+import React, { useEffect } from "react";
 
 import {
   Text,
@@ -14,17 +13,19 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
 
-import Header from "../src/components/Header/Header";
-import easy from "../src/assets/images/gameImages/easy.png";
-import medium from "../src/assets/images/gameImages/medium.png";
-import hard from "../src/assets/images/gameImages/hard.png";
-import capivarafeliz from "../src/assets/images/gameImages/capivarafeliz.png";
-import CardMemory from "../src/components/gameComponents/cardGames/cardMemory";
+import Header from "@/src/components/Header/Header";
+import easy from "@/src/assets/images/gameImages/easy.png";
+import medium from "@/src/assets/images/gameImages/medium.png";
+import hard from "@/src/assets/images/gameImages/hard.png";
+import capivarafeliz from "@/src/assets/images/gameImages/capivarafeliz.png";
+import CardMemory from "@/src/components/gameComponents/cardGames/cardMemory";
 
 import {
   useMemoryGame,
   DificuldadeType,
-} from "../src/logics/gamesLogic/memoryLogic";
+  ESTRELAS_MEMORIA,
+  registrarVitoriaMemoria,
+} from "@/src/logics/gamesLogic/memoryLogic";
 
 const MemoryGame = () => {
   const { difficulty } = useLocalSearchParams();
@@ -54,10 +55,14 @@ const MemoryGame = () => {
   };
 
   const difficultyKey =
-    typeof difficulty === "string" ? difficulty : "facil";
+    typeof difficulty === "string"
+      ? difficulty
+      : "facil";
 
   const jogo =
-    settings[difficultyKey as keyof typeof settings] ?? settings.facil;
+    settings[
+    difficultyKey as keyof typeof settings
+    ] ?? settings.facil;
 
   const dificuldadeHook: DificuldadeType =
     difficultyKey === "dificil"
@@ -70,7 +75,6 @@ const MemoryGame = () => {
     modalVisivel,
     statusJogo,
     contagem,
-    pontosGanhosRodada,
     cartas,
     tratarCliqueCarta,
     iniciarContagem,
@@ -80,18 +84,28 @@ const MemoryGame = () => {
     dificuldade: dificuldadeHook,
   });
 
+  useEffect(() => {
+    if (statusJogo === "vitoria") {
+      registrarVitoriaMemoria(dificuldadeHook);
+    }
+  }, [statusJogo]);
+
   const handleVoltarMenu = () => {
     router.replace("/gamePages");
   };
 
   const tamanhoCarta =
-    jogo.totalCartas === 6 ? 82 : jogo.totalCartas === 10 ? 72 : 66;
+    jogo.totalCartas === 6
+      ? 82
+      : jogo.totalCartas === 10
+        ? 72
+        : 66;
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <Modal
         animationType="fade"
-        transparent={true}
+        transparent
         visible={modalVisivel}
       >
         <View style={styles.modalOverlay}>
@@ -111,7 +125,9 @@ const MemoryGame = () => {
           >
             {statusJogo === "inicio" && (
               <>
-                <Text style={styles.modalTitle}>Jogo da Memória</Text>
+                <Text style={styles.modalTitle}>
+                  Jogo da Memória
+                </Text>
 
                 <Text style={styles.modalSubtitle}>
                   Vamos brincar?
@@ -125,14 +141,7 @@ const MemoryGame = () => {
                     },
                   ]}
                 >
-                  <Text
-                    style={[
-                      styles.difficultyText,
-                      {
-                        color: "#333",
-                      },
-                    ]}
-                  >
+                  <Text style={styles.difficultyText}>
                     {jogo.titulo}
                   </Text>
                 </View>
@@ -206,7 +215,7 @@ const MemoryGame = () => {
                   ]}
                 >
                   <Text style={styles.scoreLabel}>
-                    Pontos da rodada
+                    Estrelas conquistadas
                   </Text>
 
                   <Text
@@ -217,7 +226,7 @@ const MemoryGame = () => {
                       },
                     ]}
                   >
-                    +{pontosGanhosRodada}
+                    ⭐ {ESTRELAS_MEMORIA[dificuldadeHook]}
                   </Text>
                 </View>
 
@@ -330,6 +339,7 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 1,
   },
+
   gridWrapper: {
     flex: 1,
     justifyContent: "center",
@@ -348,6 +358,7 @@ const styles = StyleSheet.create({
   gridDificil: {
     paddingHorizontal: 5,
   },
+
   grid: {
     width: "100%",
     maxWidth: 360,
@@ -427,6 +438,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "900",
     letterSpacing: 1,
+    color: "#333",
   },
 
   instructions: {

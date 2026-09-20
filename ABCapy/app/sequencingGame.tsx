@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect } from "react";
+
 import {
   View,
   Text,
@@ -14,14 +15,19 @@ import { router, useLocalSearchParams } from "expo-router";
 
 import Header from "@/src/components/Header/Header";
 
-import easySeq from "../src/assets/images/gameImages/easySeq.png";
-import mediumSeq from "../src/assets/images/gameImages/mediumSeq.png";
-import hardSeq from "../src/assets/images/gameImages/hardSeq.png";
-import capivarafeliz from "../src/assets/images/gameImages/capivarafeliz.png";
+import easySeq from "@/src/assets/images/gameImages/easySeq.png";
+import mediumSeq from "@/src/assets/images/gameImages/mediumSeq.png";
+import hardSeq from "@/src/assets/images/gameImages/hardSeq.png";
+import capivarafeliz from "@/src/assets/images/gameImages/capivarafeliz.png";
 
-import { useSequencingGame } from "../src/logics/gamesLogic/sequencingLogic";
+import {
+  useSequencingGame,
+  ESTRELAS_SEQUENCING,
+} from "@/src/logics/gamesLogic/sequencingLogic";
 
-import Bolota from "../src/components/gameComponents/SequencingGame/Bolota";
+import { registrarVitoriaSequencing } from "@/src/logics/gamesLogic/sequencingLogic";
+
+import Bolota from "@/src/components/gameComponents/SequencingGame/Bolota";
 
 type Nivel = "facil" | "medio" | "dificil";
 
@@ -46,7 +52,8 @@ type NivelConfig = {
 
 const TAMANHO_BOLOTA = 105;
 const ESPACO_ENTRE_BOLOTAS = 20;
-const PASSO = TAMANHO_BOLOTA + ESPACO_ENTRE_BOLOTAS;
+const PASSO =
+  TAMANHO_BOLOTA + ESPACO_ENTRE_BOLOTAS;
 
 const gerarGrade = (
   linhas: number,
@@ -103,17 +110,14 @@ const settings: Record<Nivel, NivelConfig> = {
   },
 };
 
-const estrelasPorNivel: Record<Nivel, number> = {
-  facil: 1,
-  medio: 5,
-  dificil: 10,
-};
-
 const SequencingGame = () => {
   const { difficulty } = useLocalSearchParams();
 
   const nivel: Nivel =
-    difficulty === "medio" || difficulty === "dificil" ? difficulty : "facil";
+    difficulty === "medio" ||
+      difficulty === "dificil"
+      ? difficulty
+      : "facil";
 
   const jogo = settings[nivel];
 
@@ -129,11 +133,21 @@ const SequencingGame = () => {
     tamanhoSequencia: jogo.tamanhoSequencia,
   });
 
+  useEffect(() => {
+    if (fase === "acertou") {
+      registrarVitoriaSequencing(nivel);
+    }
+  }, [fase]);
+
   const larguraContainer =
-    jogo.colunas * TAMANHO_BOLOTA + (jogo.colunas - 1) * ESPACO_ENTRE_BOLOTAS;
+    jogo.colunas * TAMANHO_BOLOTA +
+    (jogo.colunas - 1) *
+    ESPACO_ENTRE_BOLOTAS;
 
   const alturaContainer =
-    jogo.linhas * TAMANHO_BOLOTA + (jogo.linhas - 1) * ESPACO_ENTRE_BOLOTAS;
+    jogo.linhas * TAMANHO_BOLOTA +
+    (jogo.linhas - 1) *
+    ESPACO_ENTRE_BOLOTAS;
 
   const handleVoltarMenu = () => {
     pararJogo();
@@ -147,7 +161,6 @@ const SequencingGame = () => {
         style={styles.container}
         resizeMode="cover"
       >
-        {/* HEADER */}
         <Header
           title="Siga a Ordem"
           icon="arrow-back"
@@ -163,12 +176,14 @@ const SequencingGame = () => {
           }}
         />
 
-        {/* TÍTULO */}
-        <Text style={styles.text1}>{jogo.titulo}</Text>
+        <Text style={styles.text1}>
+          {jogo.titulo}
+        </Text>
 
-        <Text style={styles.text2}>SIGA A SEQUÊNCIA DAS BOLHAS</Text>
+        <Text style={styles.text2}>
+          SIGA A SEQUÊNCIA DAS BOLHAS
+        </Text>
 
-        {/* ÁREA DO JOGO */}
         <View style={styles.gameArea}>
           <View
             style={[
@@ -179,53 +194,63 @@ const SequencingGame = () => {
               },
             ]}
           >
-            {jogo.bolotas.map((bolota, index) => (
-              <Bolota
-                key={index}
-                top={bolota.top}
-                left={bolota.left}
-                cor={bolota.cor}
-                ativa={bolotaAtiva === index}
-                explodiu={bolotasExplodidas.includes(index)}
-                onPress={() => handleCliqueBolota(index)}
-              />
-            ))}
+            {jogo.bolotas.map(
+              (bolota, index) => (
+                <Bolota
+                  key={index}
+                  top={bolota.top}
+                  left={bolota.left}
+                  cor={bolota.cor}
+                  ativa={
+                    bolotaAtiva === index
+                  }
+                  explodiu={bolotasExplodidas.includes(
+                    index,
+                  )}
+                  onPress={() =>
+                    handleCliqueBolota(index)
+                  }
+                />
+              ),
+            )}
           </View>
         </View>
 
-        {/* BOTÃO COMEÇAR */}
         {fase === "parado" && (
           <View style={styles.divBtn}>
             <Pressable
               style={[
                 styles.btnStyle,
                 {
-                  backgroundColor: jogo.header,
+                  backgroundColor:
+                    jogo.header,
                 },
               ]}
               onPress={jogarNovaRodada}
             >
-              <Text style={styles.textBtn}>COMEÇAR</Text>
+              <Text style={styles.textBtn}>
+                COMEÇAR
+              </Text>
             </Pressable>
           </View>
         )}
 
-        {/* MODAL */}
         <Modal
-          visible={fase === "acertou" || fase === "errou"}
+          visible={
+            fase === "acertou" ||
+            fase === "errou"
+          }
           transparent
           animationType="fade"
-          onRequestClose={() => {}}
+          onRequestClose={() => { }}
         >
           <View style={styles.modalOverlay}>
-            {/* CAPIVARA */}
             <Image
               source={capivarafeliz}
               style={styles.capivaraModal}
               resizeMode="contain"
             />
 
-            {/* CAIXA DO MODAL */}
             <View
               style={[
                 styles.modalContent,
@@ -234,10 +259,11 @@ const SequencingGame = () => {
                 },
               ]}
             >
-              {/* ACERTOU */}
               {fase === "acertou" && (
                 <>
-                  <Text style={styles.modalTitle}>Perfeito!</Text>
+                  <Text style={styles.modalTitle}>
+                    Perfeito!
+                  </Text>
 
                   <Text style={styles.modalSubtitle}>
                     Você acertou a sequência!
@@ -247,11 +273,16 @@ const SequencingGame = () => {
                     style={[
                       styles.scoreContainer,
                       {
-                        backgroundColor: jogo.button,
+                        backgroundColor:
+                          jogo.button,
                       },
                     ]}
                   >
-                    <Text style={styles.scoreLabel}>Estrelas da rodada</Text>
+                    <Text
+                      style={styles.scoreLabel}
+                    >
+                      Estrelas da rodada
+                    </Text>
 
                     <Text
                       style={[
@@ -261,7 +292,12 @@ const SequencingGame = () => {
                         },
                       ]}
                     >
-                      ⭐ {estrelasPorNivel[nivel]}
+                      ⭐{" "}
+                      {
+                        ESTRELAS_SEQUENCING[
+                        nivel
+                        ]
+                      }
                     </Text>
                   </View>
 
@@ -269,49 +305,87 @@ const SequencingGame = () => {
                     style={[
                       styles.modalButton,
                       {
-                        backgroundColor: jogo.header,
+                        backgroundColor:
+                          jogo.header,
                       },
                     ]}
-                    onPress={jogarNovaRodada}
+                    onPress={
+                      jogarNovaRodada
+                    }
                   >
-                    <Text style={styles.modalButtonText}>Repetir</Text>
+                    <Text
+                      style={
+                        styles.modalButtonText
+                      }
+                    >
+                      Repetir
+                    </Text>
                   </Pressable>
 
                   <Pressable
                     style={styles.backButton}
-                    onPress={handleVoltarMenu}
+                    onPress={
+                      handleVoltarMenu
+                    }
                   >
-                    <Text style={styles.backButtonText}>Sair</Text>
+                    <Text
+                      style={
+                        styles.backButtonText
+                      }
+                    >
+                      Sair
+                    </Text>
                   </Pressable>
                 </>
               )}
 
-              {/* ERROU */}
               {fase === "errou" && (
                 <>
-                  <Text style={styles.modalTitle}>OPA, ERROU!</Text>
+                  <Text style={styles.modalTitle}>
+                    OPA, ERROU!
+                  </Text>
 
-                  <Text style={styles.modalSubtitle}>
-                    Não tem problema! Vamos tentar de novo?
+                  <Text
+                    style={styles.modalSubtitle}
+                  >
+                    Não tem problema! Vamos
+                    tentar de novo?
                   </Text>
 
                   <Pressable
                     style={[
                       styles.modalButton,
                       {
-                        backgroundColor: jogo.header,
+                        backgroundColor:
+                          jogo.header,
                       },
                     ]}
-                    onPress={jogarNovaRodada}
+                    onPress={
+                      jogarNovaRodada
+                    }
                   >
-                    <Text style={styles.modalButtonText}>Tentar Novamente</Text>
+                    <Text
+                      style={
+                        styles.modalButtonText
+                      }
+                    >
+                      Tentar Novamente
+                    </Text>
                   </Pressable>
 
                   <Pressable
                     style={styles.backButton}
-                    onPress={handleVoltarMenu}
+                    onPress={
+                      handleVoltarMenu
+                    }
                   >
-                    <Text style={styles.backButtonText}>Sair</Text>
+                    <Text
+                      style={
+                        styles.backButtonText
+                      }
+                    >
+                      Sair
+                    </Text>
                   </Pressable>
                 </>
               )}
@@ -352,10 +426,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
 
-  // =========================
-  // ÁREA DO JOGO
-  // =========================
-
   gameArea: {
     flex: 1,
     justifyContent: "center",
@@ -365,10 +435,6 @@ const styles = StyleSheet.create({
   bolotasContainer: {
     position: "relative",
   },
-
-  // =========================
-  // BOTÃO COMEÇAR
-  // =========================
 
   divBtn: {
     paddingBottom: 40,
@@ -388,10 +454,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textTransform: "uppercase",
   },
-
-  // =========================
-  // MODAL
-  // =========================
 
   modalOverlay: {
     flex: 1,
@@ -415,15 +477,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderRadius: 30,
     borderWidth: 4,
-
     paddingTop: 42,
     paddingBottom: 25,
     paddingHorizontal: 28,
-
     alignItems: "center",
-
     elevation: 12,
-
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -431,7 +489,6 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.3,
     shadowRadius: 8,
-
     position: "relative",
     overflow: "visible",
     zIndex: 2,
@@ -453,21 +510,13 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
-  // =========================
-  // ESTRELAS
-  // =========================
-
   scoreContainer: {
     alignItems: "center",
     justifyContent: "center",
-
     marginVertical: 16,
-
     paddingVertical: 14,
     paddingHorizontal: 25,
-
     borderRadius: 16,
-
     width: "100%",
   },
 
@@ -484,22 +533,13 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
-  // =========================
-  // BOTÃO PRINCIPAL DO MODAL
-  // =========================
-
   modalButton: {
     width: "100%",
-
     paddingVertical: 15,
-
     borderRadius: 16,
-
     alignItems: "center",
     justifyContent: "center",
-
     elevation: 4,
-
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -515,17 +555,10 @@ const styles = StyleSheet.create({
     fontWeight: "900",
   },
 
-  // =========================
-  // BOTÃO SAIR
-  // =========================
-
   backButton: {
     marginTop: 9,
-
     paddingVertical: 10,
-
     width: "100%",
-
     alignItems: "center",
   },
 

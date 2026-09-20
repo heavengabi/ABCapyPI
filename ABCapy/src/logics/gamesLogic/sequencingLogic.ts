@@ -1,11 +1,24 @@
 import { useEffect, useState } from "react";
 
-type Fase = "parado" | "mostrando" | "jogando" | "acertou" | "errou";
+import { registrarPartida } from "./gameHistoryLogic";
+
+export type Fase =
+  | "parado"
+  | "mostrando"
+  | "jogando"
+  | "acertou"
+  | "errou";
 
 type SequencingGameConfig = {
   totalBolotas: number;
   tamanhoSequencia: number;
   tempoAceso?: number;
+};
+
+export const ESTRELAS_SEQUENCING = {
+  facil: 1,
+  medio: 5,
+  dificil: 10,
 };
 
 export const gerarSequencia = (
@@ -15,7 +28,9 @@ export const gerarSequencia = (
   const sequencia: number[] = [];
 
   while (sequencia.length < tamanho) {
-    const indice = Math.floor(Math.random() * quantidadeBolotas);
+    const indice = Math.floor(
+      Math.random() * quantidadeBolotas,
+    );
 
     if (!sequencia.includes(indice)) {
       sequencia.push(indice);
@@ -32,13 +47,20 @@ export const useSequencingGame = ({
 }: SequencingGameConfig) => {
   const [sequencia, setSequencia] = useState<number[]>([]);
   const [indiceMostrando, setIndiceMostrando] = useState(0);
-  const [bolotaAtiva, setBolotaAtiva] = useState<number | null>(null);
+  const [bolotaAtiva, setBolotaAtiva] = useState<number | null>(
+    null,
+  );
   const [indiceJogador, setIndiceJogador] = useState(0);
-  const [bolotasExplodidas, setBolotasExplodidas] = useState<number[]>([]);
+  const [bolotasExplodidas, setBolotasExplodidas] = useState<
+    number[]
+  >([]);
   const [fase, setFase] = useState<Fase>("parado");
 
   const jogarNovaRodada = () => {
-    const novaSequencia = gerarSequencia(totalBolotas, tamanhoSequencia);
+    const novaSequencia = gerarSequencia(
+      totalBolotas,
+      tamanhoSequencia,
+    );
 
     setSequencia(novaSequencia);
     setIndiceMostrando(0);
@@ -49,25 +71,28 @@ export const useSequencingGame = ({
   };
 
   const handleCliqueBolota = (indice: number) => {
-    if (fase !== "jogando" || bolotasExplodidas.includes(indice)) {
+    if (
+      fase !== "jogando" ||
+      bolotasExplodidas.includes(indice)
+    ) {
       return;
     }
 
-    // Errou
     if (sequencia[indiceJogador] !== indice) {
       setBolotaAtiva(null);
       setFase("errou");
       return;
     }
 
-    // Acertou a bolota atual
     setBolotaAtiva(indice);
 
-    setBolotasExplodidas((prev) => [...prev, indice]);
+    setBolotasExplodidas((prev) => [
+      ...prev,
+      indice,
+    ]);
 
     const proximoIndice = indiceJogador + 1;
 
-    // Terminou a sequência
     if (proximoIndice >= sequencia.length) {
       setTimeout(() => {
         setBolotaAtiva(null);
@@ -77,7 +102,6 @@ export const useSequencingGame = ({
       return;
     }
 
-    // Continua jogando
     setIndiceJogador(proximoIndice);
 
     setTimeout(() => {
@@ -95,7 +119,6 @@ export const useSequencingGame = ({
       return;
     }
 
-    // Terminou de mostrar a sequência
     if (indiceMostrando >= sequencia.length) {
       setBolotaAtiva(null);
       setFase("jogando");
@@ -118,7 +141,12 @@ export const useSequencingGame = ({
       clearTimeout(acende);
       clearTimeout(apaga);
     };
-  }, [fase, indiceMostrando, sequencia, tempoAceso]);
+  }, [
+    fase,
+    indiceMostrando,
+    sequencia,
+    tempoAceso,
+  ]);
 
   return {
     fase,
@@ -128,4 +156,13 @@ export const useSequencingGame = ({
     handleCliqueBolota,
     pararJogo,
   };
+};
+
+export const registrarVitoriaSequencing = (
+  nivel: "facil" | "medio" | "dificil",
+) => {
+  return registrarPartida(
+    1,
+    ESTRELAS_SEQUENCING[nivel],
+  );
 };
