@@ -194,12 +194,10 @@ function EditNameModal({
                 <User size={22} color="#297AB8" />
               </View>
 
-
               <Text style={nameModalStyle.title}>mudar dados</Text>
               <Text style={nameModalStyle.subtitle}>
                 como voce quer ser chamado?
               </Text>
-
 
               <View style={nameModalStyle.inputShadowWrapper}>
                 <TextInput
@@ -218,7 +216,6 @@ function EditNameModal({
               <Text style={nameModalStyle.counterText}>
                 {name.length}/20 caracteres
               </Text>
-
 
               <Text style={nameModalStyle.suggestionsLabel}>Sujestões</Text>
               <View style={nameModalStyle.suggestionsRow}>
@@ -459,7 +456,6 @@ export default function UserPage() {
           </View>
         </TouchableWithoutFeedback>
       </Modal>
-
 
       <EditNameModal
         visible={isEditingName}
