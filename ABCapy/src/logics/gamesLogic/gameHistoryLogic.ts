@@ -1,34 +1,26 @@
-const API_URL = "http://192.168.100.22:3000/api";
+import api from "../../utils/api";
 
 export const registrarPartida = async (
     gameId: number,
     starsEarned: number,
 ) => {
     try {
-        const response = await fetch(`${API_URL}/game-history`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                gameId,
-                starsEarned,
-            }),
+        const response = await api.post("/games/play", {
+            gameId,
+            starsEarned,
         });
 
-        if (!response.ok) {
-            console.error(
-                "Erro ao registrar partida:",
-                await response.text(),
-            );
+        console.log("STATUS GAME HISTORY:", response.status);
+        console.log("RESPOSTA GAME HISTORY:", response.data);
 
-            return false;
-        }
+        return response.data;
+    } catch (error: any) {
+        console.error(
+            "ERRO AO REGISTRAR PARTIDA:",
+            error.response?.status,
+            error.response?.data || error.message,
+        );
 
-        return true;
-    } catch (error) {
-        console.error("Erro ao registrar partida:", error);
-
-        return false;
+        throw error;
     }
 };

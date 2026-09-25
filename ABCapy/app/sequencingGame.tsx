@@ -111,7 +111,10 @@ const settings: Record<Nivel, NivelConfig> = {
 };
 
 const SequencingGame = () => {
-  const { difficulty } = useLocalSearchParams();
+  const { difficulty, gameId } = useLocalSearchParams<{
+    difficulty?: string;
+    gameId?: string;
+  }>()
 
   const nivel: Nivel =
     difficulty === "medio" ||
@@ -134,10 +137,13 @@ const SequencingGame = () => {
   });
 
   useEffect(() => {
-    if (fase === "acertou") {
-      registrarVitoriaSequencing(nivel);
+    if (fase === "acertou" && gameId) {
+      registrarVitoriaSequencing(
+        Number(gameId),
+        nivel,
+      );
     }
-  }, [fase]);
+  }, [fase, gameId, nivel]);
 
   const larguraContainer =
     jogo.colunas * TAMANHO_BOLOTA +

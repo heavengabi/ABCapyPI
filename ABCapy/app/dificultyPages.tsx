@@ -11,7 +11,13 @@ import dific3 from "../src/assets/images/gameImages/dific3.png";
 import { router, useLocalSearchParams } from "expo-router";
 
 const DificultyPages = () => {
-  const { game } = useLocalSearchParams();
+  const { game, gameId } = useLocalSearchParams<{
+    game?: string;
+    gameId?: string;
+  }>();
+
+  console.log("JOGO:", game);
+  console.log("GAME ID:", gameId);
 
   const goToGame = (difficulty: "facil" | "medio" | "dificil") => {
     let pathname = "";
@@ -32,10 +38,12 @@ const DificultyPages = () => {
       default:
         pathname = "/equalityGame";
     }
+
     router.push({
       pathname: pathname as any,
       params: {
         difficulty,
+        gameId: gameId,
       },
     });
   };
@@ -49,14 +57,22 @@ const DificultyPages = () => {
       >
         <Header
           icon="arrow-back"
-          onPress={() => {router.push("/gamePages") }}
+          onPress={() => {
+            router.push("/gamePages");
+          }}
           headerStyle={{ backgroundColor: "#A8DAFF" }}
           buttonStyle={{ backgroundColor: "#69B9F7" }}
         />
 
         <View style={styles.containerImg}>
-          <Text style={styles.textStyle}>Escolha a dificuldade</Text>
-          <Image source={Capy2} style={styles.imgStyle} />
+          <Text style={styles.textStyle}>
+            Escolha a dificuldade
+          </Text>
+
+          <Image
+            source={Capy2}
+            style={styles.imgStyle}
+          />
         </View>
 
         <CardDificulty
@@ -91,16 +107,19 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#D7ECFB",
   },
+
   imgStyle: {
     height: 169,
     width: 298,
     marginTop: 20,
   },
+
   containerImg: {
     justifyContent: "center",
     alignItems: "center",
     marginTop: 20,
   },
+
   textStyle: {
     fontSize: 24,
     fontFamily: "Poppins",

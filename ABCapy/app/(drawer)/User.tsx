@@ -18,7 +18,7 @@ import { Pencil, Lock, X, User } from "lucide-react-native";
 import { useNavigation, useFocusEffect } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Image } from "expo-image";
-import api from "@/src/utils/api";
+import api from "../../src/utils/api"
 
 import menu from "../../src/assets/images/homeImages/menu.png";
 import Footer from "@/src/components/Footer/Footer";
@@ -188,19 +188,19 @@ function EditNameModal({
         <View style={nameModalStyle.overlay}>
           <TouchableWithoutFeedback>
             <View style={nameModalStyle.sheetContainer}>
-             
-           
+
+
               <View style={nameModalStyle.userAvatarBadge}>
                 <User size={22} color="#297AB8" />
               </View>
 
-             
+
               <Text style={nameModalStyle.title}>mudar dados</Text>
               <Text style={nameModalStyle.subtitle}>
                 como voce quer ser chamado?
               </Text>
 
-             
+
               <View style={nameModalStyle.inputShadowWrapper}>
                 <TextInput
                   style={nameModalStyle.input}
@@ -219,7 +219,7 @@ function EditNameModal({
                 {name.length}/20 caracteres
               </Text>
 
-           
+
               <Text style={nameModalStyle.suggestionsLabel}>Sujestões</Text>
               <View style={nameModalStyle.suggestionsRow}>
                 {NAME_SUGGESTIONS.map((item, index) => (
@@ -292,7 +292,10 @@ export default function UserPage() {
               JSON.stringify(res.data),
             );
           }
-        } catch (e) {
+        }
+
+
+        catch (e) {
           console.error("Erro ao carregar dados do usuário:", e);
         }
       }
@@ -457,7 +460,7 @@ export default function UserPage() {
         </TouchableWithoutFeedback>
       </Modal>
 
-    
+
       <EditNameModal
         visible={isEditingName}
         currentName={displayName}

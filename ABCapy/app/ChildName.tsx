@@ -1,7 +1,9 @@
 import { Button } from "@/src/components/ui/Button";
-import { router } from "expo-router";
+import api from "@/src/utils/api";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import {
+  Alert,
   Image,
   ImageBackground,
   StyleSheet,
@@ -11,9 +13,50 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import BackgroundImage from "../src/assets/images/bg-login.png";
+
 export default function ChildName() {
   const [nome, setNome] = useState("");
-  const [personagem, setPersonagem] = useState("sabida");
+  const [loading, setLoading] = useState(false);
+
+  const { personagem } = useLocalSearchParams<{
+    personagem?: string;
+  }>();
+
+  const personagemSelecionado = personagem || "sabida";
+
+  const handleCreateChild = async () => {
+    if (!nome.trim()) {
+      Alert.alert("Atenção", "Digite o nome da criança.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const response = await api.post("/children", {
+        childName: nome.trim(),
+        capy: personagemSelecionado,
+        stars: 0,
+      });
+
+      console.log("Criança criada:", response.data);
+
+      router.replace("/homePage");
+    } catch (error: any) {
+      console.error(
+        "Erro ao criar criança:",
+        error.response?.data || error.message
+      );
+
+      Alert.alert(
+        "Erro",
+        error.response?.data?.message ||
+        "Não foi possível criar o perfil da criança."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -25,7 +68,7 @@ export default function ChildName() {
         <View style={styles.circuloCentral}>
           <Image
             source={
-              personagem === "aventureira"
+              personagemSelecionado === "aventureira"
                 ? require("../src/assets/charactersImages/AdventureCapy.png")
                 : require("../src/assets/charactersImages/StudentCapy.png")
             }
@@ -44,8 +87,18 @@ export default function ChildName() {
           underlineColorAndroid="transparent"
         />
 
-        <View style={{ flexDirection: "column", gap: 20, marginTop: 150 }}>
-          <Button title="Continuar" onPress={() => router.push("/homePage")} />
+        <View
+          style={{
+            flexDirection: "column",
+            gap: 20,
+            marginTop: 150,
+          }}
+        >
+          <Button
+            title={loading ? "Salvando..." : "Continuar"}
+            onPress={handleCreateChild}
+
+          />
         </View>
       </ImageBackground>
     </SafeAreaView>
@@ -57,12 +110,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#E2F2FD",
   },
+
   background: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
     padding: 20,
   },
+
   circuloCentral: {
     width: 150,
     height: 150,
@@ -75,17 +130,20 @@ const styles = StyleSheet.create({
     borderColor: "#A5F8C3",
     marginBottom: 25,
   },
+
   imagemPersonagem: {
     width: "85%",
     height: "85%",
     resizeMode: "contain",
   },
+
   titulo: {
     fontSize: 24,
     fontWeight: "900",
     color: "#1565C0",
     marginBottom: 25,
   },
+
   input: {
     width: "90%",
     height: 55,
@@ -99,6 +157,7 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     marginBottom: 40,
   },
+
   botao: {
     backgroundColor: "#2575B7",
     paddingVertical: 14,
@@ -107,6 +166,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 40,
   },
+
   textoBotao: {
     color: "#FFF",
     fontWeight: "bold",

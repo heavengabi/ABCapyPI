@@ -133,7 +133,6 @@ export const useSequencingGame = ({
 
     const apaga = setTimeout(() => {
       setBolotaAtiva(null);
-
       setIndiceMostrando((prev) => prev + 1);
     }, tempoAceso);
 
@@ -159,10 +158,11 @@ export const useSequencingGame = ({
 };
 
 export const registrarVitoriaSequencing = (
+  gameId: number,
   nivel: "facil" | "medio" | "dificil",
 ) => {
   return registrarPartida(
-    1,
+    gameId,
     ESTRELAS_SEQUENCING[nivel],
   );
 };

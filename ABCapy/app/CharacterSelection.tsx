@@ -6,8 +6,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function CharacterSelection() {
   const [personagem, setPersonagem] = useState('sabida');
-  
-  const [acessorio, setAcessorio] = useState(null); 
+
+  const [acessorio, setAcessorio] = useState(null);
 
   const accessories = [
     { id: 'viking', source: require('../src/assets/characterAccessories/FarmerCapy.png') },
@@ -21,14 +21,14 @@ export default function CharacterSelection() {
   ];
 
   return (
-    < SafeAreaView   style={styles.container}>
-      
-      
+    < SafeAreaView style={styles.container}>
+
+
       <Text style={styles.titulo}>Escolha seu Personagem</Text>
       <View style={styles.linha}>
         <TouchableOpacity onPress={() => setPersonagem('aventureira')}>
           <View style={styles.circuloOpcao}>
-            
+
             <Image source={require('../src/assets/charactersImages/AdventureCapy.png')} style={styles.imagemPersonagem} />
           </View>
           <Text style={styles.nomePersonagem}>Capivara aventureira</Text>
@@ -42,26 +42,26 @@ export default function CharacterSelection() {
         </TouchableOpacity>
       </View>
 
-      
+
       <Text style={styles.titulo}>Seu personagem</Text>
       <View style={styles.circuloCentral}>
-        
-        <Image 
-          source={personagem === 'aventureira' 
-            ? require('../src/assets/charactersImages/AdventureCapy.png') 
+
+        <Image
+          source={personagem === 'aventureira'
+            ? require('../src/assets/charactersImages/AdventureCapy.png')
             : require('../src/assets/charactersImages/StudentCapy.png')
-          } 
-          style={styles.imagemPersonagemCentral} 
+          }
+          style={styles.imagemPersonagemCentral}
         />
       </View>
 
-      
+
       <Text style={styles.titulo}>Escolha um acessório</Text>
       <View style={styles.grade}>
         {accessories.map((item) => (
           <TouchableOpacity
             key={item.id}
-           
+
             style={[
               styles.circuloAcessorio,
               acessorio === item.id && styles.activeAccessory
@@ -72,11 +72,21 @@ export default function CharacterSelection() {
         ))}
       </View>
 
-     
-       <View style={{ flexDirection: "column", gap: 20, marginTop: 20 }}>
-              
-              <Button title="Continuar" onPress={() => router.push("/ChildName")}  />
-            </View>   
+
+      <View style={{ flexDirection: "column", gap: 20, marginTop: 20 }}>
+
+        <Button
+          title="Continuar"
+          onPress={() =>
+            router.push({
+              pathname: "/ChildName",
+              params: {
+                personagem,
+              },
+            })
+          }
+        />
+      </View>
     </SafeAreaView>
   );
 }
@@ -87,12 +97,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#E2F2FD',
     flex: 1,
-    gap:16
+    gap: 16
   },
   titulo: {
     fontSize: 18,
     marginVertical: 15,
-    fontWeight: '600', 
+    fontWeight: '600',
     color: '#000',
   },
   linha: {
@@ -128,10 +138,10 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     justifyContent: "flex-end",
     backgroundColor: '#FFF',
-    
+
     alignItems: 'center',
     borderWidth: 6,
-    borderColor: '#A5F8C3', 
+    borderColor: '#A5F8C3',
   },
   imagemPersonagemCentral: {
     width: '80%',
@@ -157,11 +167,11 @@ const styles = StyleSheet.create({
     width: '70%',
     height: '70%',
     resizeMode: 'contain',
-    justifyContent:"flex-end"
+    justifyContent: "flex-end"
   },
   activeAccessory: {
     borderWidth: 3,
-    borderColor: '#2575B7', 
+    borderColor: '#2575B7',
   },
   botao: {
     backgroundColor: '#2575B7',
