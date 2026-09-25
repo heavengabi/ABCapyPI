@@ -12,17 +12,32 @@ export const storyRepository = {
   },
 
   async findAll() {
-    return await storyRepo.find();
+    return await storyRepo.find({
+      order: {
+        id: "ASC",
+      },
+    });
   },
 
   async findById(id: number) {
-    return await storyRepo.findOne({
-      where: { id },
-      relations: ["pages"],
-      order: {
-        pages: {
-          pageNumber: "ASC",
+    // Usando CreateQueryBuilder para fazer o Join e ordenar as páginas corretamente
+    return await storyRepo
+      .createQueryBuilder("story")
+      .leftJoinAndSelect("story.pages", "page")
+      .where("story.id = :id", { id })
+      .orderBy("page.pageNumber", "ASC")
+      .getOne();
+  },
+
+  async findPagesByStoryId(storyId: number) {
+    return await pageRepo.find({
+      where: {
+        story: {
+          id: storyId,
         },
+      },
+      order: {
+        pageNumber: "ASC",
       },
     });
   },

@@ -10,7 +10,20 @@ export const gameRepository = {
   },
 
   async findAll() {
-    return await repo.find();
+    const games = await repo.find();
+
+    const order = {
+      sequencing: 1,
+      memory: 2,
+      equality: 3,
+    };
+
+    return games.sort((a, b) => {
+      return (
+        (order[a.type as keyof typeof order] || 99) -
+        (order[b.type as keyof typeof order] || 99)
+      );
+    });
   },
 
   async findById(id: number) {
@@ -19,5 +32,5 @@ export const gameRepository = {
 
   async findByType(type: string) {
     return await repo.findBy({ type });
-  }
+  },
 };

@@ -4,31 +4,41 @@ import { User } from "../models/User";
 const repo = AppDataSource.getRepository(User);
 
 export const userRepository = {
-  async create(data: { nameUser: string; email: string; password: string }) {
+  async create(data: {
+    nameUser: string;
+    email: string;
+    password: string;
+  }) {
     const user = repo.create(data);
     return await repo.save(user);
   },
 
   async findAll() {
-    return repo.find({ relations: ['child'] });
+    return repo.find({
+      relations: ["child"],
+    });
   },
 
   async findById(id: number) {
-    return repo.findOne({ where: { id }, relations: ['child'] });
+    return repo.findOne({
+      where: { id },
+      relations: ["child"],
+    });
   },
 
   async findByEmail(email: string) {
     return repo.findOneBy({ email });
   },
 
- async findByIdWithPassword(id: number) {
-  return repo
-    .createQueryBuilder("user")
-    .addSelect("user.password")
-    .leftJoinAndSelect("user.child", "child")
-    .where("user.id = :id", { id })
-    .getOne();
+  async findByIdWithPassword(id: number) {
+    return repo
+      .createQueryBuilder("user")
+      .addSelect("user.password")
+      .leftJoinAndSelect("user.child", "child")
+      .where("user.id = :id", { id })
+      .getOne();
   },
+
   async findByEmailWithPassword(email: string) {
     return repo
       .createQueryBuilder("user")
@@ -44,6 +54,14 @@ export const userRepository = {
 
   async update(id: number, data: Partial<User>) {
     await repo.update(id, data);
-    return repo.findOneBy({ id });
-  }
+
+    return repo.findOne({
+      where: { id },
+      relations: ["child"],
+    });
+  },
+
+  async save(user: User) {
+    return await repo.save(user);
+  },
 };

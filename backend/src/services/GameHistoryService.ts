@@ -9,15 +9,19 @@ export const GameHistoryService = {
     data: { gameId: number; starsEarned: number }
   ) {
     if (!data.gameId || data.starsEarned === undefined) {
-      throw new BadRequestError("ID do jogo e estrelas obtidas são obrigatórios!");
+      throw new BadRequestError(
+        "ID do jogo e estrelas obtidas são obrigatórios!"
+      );
     }
 
     const child = await childrenRepository.findByUserId(userId);
+
     if (!child) {
       throw new NotFoundError("Perfil infantil não encontrado!");
     }
 
     const game = await gameRepository.findById(data.gameId);
+
     if (!game) {
       throw new NotFoundError("Jogo não encontrado!");
     }
@@ -28,9 +32,9 @@ export const GameHistoryService = {
       starsEarned: data.starsEarned,
     });
 
-    // Incrementa as estrelas no perfil da criança
     if (data.starsEarned > 0) {
       const currentStars = child.stars || 0;
+
       await childrenRepository.update(child.id, {
         stars: currentStars + data.starsEarned,
       });
@@ -41,10 +45,20 @@ export const GameHistoryService = {
 
   async getChildHistory(userId: number) {
     const child = await childrenRepository.findByUserId(userId);
+
     if (!child) {
       throw new NotFoundError("Perfil infantil não encontrado!");
     }
 
-    return await gameHistoryRepository.listByChild(child.id);
+    const history = await gameHistoryRepository.listByChild(child.id);
+
+    return history.map((item) => ({
+      id: item.id,
+      gameId: item.game.id,
+      gameTitle: item.game.title,
+      difficultyLevel: item.game.difficultyLevel,
+      starsEarned: item.starsEarned,
+      playedAt: item.playedAt,
+    }));
   },
 };

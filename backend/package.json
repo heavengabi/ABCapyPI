@@ -5,7 +5,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "ts-node-dev src/server.ts",
-    "seed": "ts-node src/database/seeds.ts"
+    "seed": "ts-node src/seeds/seed.ts"
   },
   "keywords": [],
   "author": "",
@@ -27,6 +27,7 @@
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^26.1.0",
+    "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^6.0.3"
   }
