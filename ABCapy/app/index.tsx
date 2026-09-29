@@ -1,6 +1,12 @@
 import React, { useEffect, useRef } from "react";
 import { Button } from "@/src/components/ui/Button";
-import { View, StyleSheet, ImageBackground, Animated, Easing } from "react-native";
+import {
+  View,
+  StyleSheet,
+  ImageBackground,
+  Animated,
+  Easing,
+} from "react-native";
 import LogoImage from "../src/assets/images/logo-abcapy.svg";
 import BackgroundImage from "../src/assets/images/bg-login.png";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -47,7 +53,9 @@ export default function Login() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ImageBackground style={{ flex: 1 }} source={BackgroundImage}>
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
           <Animated.View
             style={{
               opacity: logoOpacity,
@@ -66,11 +74,18 @@ export default function Login() {
               transform: [{ translateY: buttonsTranslateY }],
             }}
           >
-            <Button title="CADASTRAR" onPress={() => router.push("/Register")} />
+            <Button
+              title="CADASTRAR"
+              onPress={() => router.push("/Register")}
+            />
             <Button
               title="LOGIN"
               onPress={() => router.push("/SignUpParent")}
-              style={{ backgroundColor: "white", borderColor: "#93CCF7", borderWidth: 3 }}
+              style={{
+                backgroundColor: "white",
+                borderColor: "#93CCF7",
+                borderWidth: 3,
+              }}
               textStyle={{ color: "#93CCF7" }}
             />
           </Animated.View>

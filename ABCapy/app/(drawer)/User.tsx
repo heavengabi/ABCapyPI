@@ -56,7 +56,7 @@ const CAPY_IMAGES: Record<string, Record<string, any>> = {
   aventureira: {
     base: adventureImg,
     farmer: adventureFarmerImg, // 2.png
-    pirate: adventurePirateImg,   // 1.png
+    pirate: adventurePirateImg, // 1.png
   },
   sabida: {
     base: studentImg,
@@ -119,14 +119,19 @@ function AccessoryModal({
     if (visible) setSelectedId(currentAccessory);
   }, [visible, currentAccessory]);
 
-  const items = useMemo(() => ACCESSORIES.filter((a) => a.category === category), [category]);
+  const items = useMemo(
+    () => ACCESSORIES.filter((a) => a.category === category),
+    [category],
+  );
   const selectedAccessory = ACCESSORIES.find((a) => a.id === selectedId);
   const price = selectedAccessory?.price ?? 0;
 
   // Procura se o item selecionado já pertence ao inventário do usuário
   const purchasedItem = useMemo(() => {
     if (!selectedAccessory) return null;
-    return inventory.find((inv) => inv.accessory.id === selectedAccessory.backendId);
+    return inventory.find(
+      (inv) => inv.accessory.id === selectedAccessory.backendId,
+    );
   }, [inventory, selectedAccessory]);
 
   // Encontra qual item do inventário está equipado no momento
@@ -148,7 +153,9 @@ function AccessoryModal({
       // CASO 1: Usuário escolheu "Nenhum" (Desequipar o item atual no backend)
       if (!selectedId) {
         if (currentlyEquippedInventoryItem) {
-          await api.patch(`/inventory/${currentlyEquippedInventoryItem.id}/equip`);
+          await api.patch(
+            `/inventory/${currentlyEquippedInventoryItem.id}/equip`,
+          );
         }
         await onRefreshInventory();
         await onUpdateChildState();
@@ -164,7 +171,10 @@ function AccessoryModal({
       } else {
         // CASO 3: O item precisa ser comprado
         if (userStars < price) {
-          Alert.alert("Estrelas Insuficientes", `Você precisa de ${price} estrelas para comprar este item.`);
+          Alert.alert(
+            "Estrelas Insuficientes",
+            `Você precisa de ${price} estrelas para comprar este item.`,
+          );
           return;
         }
 
@@ -182,7 +192,8 @@ function AccessoryModal({
       console.error("Erro ao processar acessório:", err.response?.data);
       Alert.alert(
         "Erro no Servidor",
-        err.response?.data?.message || "Não foi possível realizar a ação no momento."
+        err.response?.data?.message ||
+          "Não foi possível realizar a ação no momento.",
       );
     } finally {
       setLoading(false);
@@ -190,10 +201,19 @@ function AccessoryModal({
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={onClose}
+    >
       <Pressable style={accStyle.overlay} onPress={onClose}>
         <Pressable style={accStyle.container}>
-          <TouchableOpacity style={accStyle.close} onPress={onClose} hitSlop={10}>
+          <TouchableOpacity
+            style={accStyle.close}
+            onPress={onClose}
+            hitSlop={10}
+          >
             <X size={20} color="#000" />
           </TouchableOpacity>
 
@@ -205,9 +225,17 @@ function AccessoryModal({
               <TouchableOpacity
                 key={c.id}
                 onPress={() => pickCategory(c.id)}
-                style={[accStyle.tab, category === c.id && accStyle.tabSelected]}
+                style={[
+                  accStyle.tab,
+                  category === c.id && accStyle.tabSelected,
+                ]}
               >
-                <Text style={[accStyle.tabText, category === c.id && accStyle.tabTextSelected]}>
+                <Text
+                  style={[
+                    accStyle.tabText,
+                    category === c.id && accStyle.tabTextSelected,
+                  ]}
+                >
                   {c.icon ? `${c.icon} ` : ""}
                   {c.name}
                 </Text>
@@ -220,9 +248,16 @@ function AccessoryModal({
               <TouchableOpacity
                 key={item.id}
                 onPress={() => setSelectedId(item.id)}
-                style={[accStyle.card, selectedId === item.id && accStyle.cardSelected]}
+                style={[
+                  accStyle.card,
+                  selectedId === item.id && accStyle.cardSelected,
+                ]}
               >
-                <Image source={item.thumb} style={accStyle.cardImage} contentFit="contain" />
+                <Image
+                  source={item.thumb}
+                  style={accStyle.cardImage}
+                  contentFit="contain"
+                />
               </TouchableOpacity>
             ))}
           </View>
@@ -234,12 +269,20 @@ function AccessoryModal({
             </View>
           )}
 
-          <TouchableOpacity style={accStyle.confirm} onPress={confirm} disabled={loading}>
+          <TouchableOpacity
+            style={accStyle.confirm}
+            onPress={confirm}
+            disabled={loading}
+          >
             {loading ? (
               <ActivityIndicator size="small" color="#297AB8" />
             ) : (
               <Text style={accStyle.confirmText}>
-                {selectedId === null ? "confirmar" : isPurchased ? "equipar" : "comprar"}
+                {selectedId === null
+                  ? "confirmar"
+                  : isPurchased
+                    ? "equipar"
+                    : "comprar"}
               </Text>
             )}
           </TouchableOpacity>
@@ -258,7 +301,12 @@ interface EditNameModalProps {
   onSave: (newName: string) => Promise<void>;
 }
 
-function EditNameModal({ visible, currentName, onClose, onSave }: EditNameModalProps) {
+function EditNameModal({
+  visible,
+  currentName,
+  onClose,
+  onSave,
+}: EditNameModalProps) {
   const [name, setName] = useState(currentName);
   const [loading, setLoading] = useState(false);
 
@@ -277,14 +325,22 @@ function EditNameModal({ visible, currentName, onClose, onSave }: EditNameModalP
       await onSave(trimmed);
       onClose();
     } catch (err: any) {
-      Alert.alert("Erro", err.response?.data?.message || "Não foi possível atualizar o nome.");
+      Alert.alert(
+        "Erro",
+        err.response?.data?.message || "Não foi possível atualizar o nome.",
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={onClose}
+    >
       <Pressable style={nameStyle.overlay} onPress={onClose}>
         <Pressable style={nameStyle.sheet}>
           <View style={nameStyle.avatarBadge}>
@@ -322,10 +378,18 @@ function EditNameModal({ visible, currentName, onClose, onSave }: EditNameModalP
           </View>
 
           <View style={nameStyle.actions}>
-            <TouchableOpacity style={nameStyle.actionBtn} onPress={onClose} disabled={loading}>
+            <TouchableOpacity
+              style={nameStyle.actionBtn}
+              onPress={onClose}
+              disabled={loading}
+            >
               <Text style={nameStyle.actionText}>cancelar</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={nameStyle.actionBtn} onPress={confirm} disabled={loading}>
+            <TouchableOpacity
+              style={nameStyle.actionBtn}
+              onPress={confirm}
+              disabled={loading}
+            >
               {loading ? (
                 <ActivityIndicator size="small" color="#297AB8" />
               ) : (
@@ -394,7 +458,9 @@ export default function UserPage() {
   const equippedAccessory = useMemo(() => {
     const equippedItem = inventory.find((item) => item.equipped);
     if (!equippedItem) return null;
-    const match = ACCESSORIES.find((a) => a.backendId === equippedItem.accessory.id);
+    const match = ACCESSORIES.find(
+      (a) => a.backendId === equippedItem.accessory.id,
+    );
     return match?.id ?? null;
   }, [inventory]);
 
@@ -410,8 +476,15 @@ export default function UserPage() {
         showsVerticalScrollIndicator={false}
       >
         <View style={style.topBar}>
-          <Pressable onPress={() => navigation.dispatch({ type: "OPEN_DRAWER" })} hitSlop={10}>
-            <Image source={menuIcon} style={style.menuIcon} contentFit="contain" />
+          <Pressable
+            onPress={() => navigation.dispatch({ type: "OPEN_DRAWER" })}
+            hitSlop={10}
+          >
+            <Image
+              source={menuIcon}
+              style={style.menuIcon}
+              contentFit="contain"
+            />
           </Pressable>
 
           <View style={style.headerStars}>
@@ -437,14 +510,22 @@ export default function UserPage() {
 
           {badge && (
             <View style={style.badgeAcessorio}>
-              <Image source={badge} style={{ width: 52, height: 32 }} contentFit="cover" />
+              <Image
+                source={badge}
+                style={{ width: 52, height: 32 }}
+                contentFit="cover"
+              />
             </View>
           )}
         </TouchableOpacity>
 
         <View style={style.userNameRow}>
           <Text style={style.userNameText}>{name}</Text>
-          <TouchableOpacity style={style.editButton} onPress={() => setShowName(true)} hitSlop={10}>
+          <TouchableOpacity
+            style={style.editButton}
+            onPress={() => setShowName(true)}
+            hitSlop={10}
+          >
             <Pencil color="#0284C7" size={16} />
           </TouchableOpacity>
         </View>
@@ -453,12 +534,19 @@ export default function UserPage() {
           <View style={style.progressBarContainer}>
             <View style={style.progressBarBackground}>
               <View
-                style={[style.progressBarFill, { width: `${Math.min(stars * 10, 100)}%` }]}
+                style={[
+                  style.progressBarFill,
+                  { width: `${Math.min(stars * 10, 100)}%` },
+                ]}
               />
             </View>
 
             <View style={style.rewardContainer}>
-              <Image source={pirateImg} style={style.rewardImageLocked} contentFit="cover" />
+              <Image
+                source={pirateImg}
+                style={style.rewardImageLocked}
+                contentFit="cover"
+              />
               <Lock size={18} color="#000" style={style.lockIcon} />
             </View>
           </View>
@@ -524,7 +612,11 @@ export default function UserPage() {
 
 const style = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: "#FFFFFF" },
-  scrollContent: { paddingHorizontal: 20, paddingBottom: 100, alignItems: "center" },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 100,
+    alignItems: "center",
+  },
   topBar: {
     width: "100%",
     flexDirection: "row",
@@ -569,8 +661,17 @@ const style = StyleSheet.create({
     borderColor: "#FFF",
     overflow: "hidden",
   },
-  userNameRow: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 25 },
-  userNameText: { fontSize: 24, fontFamily: "Poppins_600SemiBold", color: "#297AB8" },
+  userNameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginBottom: 25,
+  },
+  userNameText: {
+    fontSize: 24,
+    fontFamily: "Poppins_600SemiBold",
+    color: "#297AB8",
+  },
   editButton: {
     backgroundColor: "#C5E5FF",
     width: 30,
@@ -595,7 +696,11 @@ const style = StyleSheet.create({
     borderRadius: 10,
     overflow: "hidden",
   },
-  progressBarFill: { height: "100%", backgroundColor: "#297AB8", borderRadius: 10 },
+  progressBarFill: {
+    height: "100%",
+    backgroundColor: "#297AB8",
+    borderRadius: 10,
+  },
   rewardContainer: {
     width: 60,
     height: 60,
@@ -605,9 +710,18 @@ const style = StyleSheet.create({
     alignItems: "center",
     position: "relative",
   },
-  rewardImageLocked: { width: 42, height: 42, tintColor: "rgba(80, 80, 80, 0.6)" },
+  rewardImageLocked: {
+    width: 42,
+    height: 42,
+    tintColor: "rgba(80, 80, 80, 0.6)",
+  },
   lockIcon: { position: "absolute" },
-  progressSubtext: { color: "#297AB8", fontSize: 12, marginTop: 8, textAlign: "center" },
+  progressSubtext: {
+    color: "#297AB8",
+    fontSize: 12,
+    marginTop: 8,
+    textAlign: "center",
+  },
   gamesCard: {
     width: "100%",
     backgroundColor: "#E3F2FD",
@@ -628,12 +742,26 @@ const style = StyleSheet.create({
     elevation: 2,
     marginBottom: 20,
   },
-  gamesTitleText: { color: "#297AB8", fontSize: 16, fontFamily: "Poppins_700Bold" },
+  gamesTitleText: {
+    color: "#297AB8",
+    fontSize: 16,
+    fontFamily: "Poppins_700Bold",
+  },
   podiumPlaceholder: { height: 120, width: "100%" },
-  statsRow: { flexDirection: "row", justifyContent: "space-around", width: "100%", marginTop: 10 },
+  statsRow: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "100%",
+    marginTop: 10,
+  },
   statBox: { alignItems: "center" },
   statNumber: { fontSize: 18, fontFamily: "Poppins_700Bold", color: "#000" },
-  statLabel: { fontSize: 12, color: "#297AB8", fontFamily: "Poppins_400Regular", marginTop: 2 },
+  statLabel: {
+    fontSize: 12,
+    color: "#297AB8",
+    fontFamily: "Poppins_400Regular",
+    marginTop: 2,
+  },
   finalCard: {
     width: "100%",
     backgroundColor: "#FFFFFF",
@@ -647,12 +775,25 @@ const style = StyleSheet.create({
     shadowRadius: 6,
     elevation: 2,
   },
-  finalCardLabel: { fontSize: 14, color: "#297AB8", marginBottom: 4, fontFamily: "Poppins_400Regular" },
-  finalCardValue: { fontSize: 20, fontFamily: "Poppins_700Bold", color: "#000" },
+  finalCardLabel: {
+    fontSize: 14,
+    color: "#297AB8",
+    marginBottom: 4,
+    fontFamily: "Poppins_400Regular",
+  },
+  finalCardValue: {
+    fontSize: 20,
+    fontFamily: "Poppins_700Bold",
+    color: "#000",
+  },
 });
 
 const accStyle = StyleSheet.create({
-  overlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.4)", justifyContent: "flex-end" },
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "flex-end",
+  },
   container: {
     backgroundColor: "#FFF",
     borderTopLeftRadius: 28,
@@ -665,11 +806,27 @@ const accStyle = StyleSheet.create({
   title: { fontSize: 20, fontWeight: "800", color: "#297AB8" },
   subtitle: { fontSize: 13, color: "#A0AEC0", marginBottom: 20 },
   categories: { flexDirection: "row", gap: 8, marginBottom: 20 },
-  tab: { paddingVertical: 8, paddingHorizontal: 14, borderRadius: 12, backgroundColor: "#F3F4F6" },
-  tabSelected: { backgroundColor: "#FFF", borderWidth: 2, borderColor: "#93CCF7" },
+  tab: {
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    backgroundColor: "#F3F4F6",
+  },
+  tabSelected: {
+    backgroundColor: "#FFF",
+    borderWidth: 2,
+    borderColor: "#93CCF7",
+  },
   tabText: { fontSize: 14, color: "#4A5568", fontWeight: "500" },
   tabTextSelected: { color: "#297AB8", fontWeight: "bold" },
-  grid: { flexDirection: "row", flexWrap: "wrap", width: "100%", gap: 12, minHeight: 80, marginBottom: 16 },
+  grid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    width: "100%",
+    gap: 12,
+    minHeight: 80,
+    marginBottom: 16,
+  },
   card: {
     width: "22%",
     aspectRatio: 1,
@@ -682,15 +839,30 @@ const accStyle = StyleSheet.create({
   },
   cardSelected: { backgroundColor: "#EBF8FF", borderColor: "#93CCF7" },
   cardImage: { width: "75%", height: "75%" },
-  price: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 16 },
+  price: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginBottom: 16,
+  },
   starIcon: { width: 22, height: 22 },
   priceText: { fontSize: 18, fontWeight: "bold", color: "#000" },
-  confirm: { backgroundColor: "#F3F4F6", width: "60%", paddingVertical: 12, borderRadius: 14, alignItems: "center" },
+  confirm: {
+    backgroundColor: "#F3F4F6",
+    width: "60%",
+    paddingVertical: 12,
+    borderRadius: 14,
+    alignItems: "center",
+  },
   confirmText: { color: "#297AB8", fontWeight: "bold", fontSize: 16 },
 });
 
 const nameStyle = StyleSheet.create({
-  overlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.25)", justifyContent: "flex-end" },
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.25)",
+    justifyContent: "flex-end",
+  },
   sheet: {
     backgroundColor: "#FFF",
     borderTopLeftRadius: 36,
@@ -743,7 +915,12 @@ const nameStyle = StyleSheet.create({
     color: "#297AB8",
     marginBottom: 10,
   },
-  suggestionsRow: { flexDirection: "row", width: "100%", gap: 12, marginBottom: 32 },
+  suggestionsRow: {
+    flexDirection: "row",
+    width: "100%",
+    gap: 12,
+    marginBottom: 32,
+  },
   chip: {
     flex: 1,
     height: 46,

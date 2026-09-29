@@ -9,7 +9,8 @@ import {
   ImageSourcePropType,
 } from "react-native";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { Volume2 } from "lucide-react-native";
 
@@ -23,46 +24,52 @@ import CardStory from "@/src/components/Story/CardStory";
 
 import { useStory } from "@/src/hooks/useStory";
 
-// ==========================================
-// IMAGENS DAS PÁGINAS
-// ==========================================
-
 const storyImages: Record<string, ImageSourcePropType> = {
-  "1.png": require("../src/assets/storiesImages/storyPage/1.png"),
-  "2.png": require("../src/assets/storiesImages/storyPage/2.png"),
-  "3.png": require("../src/assets/storiesImages/storyPage/3.png"),
-  "4.png": require("../src/assets/storiesImages/storyPage/4.png"),
-  "5.png": require("../src/assets/storiesImages/storyPage/5.png"),
-  "6.png": require("../src/assets/storiesImages/storyPage/6.png"),
-  "7.png": require("../src/assets/storiesImages/storyPage/7.png"),
-  "8.png": require("../src/assets/storiesImages/storyPage/8.png"),
-  "9.png": require("../src/assets/storiesImages/storyPage/9.png"),
-  "10.png": require("../src/assets/storiesImages/storyPage/10.png"),
-  "11.png": require("../src/assets/storiesImages/storyPage/11.png"),
-  "12.png": require("../src/assets/storiesImages/storyPage/12.png"),
-  "13.png": require("../src/assets/storiesImages/storyPage/13.png"),
-  "14.png": require("../src/assets/storiesImages/storyPage/14.png"),
-  "15.png": require("../src/assets/storiesImages/storyPage/15.png"),
-  "16.png": require("../src/assets/storiesImages/storyPage/16.png"),
-  "17.png": require("../src/assets/storiesImages/storyPage/17.png"),
-  "18.png": require("../src/assets/storiesImages/storyPage/18.png"),
-  "19.png": require("../src/assets/storiesImages/storyPage/19.png"),
-  "20.png": require("../src/assets/storiesImages/storyPage/20.png"),
-  "21.png": require("../src/assets/storiesImages/storyPage/21.png"),
-  "22.png": require("../src/assets/storiesImages/storyPage/22.png"),
-  "23.png": require("../src/assets/storiesImages/storyPage/23.png"),
-  "24.png": require("../src/assets/storiesImages/storyPage/24.png"),
-  "25.png": require("../src/assets/storiesImages/storyPage/25.png"),
-  "26.png": require("../src/assets/storiesImages/storyPage/26.png"),
-  "27.png": require("../src/assets/storiesImages/storyPage/27.png"),
-  "28.png": require("../src/assets/storiesImages/storyPage/28.png"),
+  "amigo1.png": require("../src/assets/storiesImages/storyPage/amigo1.png"),
+  "amigo2.png": require("../src/assets/storiesImages/storyPage/amigo2.png"),
+  "amigo3.png": require("../src/assets/storiesImages/storyPage/amigo3.png"),
+  "amigo4.png": require("../src/assets/storiesImages/storyPage/amigo4.png"),
+
+  "arrumar1.png": require("../src/assets/storiesImages/storyPage/arrumar1.png"),
+  "arrumar2.png": require("../src/assets/storiesImages/storyPage/arrumar2.png"),
+  "arrumar3.png": require("../src/assets/storiesImages/storyPage/arrumar3.png"),
+  "arrumar4.png": require("../src/assets/storiesImages/storyPage/arrumar4.png"),
+
+  "brinquedo1.png": require("../src/assets/storiesImages/storyPage/brinquedo1.png"),
+  "brinquedo2.png": require("../src/assets/storiesImages/storyPage/brinquedo2.png"),
+  "brinquedo3.png": require("../src/assets/storiesImages/storyPage/brinquedo3.png"),
+  "brinquedo4.png": require("../src/assets/storiesImages/storyPage/brinquedo4.png"),
+
+  "chuva1.png": require("../src/assets/storiesImages/storyPage/chuva1.png"),
+  "chuva2.png": require("../src/assets/storiesImages/storyPage/chuva2.png"),
+  "chuva3.png": require("../src/assets/storiesImages/storyPage/chuva3.png"),
+  "chuva4.png": require("../src/assets/storiesImages/storyPage/chuva4.png"),
+
+  "festa1.png": require("../src/assets/storiesImages/storyPage/festa1.png"),
+  "festa2.png": require("../src/assets/storiesImages/storyPage/festa2.png"),
+  "festa3.png": require("../src/assets/storiesImages/storyPage/festa3.png"),
+  "festa4.png": require("../src/assets/storiesImages/storyPage/festa4.png"),
+
+  "parque1.png": require("../src/assets/storiesImages/storyPage/parque1.png"),
+  "parque2.png": require("../src/assets/storiesImages/storyPage/parque2.png"),
+  "parque3.png": require("../src/assets/storiesImages/storyPage/parque3.png"),
+  "parque4.png": require("../src/assets/storiesImages/storyPage/parque4.png"),
+
+  "rotina1.png": require("../src/assets/storiesImages/storyPage/rotina1.png"),
+  "rotina2.png": require("../src/assets/storiesImages/storyPage/rotina2.png"),
+  "rotina3.png": require("../src/assets/storiesImages/storyPage/rotina3.png"),
+  "rotina4.png": require("../src/assets/storiesImages/storyPage/rotina4.png"),
 };
+
 const StoryPage = () => {
   const { storyId } = useLocalSearchParams<{
     storyId?: string;
   }>();
 
   const router = useRouter();
+
+  const [progressLoaded, setProgressLoaded] = useState(false);
+  const [savedPage, setSavedPage] = useState(1);
 
   const {
     pages,
@@ -83,71 +90,114 @@ const StoryPage = () => {
     handleReadAgain,
   } = useStory(storyId);
 
-  // ==========================================
-  // CARREGANDO
-  // ==========================================
+  useEffect(() => {
+    const loadProgress = async () => {
+      if (!storyId) {
+        setProgressLoaded(true);
+        return;
+      }
+
+      try {
+        const key = `story_progress_${storyId}`;
+
+        const savedProgress = await AsyncStorage.getItem(key);
+
+        if (savedProgress) {
+          const page = Number(savedProgress);
+
+          if (!Number.isNaN(page) && page > 1) {
+            setSavedPage(page);
+          }
+        }
+      } catch (error) {
+        console.error("Erro ao carregar progresso:", error);
+      } finally {
+        setProgressLoaded(true);
+      }
+    };
+
+    loadProgress();
+  }, [storyId]);
+
+  useEffect(() => {
+    if (!progressLoaded) return;
+    if (savedPage <= 1) return;
+    if (currentPageNumber >= savedPage) return;
+    if (loadingNext) return;
+
+    nextPage();
+  }, [progressLoaded, savedPage, currentPageNumber, loadingNext, nextPage]);
+
+  useEffect(() => {
+    const saveProgress = async () => {
+      if (!progressLoaded) return;
+      if (!storyId) return;
+      if (currentPageNumber <= 1) return;
+
+      try {
+        const key = `story_progress_${storyId}`;
+
+        await AsyncStorage.setItem(key, String(currentPageNumber));
+      } catch (error) {
+        console.error("Erro ao salvar progresso:", error);
+      }
+    };
+
+    saveProgress();
+  }, [currentPageNumber, storyId, progressLoaded]);
+
+  const handleCompleteStory = async () => {
+    try {
+      if (storyId) {
+        await AsyncStorage.removeItem(`story_progress_${storyId}`);
+      }
+    } catch (error) {
+      console.error("Erro ao limpar progresso:", error);
+    }
+
+    completeStory();
+  };
 
   if (loading) {
     return (
       <SafeAreaView style={styles.safeArea}>
-        {" "}
         <View style={styles.loading}>
-          {" "}
           <ActivityIndicator size="large" color="#69B9F7" />
+
           <Text style={styles.loadingText}>Carregando história...</Text>
         </View>
       </SafeAreaView>
     );
   }
 
-  // ==========================================
-  // SEM PÁGINAS
-  // ==========================================
-
   if (pages.length === 0) {
     return (
       <SafeAreaView style={styles.safeArea}>
-        {" "}
         <View style={styles.loading}>
-          {" "}
-          <Text style={styles.loadingText}>
-            Nenhuma página encontrada.{" "}
-          </Text>{" "}
-        </View>{" "}
+          <Text style={styles.loadingText}>Nenhuma página encontrada.</Text>
+        </View>
       </SafeAreaView>
     );
   }
 
-  // ==========================================
-  // PÁGINA NÃO ENCONTRADA
-  // ==========================================
-
   if (!currentPage) {
     return (
       <SafeAreaView style={styles.safeArea}>
-        {" "}
         <View style={styles.loading}>
-          {" "}
-          <Text style={styles.loadingText}>Página não encontrada. </Text>{" "}
-        </View>{" "}
+          <Text style={styles.loadingText}>Página não encontrada.</Text>
+        </View>
       </SafeAreaView>
     );
   }
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {" "}
       <ImageBackground
         source={storysBack}
         style={styles.background}
         resizeMode="cover"
       >
-        {" "}
         <View style={styles.container}>
-          {/* ==================================
-          CARD DA HISTÓRIA
-      ================================== */}
-
           <CardStory
             titulo={storyTitle}
             imagem={
@@ -158,10 +208,6 @@ const StoryPage = () => {
             subtitulo={`Página ${currentPageNumber}`}
             paragrafo={currentPage.text}
           />
-
-          {/* ==================================
-          NAVEGAÇÃO
-      ================================== */}
 
           <View style={styles.navigation}>
             <Pressable
@@ -178,7 +224,7 @@ const StoryPage = () => {
             {isLastPage ? (
               <Pressable
                 style={styles.navigationButton}
-                onPress={completeStory}
+                onPress={handleCompleteStory}
                 disabled={loadingNext}
               >
                 <Text style={styles.navigationText}>
@@ -196,10 +242,6 @@ const StoryPage = () => {
             )}
           </View>
 
-          {/* ==================================
-          BOTÃO DE NARRAÇÃO
-      ================================== */}
-
           <Pressable
             style={[styles.speakButton, speaking && styles.speakingButton]}
             onPress={speakPage}
@@ -207,9 +249,7 @@ const StoryPage = () => {
             <Volume2 size={32} color="#000" />
           </Pressable>
         </View>
-        {/* ==================================
-        MODAL DE CONCLUSÃO
-    ================================== */}
+
         <Modal
           visible={showModal}
           transparent
@@ -228,13 +268,9 @@ const StoryPage = () => {
                 </Text>
               )}
 
-              {/* LER NOVAMENTE */}
-
               <Pressable style={styles.modalButton} onPress={handleReadAgain}>
                 <Text style={styles.modalButtonText}>Ler novamente</Text>
               </Pressable>
-
-              {/* VOLTAR */}
 
               <Pressable
                 style={styles.modalButton}

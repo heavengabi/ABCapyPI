@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { ImageSourcePropType } from "react-native";
 
-import img1 from "@/src/assets/images/gameImages/img1.png";
-import img2 from "@/src/assets/images/gameImages/img2.png";
-import img3 from "@/src/assets/images/gameImages/img3.png";
-import img4 from "@/src/assets/images/gameImages/img4.png";
-import img5 from "@/src/assets/images/gameImages/img5.png";
-
+import img1 from "@/src/assets/gameImages/1memory.png";
+import img2 from "@/src/assets/gameImages/2memory.png";
+import img3 from "@/src/assets/gameImages/3memory.png";
+import img4 from "@/src/assets/gameImages/4memory.png";
+import img5 from "@/src/assets/gameImages/5memory.png";
+import img6 from "@/src/assets/gameImages/6memory.png";
+import img7 from "@/src/assets/gameImages/7memory.png";
+import img8 from "@/src/assets/gameImages/8memory.png";
 import { registrarPartida } from "./gameHistoryLogic";
 
 const imagensCartas: Record<number, ImageSourcePropType> = {
@@ -15,6 +17,9 @@ const imagensCartas: Record<number, ImageSourcePropType> = {
   3: img3,
   4: img4,
   5: img5,
+  6: img6,
+  7: img7,
+  8: img8,
 };
 
 export type DificuldadeType = "facil" | "medio" | "hard";
@@ -131,10 +136,7 @@ export const useMemoryGame = ({
 
     setCartas(novasCartas);
 
-    const novasSelecionadas = [
-      ...cartasSelecionadas,
-      indexClicado,
-    ];
+    const novasSelecionadas = [...cartasSelecionadas, indexClicado];
 
     setCartasSelecionadas(novasSelecionadas);
 
@@ -212,11 +214,6 @@ export const useMemoryGame = ({
   };
 };
 
-export const registrarVitoriaMemoria = (
-  dificuldade: DificuldadeType,
-) => {
-  return registrarPartida(
-    2,
-    ESTRELAS_MEMORIA[dificuldade],
-  );
+export const registrarVitoriaMemoria = (dificuldade: DificuldadeType) => {
+  return registrarPartida(2, ESTRELAS_MEMORIA[dificuldade]);
 };

@@ -47,9 +47,9 @@ const Faq = () => {
     <ScrollView contentContainerStyle={styles.container}>
       <Pressable
         style={styles.backButton}
-        onPress={() => router.back()}
+        onPress={() => router.push("/(drawer)/homePage")}
       >
-        <Ionicons name="arrow-back" size={24} color="#000000" onPress={() => navigation.goBack()} />
+        <Ionicons name="arrow-back" size={24} color="#000000" onPress={() => router.push("/(drawer)/homePage")} />
       </Pressable>
 
       <Text style={styles.title}>Principais dúvidas</Text>

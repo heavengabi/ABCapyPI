@@ -198,7 +198,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   skeletonBox: {
-    ...StyleSheet.absoluteFillObject,
     backgroundColor: "#E2F2FD",
     borderRadius: 75,
     justifyContent: "center",
