@@ -30,7 +30,11 @@ export const ChildAccessoryService = {
       throw new BadRequestError("Estrelas insuficientes para comprar este acessório!");
     }
 
-    // Debita as estrelas
+    console.log("Estrelas Antes:", child.stars);
+    console.log("Preço do Acessório:", price);
+    console.log("Estrelas Depois (Calculado):", currentStars - price);
+
+    // Debita as estrelas garantindo a atualização no repositório
     await childrenRepository.update(child.id, {
       stars: currentStars - price,
     });
@@ -53,6 +57,18 @@ export const ChildAccessoryService = {
       throw new NotFoundError("Item de inventário não encontrado!");
     }
 
+    // Se o item vai ser equipado, desequipa primeiro todos os outros do mesmo tipo/categoria
+    if (!item.equipped) {
+      const inventory = await childAccessoryRepository.listInventory(child.id);
+      for (const inv of inventory) {
+        if (inv.accessory.type === item.accessory.type && inv.equipped) {
+          inv.equipped = false;
+          await childAccessoryRepository.save(inv);
+        }
+      }
+    }
+
+    // Inverte o estado atual (Equipa se estava desequipado / Desequipa se estava equipado)
     item.equipped = !item.equipped;
     return await childAccessoryRepository.save(item);
   },

@@ -38,10 +38,9 @@ app.use(errorMiddleware);
 AppDataSource.initialize()
   .then(() => {
     console.log("Banco de dados conectado com sucesso!");
-
-    app.listen(PORT, () => {
-      console.log(`Servidor backend rodando na porta ${PORT}!`);
-    });
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Servidor backend rodando na porta ${PORT}!`);
+});
   })
   .catch((error) => {
     console.error("Erro ao conectar com o banco:", error);

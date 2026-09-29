@@ -1,4 +1,5 @@
 import { Button } from "@/src/components/ui/Button";
+import { FadeInView } from "@/src/components/ui/FadeInView";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "@/src/utils/api";
 import { router } from "expo-router";
@@ -55,8 +56,7 @@ export default function SignUpParent() {
 
       Alert.alert(
         "Erro",
-        error.response?.data?.message ||
-        "Email ou senha inválidos."
+        error.response?.data?.message || "Email ou senha inválidos."
       );
     } finally {
       setLoading(false);
@@ -65,10 +65,7 @@ export default function SignUpParent() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <ImageBackground
-        style={{ flex: 1 }}
-        source={BackgroundImage}
-      >
+      <ImageBackground style={{ flex: 1 }} source={BackgroundImage}>
         <View
           style={{
             flex: 1,
@@ -76,7 +73,8 @@ export default function SignUpParent() {
             alignItems: "center",
           }}
         >
-          <View
+          {/* CABEÇALHO */}
+          <FadeInView
             style={{
               justifyContent: "center",
               alignItems: "center",
@@ -104,9 +102,11 @@ export default function SignUpParent() {
             >
               Entre para continuar sua jornada!
             </Text>
-          </View>
+          </FadeInView>
 
-          <View
+          {/* FORMULÁRIO */}
+          <FadeInView
+            delay={200}
             style={{
               flexDirection: "column",
               gap: 20,
@@ -167,8 +167,7 @@ export default function SignUpParent() {
             <Button
               title={loading ? "Entrando..." : "Continuar"}
               onPress={handleLogin}
-
-              style={{ marginTop: 20 }}
+              style={{ marginTop: 20, width: "100%"}}
             />
 
             {loading && <ActivityIndicator />}
@@ -190,7 +189,7 @@ export default function SignUpParent() {
             >
               Esqueci minha senha
             </Text>
-          </View>
+          </FadeInView>
         </View>
       </ImageBackground>
     </SafeAreaView>

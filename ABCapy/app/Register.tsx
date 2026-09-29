@@ -1,4 +1,5 @@
 import { Button } from "@/src/components/ui/Button";
+import { FadeInView } from "@/src/components/ui/FadeInView";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "@/src/utils/api";
 import React, { useState } from "react";
@@ -57,7 +58,6 @@ export default function Register() {
       console.log("TOKEN SALVO:", token);
 
       router.replace("/CharacterSelection");
-
     } catch (error: any) {
       console.error(
         "Erro no cadastro:",
@@ -67,7 +67,7 @@ export default function Register() {
       Alert.alert(
         "Erro",
         error.response?.data?.message ||
-        "Não foi possível realizar o cadastro."
+          "Não foi possível realizar o cadastro."
       );
     } finally {
       setLoading(false);
@@ -76,10 +76,7 @@ export default function Register() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <ImageBackground
-        style={{ flex: 1 }}
-        source={BackgroundImage}
-      >
+      <ImageBackground style={{ flex: 1 }} source={BackgroundImage}>
         <View
           style={{
             flex: 1,
@@ -88,36 +85,41 @@ export default function Register() {
             paddingHorizontal: 30,
           }}
         >
-          <Image
-            source={logoImage}
-            style={{
-              width: 100,
-              height: 100,
-            }}
-          />
+          
+          <FadeInView style={{ alignItems: "center" }}>
+            <Image
+              source={logoImage}
+              style={{
+                width: 100,
+                height: 100,
+              }}
+            />
 
-          <Text
-            style={{
-              fontSize: 24,
-              fontWeight: "800",
-              textAlign: "center",
-              marginTop: 50,
-            }}
-          >
-            CADASTRO
-          </Text>
+            <Text
+              style={{
+                fontSize: 24,
+                fontWeight: "800",
+                textAlign: "center",
+                marginTop: 50,
+              }}
+            >
+              CADASTRO
+            </Text>
 
-          <Text
-            style={{
-              textAlign: "center",
-              fontSize: 12,
-              fontWeight: "800",
-            }}
-          >
-            Junte-se à aventura com a Capy
-          </Text>
+            <Text
+              style={{
+                textAlign: "center",
+                fontSize: 12,
+                fontWeight: "800",
+              }}
+            >
+              Junte-se à aventura com a Capy
+            </Text>
+          </FadeInView>
 
-          <View
+          {/* FORMULÁRIO */}
+          <FadeInView
+            delay={200}
             style={{
               flexDirection: "column",
               gap: 15,
@@ -220,8 +222,7 @@ export default function Register() {
             <Button
               title={loading ? "Cadastrando..." : "Continuar"}
               onPress={handleRegister}
-
-              style={{ marginTop: 20 }}
+              style={{ marginTop: 20, width: "100%" }}
             />
 
             {loading && <ActivityIndicator />}
@@ -234,7 +235,7 @@ export default function Register() {
             >
               Já tem uma conta? Entre
             </Text>
-          </View>
+          </FadeInView>
         </View>
       </ImageBackground>
     </SafeAreaView>
