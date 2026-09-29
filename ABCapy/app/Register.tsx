@@ -1,4 +1,5 @@
-import { Button } from "@/src/components/ui/Button";
+
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "@/src/utils/api";
 import React, { useState } from "react";
@@ -16,6 +17,7 @@ import logoImage from "../src/assets/images/small-logo.png";
 import BackgroundImage from "../src/assets/images/bg-login.png";
 import { Lock, User, Mail } from "lucide-react-native";
 import { router } from "expo-router";
+import { Button } from "@/src/components/ui/Button";
 
 export default function Register() {
   const [nameUser, setNameUser] = useState("");
