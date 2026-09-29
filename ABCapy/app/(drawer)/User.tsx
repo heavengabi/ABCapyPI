@@ -1,142 +1,256 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  ScrollView,
-  Text,
-  View,
-  StyleSheet,
-  TouchableOpacity,
-  Image as RNImage,
-  Modal,
-  TouchableWithoutFeedback,
-  Pressable,
-  TextInput,
   ActivityIndicator,
   Alert,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Pencil, Lock, X, User } from "lucide-react-native";
 import { useNavigation, useFocusEffect } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Image } from "expo-image";
-import api from "../../src/utils/api"
-
-import menu from "../../src/assets/images/homeImages/menu.png";
+import api from "../../src/utils/api";
 import Footer from "@/src/components/Footer/Footer";
 
-const CAPY_AVATARS: Record<string, any> = {
-  aventureira: require("../../src/assets/charactersImages/AdventureCapy.png"),
-  sabida: require("../../src/assets/charactersImages/StudentCapy.png"),
-};
+/* ------------------------------ Assets/Dados ------------------------------ */
 
-const CATEGORIES = [
-  { id: "1", name: "nenhum" },
-  { id: "2", name: "chapéus", icon: "🎩" },
-  { id: "3", name: "óculos", icon: "👓" },
-];
-
-const ITEMS = [
-  {
-    id: "101",
-    image: require("../../src/assets/characterAccessories/FarmerCapy.png"),
-  },
-  {
-    id: "102",
-    image: require("../../src/assets/characterAccessories/FarmerCapy.png"),
-  },
-  {
-    id: "103",
-    image: require("../../src/assets/characterAccessories/PirateCapy.png"),
-  },
-  {
-    id: "104",
-    image: require("../../src/assets/characterAccessories/FarmerCapy.png"),
-  },
-];
-
+const CACHE_KEY = "@ABCapy:child";
 const NAME_SUGGESTIONS = ["Capy", "Paçoca", "Pipoca"];
 
-interface ActionModalProps {
-  handleClose: () => void;
-  userName: string;
+const menuIcon = require("../../src/assets/images/homeImages/menu.png");
+const starIcon = require("../../src/assets/images/solar_star-bold-duotone.png");
+
+// Ícones dos Acessórios (miniaturas da loja)
+const pirateImg = require("../../src/assets/characterAccessories/PirateCapy.png");
+const farmerImg = require("../../src/assets/characterAccessories/FarmerCapy.png");
+
+// Imagens base dos personagens
+const adventureImg = require("../../src/assets/charactersImages/AdventureCapy.png");
+const studentImg = require("../../src/assets/charactersImages/StudentCapy.png");
+
+// Capivara com Acessórios (1.png = Pirata | 2.png = Fazendeiro)
+const adventurePirateImg = require("../../src/assets/characterAccessories/capyUsingAcessories/1.png");
+const adventureFarmerImg = require("../../src/assets/characterAccessories/capyUsingAcessories/2.png");
+
+const CATEGORIES = [
+  { id: "none", name: "nenhum" },
+  { id: "hat", name: "chapéus", icon: "🎩" },
+  { id: "glasses", name: "óculos", icon: "👓" },
+];
+
+// Mapeamento com os IDs correspondentes do banco de dados (1 = Fazendeiro, 2 = Pirata)
+const ACCESSORIES = [
+  { id: "farmer", backendId: 1, category: "hat", price: 0, thumb: farmerImg },
+  { id: "pirate", backendId: 2, category: "hat", price: 50, thumb: pirateImg },
+];
+
+// Mapeamento correto das imagens da Capivara
+const CAPY_IMAGES: Record<string, Record<string, any>> = {
+  aventureira: {
+    base: adventureImg,
+    farmer: adventureFarmerImg, // 2.png
+    pirate: adventurePirateImg,   // 1.png
+  },
+  sabida: {
+    base: studentImg,
+    farmer: adventureFarmerImg,
+    pirate: adventurePirateImg,
+  },
+};
+
+const getCapyImage = (capy?: string, accessory?: string | null) => {
+  const set = CAPY_IMAGES[capy ?? ""] ?? CAPY_IMAGES.aventureira;
+  return (accessory && set[accessory]) || set.base;
+};
+
+interface Child {
+  childName: string;
+  capy: string;
+  stars: number;
+  accessory?: string | null;
 }
 
-// Modal de Personalização de Acessórios
-function ActionModalContent({ handleClose, userName }: ActionModalProps) {
-  const [selectedCategory, setSelectedCategory] = useState("2");
-  const [selectedItem, setSelectedItem] = useState("103");
+interface InventoryItem {
+  id: number; // ChildAccessory.id
+  equipped: boolean;
+  accessory: {
+    id: number;
+    name: string;
+    type?: string;
+    price: number;
+  };
+}
+
+/* ----------------------------- Modal de Acessórios ----------------------------- */
+
+interface AccessoryModalProps {
+  visible: boolean;
+  userName: string;
+  userStars: number;
+  currentAccessory: string | null;
+  inventory: InventoryItem[];
+  onClose: () => void;
+  onRefreshInventory: () => Promise<void>;
+  onUpdateChildState: () => Promise<void>;
+}
+
+function AccessoryModal({
+  visible,
+  userName,
+  userStars,
+  currentAccessory,
+  inventory,
+  onClose,
+  onRefreshInventory,
+  onUpdateChildState,
+}: AccessoryModalProps) {
+  const [category, setCategory] = useState("hat");
+  const [selectedId, setSelectedId] = useState<string | null>(currentAccessory);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (visible) setSelectedId(currentAccessory);
+  }, [visible, currentAccessory]);
+
+  const items = useMemo(() => ACCESSORIES.filter((a) => a.category === category), [category]);
+  const selectedAccessory = ACCESSORIES.find((a) => a.id === selectedId);
+  const price = selectedAccessory?.price ?? 0;
+
+  // Procura se o item selecionado já pertence ao inventário do usuário
+  const purchasedItem = useMemo(() => {
+    if (!selectedAccessory) return null;
+    return inventory.find((inv) => inv.accessory.id === selectedAccessory.backendId);
+  }, [inventory, selectedAccessory]);
+
+  // Encontra qual item do inventário está equipado no momento
+  const currentlyEquippedInventoryItem = useMemo(() => {
+    return inventory.find((inv) => inv.equipped);
+  }, [inventory]);
+
+  const isPurchased = !!purchasedItem || price === 0;
+
+  const pickCategory = (id: string) => {
+    setCategory(id);
+    if (id === "none") setSelectedId(null);
+  };
+
+  const confirm = async () => {
+    try {
+      setLoading(true);
+
+      // CASO 1: Usuário escolheu "Nenhum" (Desequipar o item atual no backend)
+      if (!selectedId) {
+        if (currentlyEquippedInventoryItem) {
+          await api.patch(`/inventory/${currentlyEquippedInventoryItem.id}/equip`);
+        }
+        await onRefreshInventory();
+        await onUpdateChildState();
+        onClose();
+        return;
+      }
+
+      // CASO 2: O item já foi comprado (Equipar/Alterar)
+      if (purchasedItem) {
+        if (!purchasedItem.equipped) {
+          await api.patch(`/inventory/${purchasedItem.id}/equip`);
+        }
+      } else {
+        // CASO 3: O item precisa ser comprado
+        if (userStars < price) {
+          Alert.alert("Estrelas Insuficientes", `Você precisa de ${price} estrelas para comprar este item.`);
+          return;
+        }
+
+        if (selectedAccessory) {
+          await api.post("/inventory/buy", {
+            accessoryId: selectedAccessory.backendId,
+          });
+        }
+      }
+
+      await onRefreshInventory();
+      await onUpdateChildState();
+      onClose();
+    } catch (err: any) {
+      console.error("Erro ao processar acessório:", err.response?.data);
+      Alert.alert(
+        "Erro no Servidor",
+        err.response?.data?.message || "Não foi possível realizar a ação no momento."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <View style={modalStyle.modalContainer}>
-      <TouchableOpacity
-        style={modalStyle.closeButton}
-        onPress={handleClose}
-        hitSlop={10}
-      >
-        <X size={20} color="#000" />
-      </TouchableOpacity>
-
-      <Text style={modalStyle.title}>Acessórios</Text>
-      <Text style={modalStyle.subtitle}>Personalize {userName}</Text>
-
-      <View style={modalStyle.categoriesRow}>
-        {CATEGORIES.map((cat) => (
-          <TouchableOpacity
-            key={cat.id}
-            onPress={() => setSelectedCategory(cat.id)}
-            style={[
-              modalStyle.categoryTab,
-              selectedCategory === cat.id && modalStyle.categoryTabSelected,
-            ]}
-          >
-            {cat.icon && <Text style={{ marginRight: 6 }}>{cat.icon}</Text>}
-            <Text
-              style={[
-                modalStyle.categoryText,
-                selectedCategory === cat.id && modalStyle.categoryTextSelected,
-              ]}
-            >
-              {cat.name}
-            </Text>
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <Pressable style={accStyle.overlay} onPress={onClose}>
+        <Pressable style={accStyle.container}>
+          <TouchableOpacity style={accStyle.close} onPress={onClose} hitSlop={10}>
+            <X size={20} color="#000" />
           </TouchableOpacity>
-        ))}
-      </View>
 
-      <View style={modalStyle.gridContainer}>
-        {ITEMS.map((item) => (
-          <TouchableOpacity
-            key={item.id}
-            onPress={() => setSelectedItem(item.id)}
-            style={[
-              modalStyle.itemCard,
-              selectedItem === item.id && modalStyle.itemCardSelected,
-            ]}
-          >
-            <RNImage source={item.image} style={modalStyle.itemImage} />
+          <Text style={accStyle.title}>Acessórios</Text>
+          <Text style={accStyle.subtitle}>Personalize {userName}</Text>
+
+          <View style={accStyle.categories}>
+            {CATEGORIES.map((c) => (
+              <TouchableOpacity
+                key={c.id}
+                onPress={() => pickCategory(c.id)}
+                style={[accStyle.tab, category === c.id && accStyle.tabSelected]}
+              >
+                <Text style={[accStyle.tabText, category === c.id && accStyle.tabTextSelected]}>
+                  {c.icon ? `${c.icon} ` : ""}
+                  {c.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          <View style={accStyle.grid}>
+            {items.map((item) => (
+              <TouchableOpacity
+                key={item.id}
+                onPress={() => setSelectedId(item.id)}
+                style={[accStyle.card, selectedId === item.id && accStyle.cardSelected]}
+              >
+                <Image source={item.thumb} style={accStyle.cardImage} contentFit="contain" />
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {selectedId != null && !isPurchased && (
+            <View style={accStyle.price}>
+              <Image source={starIcon} style={accStyle.starIcon} />
+              <Text style={accStyle.priceText}>{price}</Text>
+            </View>
+          )}
+
+          <TouchableOpacity style={accStyle.confirm} onPress={confirm} disabled={loading}>
+            {loading ? (
+              <ActivityIndicator size="small" color="#297AB8" />
+            ) : (
+              <Text style={accStyle.confirmText}>
+                {selectedId === null ? "confirmar" : isPurchased ? "equipar" : "comprar"}
+              </Text>
+            )}
           </TouchableOpacity>
-        ))}
-      </View>
-
-      <View style={modalStyle.footer}>
-        <View style={modalStyle.starPriceRow}>
-          <RNImage
-            source={require("../../src/assets/images/solar_star-bold-duotone.png")}
-            style={{ width: 22, height: 22 }}
-          />
-          <Text style={modalStyle.starPriceText}>50</Text>
-        </View>
-
-        <TouchableOpacity
-          style={modalStyle.confirmButton}
-          onPress={handleClose}
-        >
-          <Text style={modalStyle.confirmButtonText}>confirmar</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+        </Pressable>
+      </Pressable>
+    </Modal>
   );
 }
 
-// Modal de Alteração de Nome
+/* ------------------------------- Modal de Nome ------------------------------- */
+
 interface EditNameModalProps {
   visible: boolean;
   currentName: string;
@@ -144,182 +258,149 @@ interface EditNameModalProps {
   onSave: (newName: string) => Promise<void>;
 }
 
-function EditNameModal({
-  visible,
-  currentName,
-  onClose,
-  onSave,
-}: EditNameModalProps) {
+function EditNameModal({ visible, currentName, onClose, onSave }: EditNameModalProps) {
   const [name, setName] = useState(currentName);
   const [loading, setLoading] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setName(currentName);
   }, [currentName, visible]);
 
-  async function handleConfirm() {
-    if (!name.trim()) {
+  const confirm = async () => {
+    const trimmed = name.trim();
+    if (!trimmed) {
       Alert.alert("Atenção", "O nome não pode ficar em branco.");
       return;
     }
-
     try {
       setLoading(true);
-      await onSave(name.trim());
+      await onSave(trimmed);
       onClose();
     } catch (err: any) {
-      Alert.alert(
-        "Erro",
-        err.response?.data?.message || "Não foi possível atualizar o nome.",
-      );
+      Alert.alert("Erro", err.response?.data?.message || "Não foi possível atualizar o nome.");
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
-    >
-      <TouchableWithoutFeedback onPress={onClose}>
-        <View style={nameModalStyle.overlay}>
-          <TouchableWithoutFeedback>
-            <View style={nameModalStyle.sheetContainer}>
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <Pressable style={nameStyle.overlay} onPress={onClose}>
+        <Pressable style={nameStyle.sheet}>
+          <View style={nameStyle.avatarBadge}>
+            <User size={22} color="#297AB8" />
+          </View>
 
+          <Text style={nameStyle.title}>mudar dados</Text>
+          <Text style={nameStyle.subtitle}>como você quer ser chamado?</Text>
 
-              <View style={nameModalStyle.userAvatarBadge}>
-                <User size={22} color="#297AB8" />
-              </View>
+          <View style={nameStyle.inputWrapper}>
+            <TextInput
+              style={nameStyle.input}
+              value={name}
+              onChangeText={setName}
+              placeholder="Nome"
+              placeholderTextColor="#A0AEC0"
+              maxLength={20}
+              textAlign="center"
+            />
+          </View>
+          <Text style={nameStyle.counter}>{name.length}/20 caracteres</Text>
 
-              <Text style={nameModalStyle.title}>mudar dados</Text>
-              <Text style={nameModalStyle.subtitle}>
-                como voce quer ser chamado?
-              </Text>
+          <Text style={nameStyle.suggestionsLabel}>Sugestões</Text>
+          <View style={nameStyle.suggestionsRow}>
+            {NAME_SUGGESTIONS.map((item) => (
+              <TouchableOpacity
+                key={item}
+                style={nameStyle.chip}
+                onPress={() => setName(item)}
+                activeOpacity={0.7}
+              >
+                <Text style={nameStyle.chipText}>{item}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
 
-              <View style={nameModalStyle.inputShadowWrapper}>
-                <TextInput
-                  style={nameModalStyle.input}
-                  value={name}
-                  onChangeText={(val) => {
-                    if (val.length <= 20) setName(val);
-                  }}
-                  placeholder="Nome"
-                  placeholderTextColor="#A0AEC0"
-                  maxLength={20}
-                  textAlign="center"
-                />
-              </View>
-
-              <Text style={nameModalStyle.counterText}>
-                {name.length}/20 caracteres
-              </Text>
-
-              <Text style={nameModalStyle.suggestionsLabel}>Sujestões</Text>
-              <View style={nameModalStyle.suggestionsRow}>
-                {NAME_SUGGESTIONS.map((item, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    style={nameModalStyle.suggestionChip}
-                    onPress={() => setName(item)}
-                    activeOpacity={0.7}
-                  >
-                    <Text style={nameModalStyle.suggestionText}>{item}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-
-              {/* Botões de Ação */}
-              <View style={nameModalStyle.actionsRow}>
-                <TouchableOpacity
-                  style={[nameModalStyle.actionBtn, nameModalStyle.cancelBtn]}
-                  onPress={onClose}
-                  disabled={loading}
-                >
-                  <Text style={nameModalStyle.actionBtnText}>cancelar</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[nameModalStyle.actionBtn, nameModalStyle.confirmBtn]}
-                  onPress={handleConfirm}
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <ActivityIndicator size="small" color="#297AB8" />
-                  ) : (
-                    <Text style={nameModalStyle.actionBtnText}>confirmar</Text>
-                  )}
-                </TouchableOpacity>
-              </View>
-            </View>
-          </TouchableWithoutFeedback>
-        </View>
-      </TouchableWithoutFeedback>
+          <View style={nameStyle.actions}>
+            <TouchableOpacity style={nameStyle.actionBtn} onPress={onClose} disabled={loading}>
+              <Text style={nameStyle.actionText}>cancelar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={nameStyle.actionBtn} onPress={confirm} disabled={loading}>
+              {loading ? (
+                <ActivityIndicator size="small" color="#297AB8" />
+              ) : (
+                <Text style={nameStyle.actionText}>confirmar</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </Pressable>
+      </Pressable>
     </Modal>
   );
 }
 
-export default function UserPage() {
-  const [visibleModal, setVisibleModal] = useState(false);
-  const [isEditingName, setIsEditingName] = useState(false);
-  const [childData, setChildData] = useState<{
-    childName: string;
-    capy: string;
-    stars: number;
-  } | null>(null);
+/* ---------------------------------- Página ---------------------------------- */
 
+export default function UserPage() {
+  const [child, setChild] = useState<Child | null>(null);
+  const [inventory, setInventory] = useState<InventoryItem[]>([]);
+  const [showAccessories, setShowAccessories] = useState(false);
+  const [showName, setShowName] = useState(false);
   const navigation = useNavigation<any>();
 
-  useFocusEffect(
-    React.useCallback(() => {
-      async function carregar() {
-        try {
-          const cache = await AsyncStorage.getItem("@ABCapy:child");
-          if (cache) {
-            setChildData(JSON.parse(cache));
-          }
+  // Busca inventário
+  const fetchInventory = async () => {
+    try {
+      const { data } = await api.get("/inventory/me");
+      if (data) setInventory(data);
+    } catch (e) {
+      console.error("Erro ao carregar inventário:", e);
+    }
+  };
 
-          const res = await api.get("/children/me");
-          if (res.data) {
-            setChildData(res.data);
-            await AsyncStorage.setItem(
-              "@ABCapy:child",
-              JSON.stringify(res.data),
-            );
-          }
-        }
-
-
-        catch (e) {
-          console.error("Erro ao carregar dados do usuário:", e);
-        }
+  // Busca perfil atualizado
+  const fetchChildProfile = async () => {
+    try {
+      const { data } = await api.get("/children/me");
+      if (data) {
+        setChild(data);
+        await AsyncStorage.setItem(CACHE_KEY, JSON.stringify(data));
       }
+    } catch (e) {
+      console.error("Erro ao carregar perfil da criança:", e);
+    }
+  };
 
-      carregar();
+  useFocusEffect(
+    useCallback(() => {
+      (async () => {
+        const cache = await AsyncStorage.getItem(CACHE_KEY);
+        if (cache) setChild(JSON.parse(cache));
+
+        await fetchChildProfile();
+        await fetchInventory();
+      })();
     }, []),
   );
 
-  // Requisição PUT integrada com o back-end e atualização do cache local
-  const handleUpdateName = async (newName: string) => {
-    const res = await api.put("/children/me", { childName: newName });
-    const updatedData = { ...childData, ...res.data, childName: newName };
-
-    setChildData(updatedData);
-    await AsyncStorage.setItem("@ABCapy:child", JSON.stringify(updatedData));
+  const updateChild = async (patch: Partial<Child>) => {
+    const { data } = await api.put("/children/me", patch);
+    const next = { ...child, ...data, ...patch } as Child;
+    setChild(next);
+    await AsyncStorage.setItem(CACHE_KEY, JSON.stringify(next));
   };
 
-  const openMenu = () => {
-    navigation.dispatch({ type: "OPEN_DRAWER" });
-  };
+  // Identifica o acessório equipado
+  const equippedAccessory = useMemo(() => {
+    const equippedItem = inventory.find((item) => item.equipped);
+    if (!equippedItem) return null;
+    const match = ACCESSORIES.find((a) => a.backendId === equippedItem.accessory.id);
+    return match?.id ?? null;
+  }, [inventory]);
 
-  const displayName = childData?.childName || "Amiguinho";
-  const displayStars = childData?.stars ?? 0;
-  const avatarSource =
-    childData?.capy && CAPY_AVATARS[childData.capy]
-      ? CAPY_AVATARS[childData.capy]
-      : CAPY_AVATARS.sabida;
+  const name = child?.childName || "Amiguinho";
+  const stars = child?.stars ?? 0;
+  const badge = ACCESSORIES.find((a) => a.id === equippedAccessory)?.thumb;
 
   return (
     <SafeAreaView edges={["top", "bottom"]} style={style.safeArea}>
@@ -329,51 +410,41 @@ export default function UserPage() {
         showsVerticalScrollIndicator={false}
       >
         <View style={style.topBar}>
-          <Pressable onPress={openMenu} hitSlop={10}>
-            <RNImage source={menu} style={style.menuIcon} />
+          <Pressable onPress={() => navigation.dispatch({ type: "OPEN_DRAWER" })} hitSlop={10}>
+            <Image source={menuIcon} style={style.menuIcon} contentFit="contain" />
           </Pressable>
 
           <View style={style.headerStars}>
-            <RNImage
-              source={require("../../src/assets/images/solar_star-bold-duotone.png")}
-              style={{ width: 24, height: 24 }}
-            />
-            <Text style={style.starsText}>{displayStars}</Text>
+            <Image source={starIcon} style={{ width: 24, height: 24 }} />
+            <Text style={style.starsText}>{stars}</Text>
           </View>
         </View>
 
         <Text style={style.pageTitle}>Perfil</Text>
 
-        {/* Tocar no avatar abre a troca de acessórios */}
         <TouchableOpacity
           style={style.avatarWrapper}
           activeOpacity={0.8}
-          onPress={() => setVisibleModal(true)}
+          onPress={() => setShowAccessories(true)}
         >
           <View style={style.circuloOpcao}>
             <Image
-              source={avatarSource}
+              source={getCapyImage(child?.capy, equippedAccessory)}
               style={style.imagemPersonagem}
               contentFit="contain"
             />
           </View>
 
-          <View style={style.badgeAcessorio}>
-            <RNImage
-              source={require("../../src/assets/characterAccessories/FarmerCapy.png")}
-              style={{ width: 52, height: 32, resizeMode: "cover" }}
-            />
-          </View>
+          {badge && (
+            <View style={style.badgeAcessorio}>
+              <Image source={badge} style={{ width: 52, height: 32 }} contentFit="cover" />
+            </View>
+          )}
         </TouchableOpacity>
 
-        {/* Linha do nome com lápis abrindo o modal de edição */}
         <View style={style.userNameRow}>
-          <Text style={style.userNameText}>{displayName}</Text>
-          <TouchableOpacity
-            style={style.editButton}
-            onPress={() => setIsEditingName(true)}
-            hitSlop={10}
-          >
+          <Text style={style.userNameText}>{name}</Text>
+          <TouchableOpacity style={style.editButton} onPress={() => setShowName(true)} hitSlop={10}>
             <Pencil color="#0284C7" size={16} />
           </TouchableOpacity>
         </View>
@@ -382,25 +453,18 @@ export default function UserPage() {
           <View style={style.progressBarContainer}>
             <View style={style.progressBarBackground}>
               <View
-                style={[
-                  style.progressBarFill,
-                  { width: `${Math.min(displayStars * 10, 100)}%` },
-                ]}
+                style={[style.progressBarFill, { width: `${Math.min(stars * 10, 100)}%` }]}
               />
             </View>
 
             <View style={style.rewardContainer}>
-              <RNImage
-                source={require("../../src/assets/characterAccessories/PirateCapy.png")}
-                style={style.rewardImageLocked}
-              />
+              <Image source={pirateImg} style={style.rewardImageLocked} contentFit="cover" />
               <Lock size={18} color="#000" style={style.lockIcon} />
             </View>
           </View>
 
           <Text style={style.progressSubtext}>
-            Faltam {Math.max(0, 10 - (displayStars % 10))} estrelas para a
-            próxima recompensa
+            Faltam {10 - (stars % 10)} estrelas para a próxima recompensa
           </Text>
         </View>
 
@@ -427,41 +491,28 @@ export default function UserPage() {
         <View style={style.finalCard}>
           <Text style={style.finalCardLabel}>estrelas conquistadas</Text>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-            <Text style={style.finalCardValue}>{displayStars}</Text>
-            <RNImage
-              source={require("../../src/assets/images/solar_star-bold-duotone.png")}
-              style={{ width: 22, height: 22 }}
-            />
+            <Text style={style.finalCardValue}>{stars}</Text>
+            <Image source={starIcon} style={{ width: 22, height: 22 }} />
           </View>
         </View>
       </ScrollView>
 
-      {/* Modal de Acessórios */}
-      <Modal
-        visible={visibleModal}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setVisibleModal(false)}
-      >
-        <TouchableWithoutFeedback onPress={() => setVisibleModal(false)}>
-          <View style={style.modalOverlay}>
-            <TouchableWithoutFeedback>
-              <View style={{ width: "100%" }}>
-                <ActionModalContent
-                  handleClose={() => setVisibleModal(false)}
-                  userName={displayName}
-                />
-              </View>
-            </TouchableWithoutFeedback>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
+      <AccessoryModal
+        visible={showAccessories}
+        userName={name}
+        userStars={stars}
+        currentAccessory={equippedAccessory}
+        inventory={inventory}
+        onClose={() => setShowAccessories(false)}
+        onRefreshInventory={fetchInventory}
+        onUpdateChildState={fetchChildProfile}
+      />
 
       <EditNameModal
-        visible={isEditingName}
-        currentName={displayName}
-        onClose={() => setIsEditingName(false)}
-        onSave={handleUpdateName}
+        visible={showName}
+        currentName={name}
+        onClose={() => setShowName(false)}
+        onSave={(childName) => updateChild({ childName })}
       />
 
       <Footer />
@@ -469,16 +520,11 @@ export default function UserPage() {
   );
 }
 
+/* --------------------------------- Estilos --------------------------------- */
+
 const style = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#FFFFFF",
-  },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 100,
-    alignItems: "center",
-  },
+  safeArea: { flex: 1, backgroundColor: "#FFFFFF" },
+  scrollContent: { paddingHorizontal: 20, paddingBottom: 100, alignItems: "center" },
   topBar: {
     width: "100%",
     flexDirection: "row",
@@ -486,21 +532,9 @@ const style = StyleSheet.create({
     alignItems: "center",
     marginTop: 10,
   },
-  menuIcon: {
-    width: 31,
-    height: 31,
-    resizeMode: "contain",
-  },
-  headerStars: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  starsText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#000",
-  },
+  menuIcon: { width: 31, height: 31 },
+  headerStars: { flexDirection: "row", alignItems: "center", gap: 4 },
+  starsText: { fontSize: 18, fontWeight: "bold", color: "#000" },
   pageTitle: {
     color: "#297AB8",
     fontSize: 34,
@@ -508,10 +542,7 @@ const style = StyleSheet.create({
     marginTop: 10,
     marginBottom: 20,
   },
-  avatarWrapper: {
-    position: "relative",
-    marginBottom: 15,
-  },
+  avatarWrapper: { position: "relative", marginBottom: 15 },
   circuloOpcao: {
     width: 140,
     height: 140,
@@ -523,10 +554,7 @@ const style = StyleSheet.create({
     borderWidth: 8,
     overflow: "hidden",
   },
-  imagemPersonagem: {
-    width: "85%",
-    height: "85%",
-  },
+  imagemPersonagem: { width: "85%", height: "85%" },
   badgeAcessorio: {
     position: "absolute",
     bottom: 0,
@@ -541,17 +569,8 @@ const style = StyleSheet.create({
     borderColor: "#FFF",
     overflow: "hidden",
   },
-  userNameRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    marginBottom: 25,
-  },
-  userNameText: {
-    fontSize: 24,
-    fontFamily: "Poppins_600SemiBold",
-    color: "#297AB8",
-  },
+  userNameRow: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 25 },
+  userNameText: { fontSize: 24, fontFamily: "Poppins_600SemiBold", color: "#297AB8" },
   editButton: {
     backgroundColor: "#C5E5FF",
     width: 30,
@@ -560,11 +579,7 @@ const style = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  progressSection: {
-    width: "100%",
-    alignItems: "center",
-    marginBottom: 25,
-  },
+  progressSection: { width: "100%", alignItems: "center", marginBottom: 25 },
   progressBarContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -580,11 +595,7 @@ const style = StyleSheet.create({
     borderRadius: 10,
     overflow: "hidden",
   },
-  progressBarFill: {
-    height: "100%",
-    backgroundColor: "#297AB8",
-    borderRadius: 10,
-  },
+  progressBarFill: { height: "100%", backgroundColor: "#297AB8", borderRadius: 10 },
   rewardContainer: {
     width: 60,
     height: 60,
@@ -594,21 +605,9 @@ const style = StyleSheet.create({
     alignItems: "center",
     position: "relative",
   },
-  rewardImageLocked: {
-    width: 42,
-    height: 42,
-    resizeMode: "cover",
-    tintColor: "rgba(80, 80, 80, 0.6)",
-  },
-  lockIcon: {
-    position: "absolute",
-  },
-  progressSubtext: {
-    color: "#297AB8",
-    fontSize: 12,
-    marginTop: 8,
-    textAlign: "center",
-  },
+  rewardImageLocked: { width: 42, height: 42, tintColor: "rgba(80, 80, 80, 0.6)" },
+  lockIcon: { position: "absolute" },
+  progressSubtext: { color: "#297AB8", fontSize: 12, marginTop: 8, textAlign: "center" },
   gamesCard: {
     width: "100%",
     backgroundColor: "#E3F2FD",
@@ -629,35 +628,12 @@ const style = StyleSheet.create({
     elevation: 2,
     marginBottom: 20,
   },
-  gamesTitleText: {
-    color: "#297AB8",
-    fontSize: 16,
-    fontFamily: "Poppins_700Bold",
-  },
-  podiumPlaceholder: {
-    height: 120,
-    width: "100%",
-  },
-  statsRow: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    width: "100%",
-    marginTop: 10,
-  },
-  statBox: {
-    alignItems: "center",
-  },
-  statNumber: {
-    fontSize: 18,
-    fontFamily: "Poppins_700Bold",
-    color: "#000",
-  },
-  statLabel: {
-    fontSize: 12,
-    color: "#297AB8",
-    fontFamily: "Poppins_400Regular",
-    marginTop: 2,
-  },
+  gamesTitleText: { color: "#297AB8", fontSize: 16, fontFamily: "Poppins_700Bold" },
+  podiumPlaceholder: { height: 120, width: "100%" },
+  statsRow: { flexDirection: "row", justifyContent: "space-around", width: "100%", marginTop: 10 },
+  statBox: { alignItems: "center" },
+  statNumber: { fontSize: 18, fontFamily: "Poppins_700Bold", color: "#000" },
+  statLabel: { fontSize: 12, color: "#297AB8", fontFamily: "Poppins_400Regular", marginTop: 2 },
   finalCard: {
     width: "100%",
     backgroundColor: "#FFFFFF",
@@ -671,91 +647,30 @@ const style = StyleSheet.create({
     shadowRadius: 6,
     elevation: 2,
   },
-  finalCardLabel: {
-    fontSize: 14,
-    color: "#297AB8",
-    marginBottom: 4,
-    fontFamily: "Poppins_400Regular",
-  },
-  finalCardValue: {
-    fontSize: 20,
-    fontFamily: "Poppins_700Bold",
-    color: "#000",
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.4)",
-    justifyContent: "flex-end",
-  },
+  finalCardLabel: { fontSize: 14, color: "#297AB8", marginBottom: 4, fontFamily: "Poppins_400Regular" },
+  finalCardValue: { fontSize: 20, fontFamily: "Poppins_700Bold", color: "#000" },
 });
 
-const modalStyle = StyleSheet.create({
-  modalContainer: {
-    backgroundColor: "#FFFFFF",
+const accStyle = StyleSheet.create({
+  overlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.4)", justifyContent: "flex-end" },
+  container: {
+    backgroundColor: "#FFF",
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
-    paddingHorizontal: 20,
-    paddingTop: 24,
+    padding: 24,
     paddingBottom: 34,
     alignItems: "center",
-    width: "100%",
-    position: "relative",
   },
-  closeButton: {
-    position: "absolute",
-    right: 20,
-    top: 20,
-    zIndex: 10,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: "#297AB8",
-    marginBottom: 2,
-  },
-  subtitle: {
-    fontSize: 13,
-    color: "#A0AEC0",
-    marginBottom: 20,
-  },
-  categoriesRow: {
-    flexDirection: "row",
-    gap: 8,
-    marginBottom: 20,
-    width: "100%",
-    justifyContent: "center",
-  },
-  categoryTab: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    borderRadius: 12,
-    backgroundColor: "#F3F4F6",
-  },
-  categoryTabSelected: {
-    backgroundColor: "#FFFFFF",
-    borderWidth: 2,
-    borderColor: "#93CCF7",
-  },
-  categoryText: {
-    fontSize: 14,
-    color: "#4A5568",
-    fontWeight: "500",
-  },
-  categoryTextSelected: {
-    color: "#297AB8",
-    fontWeight: "bold",
-  },
-  gridContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "flex-start",
-    width: "100%",
-    gap: 12,
-    marginBottom: 16,
-  },
-  itemCard: {
+  close: { position: "absolute", right: 20, top: 20, zIndex: 10 },
+  title: { fontSize: 20, fontWeight: "800", color: "#297AB8" },
+  subtitle: { fontSize: 13, color: "#A0AEC0", marginBottom: 20 },
+  categories: { flexDirection: "row", gap: 8, marginBottom: 20 },
+  tab: { paddingVertical: 8, paddingHorizontal: 14, borderRadius: 12, backgroundColor: "#F3F4F6" },
+  tabSelected: { backgroundColor: "#FFF", borderWidth: 2, borderColor: "#93CCF7" },
+  tabText: { fontSize: 14, color: "#4A5568", fontWeight: "500" },
+  tabTextSelected: { color: "#297AB8", fontWeight: "bold" },
+  grid: { flexDirection: "row", flexWrap: "wrap", width: "100%", gap: 12, minHeight: 80, marginBottom: 16 },
+  card: {
     width: "22%",
     aspectRatio: 1,
     backgroundColor: "#F3F4F6",
@@ -765,53 +680,19 @@ const modalStyle = StyleSheet.create({
     borderWidth: 2,
     borderColor: "transparent",
   },
-  itemCardSelected: {
-    backgroundColor: "#EBF8FF",
-    borderColor: "#93CCF7",
-  },
-  itemImage: {
-    width: "75%",
-    height: "75%",
-    resizeMode: "contain",
-  },
-  footer: {
-    width: "100%",
-    alignItems: "center",
-    marginTop: 8,
-  },
-  starPriceRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    marginBottom: 16,
-  },
-  starPriceText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#000",
-  },
-  confirmButton: {
-    backgroundColor: "#F3F4F6",
-    width: "60%",
-    paddingVertical: 12,
-    borderRadius: 14,
-    alignItems: "center",
-  },
-  confirmButtonText: {
-    color: "#297AB8",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
+  cardSelected: { backgroundColor: "#EBF8FF", borderColor: "#93CCF7" },
+  cardImage: { width: "75%", height: "75%" },
+  price: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 16 },
+  starIcon: { width: 22, height: 22 },
+  priceText: { fontSize: 18, fontWeight: "bold", color: "#000" },
+  confirm: { backgroundColor: "#F3F4F6", width: "60%", paddingVertical: 12, borderRadius: 14, alignItems: "center" },
+  confirmText: { color: "#297AB8", fontWeight: "bold", fontSize: 16 },
 });
 
-const nameModalStyle = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.25)",
-    justifyContent: "flex-end",
-  },
-  sheetContainer: {
-    backgroundColor: "#FFFFFF",
+const nameStyle = StyleSheet.create({
+  overlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.25)", justifyContent: "flex-end" },
+  sheet: {
+    backgroundColor: "#FFF",
     borderTopLeftRadius: 36,
     borderTopRightRadius: 36,
     borderWidth: 4,
@@ -821,21 +702,8 @@ const nameModalStyle = StyleSheet.create({
     paddingTop: 24,
     paddingBottom: 40,
     alignItems: "center",
-    position: "relative",
   },
-  leavesContainer: {
-    position: "absolute",
-    top: -18,
-    left: 45,
-    right: 45,
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  leafIcon: {
-    fontSize: 22,
-    transform: [{ rotate: "15deg" }],
-  },
-  userAvatarBadge: {
+  avatarBadge: {
     position: "absolute",
     left: 20,
     top: 20,
@@ -846,21 +714,9 @@ const nameModalStyle = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#297AB8",
-    textAlign: "center",
-    marginTop: 6,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: "#99A8B6",
-    textAlign: "center",
-    marginTop: 6,
-    marginBottom: 16,
-  },
-  inputShadowWrapper: {
+  title: { fontSize: 20, fontWeight: "bold", color: "#297AB8", marginTop: 6 },
+  subtitle: { fontSize: 14, color: "#99A8B6", marginTop: 6, marginBottom: 16 },
+  inputWrapper: {
     width: "80%",
     borderRadius: 16,
     backgroundColor: "#F2F6F8",
@@ -879,12 +735,7 @@ const nameModalStyle = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 16,
   },
-  counterText: {
-    fontSize: 13,
-    color: "#99A8B6",
-    marginTop: 6,
-    marginBottom: 26,
-  },
+  counter: { fontSize: 13, color: "#99A8B6", marginTop: 6, marginBottom: 26 },
   suggestionsLabel: {
     alignSelf: "flex-start",
     fontSize: 15,
@@ -892,14 +743,8 @@ const nameModalStyle = StyleSheet.create({
     color: "#297AB8",
     marginBottom: 10,
   },
-  suggestionsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-    gap: 12,
-    marginBottom: 32,
-  },
-  suggestionChip: {
+  suggestionsRow: { flexDirection: "row", width: "100%", gap: 12, marginBottom: 32 },
+  chip: {
     flex: 1,
     height: 46,
     backgroundColor: "#F2F6F8",
@@ -914,17 +759,8 @@ const nameModalStyle = StyleSheet.create({
     shadowRadius: 3,
     elevation: 2,
   },
-  suggestionText: {
-    color: "#4A5568",
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  actionsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-    gap: 16,
-  },
+  chipText: { color: "#4A5568", fontSize: 14, fontWeight: "600" },
+  actions: { flexDirection: "row", width: "100%", gap: 16 },
   actionBtn: {
     flex: 1,
     backgroundColor: "#F3F7FA",
@@ -940,11 +776,5 @@ const nameModalStyle = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  cancelBtn: {},
-  confirmBtn: {},
-  actionBtnText: {
-    color: "#297AB8",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
+  actionText: { color: "#297AB8", fontSize: 16, fontWeight: "bold" },
 });

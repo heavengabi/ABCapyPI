@@ -56,21 +56,7 @@ export default function CharacterSelection() {
       </View>
 
 
-      <Text style={styles.titulo}>Escolha um acessório</Text>
-      <View style={styles.grade}>
-        {accessories.map((item) => (
-          <TouchableOpacity
-            key={item.id}
-
-            style={[
-              styles.circuloAcessorio,
-              acessorio === item.id && styles.activeAccessory
-            ]}
-          >
-            {item.source && <Image source={item.source} style={styles.accessoryImage} />}
-          </TouchableOpacity>
-        ))}
-      </View>
+     
 
 
       <View style={{ flexDirection: "column", gap: 20, marginTop: 20 }}>
