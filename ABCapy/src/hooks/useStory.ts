@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Speech from "expo-speech";
 
-const API_URL = "http://192.168.100.22:3000";
+import api from "@/src/utils/api";
 
 export type StoryPageData = {
     id: number;
@@ -29,14 +28,6 @@ export const useStory = (storyId?: string) => {
     const [showModal, setShowModal] = useState(false);
     const [isFirstCompletion, setIsFirstCompletion] = useState(false);
 
-    const getToken = async () => {
-        const token = await AsyncStorage.getItem("@ABCapy:token");
-
-        console.log("🔑 TOKEN RECUPERADO:", token);
-
-        return token;
-    };
-
     const loadStory = async () => {
         try {
             setLoading(true);
@@ -51,59 +42,37 @@ export const useStory = (storyId?: string) => {
             // BUSCAR DADOS DA HISTÓRIA
             // ==========================================
 
-            const storyUrl = `${API_URL}/stories/${id}`;
-
-            console.log("📡 BUSCANDO HISTÓRIA:", storyUrl);
-
-            const storyResponse = await fetch(storyUrl);
+            const storyResponse = await api.get(
+                `/stories/${id}`
+            );
 
             console.log(
                 "📡 STATUS HISTÓRIA:",
                 storyResponse.status
             );
 
-            if (storyResponse.ok) {
-                const storyData = await storyResponse.json();
+            const storyData = storyResponse.data;
 
-                console.log("📖 HISTÓRIA:", storyData);
-                console.log("📖 TÍTULO:", storyData.title);
+            console.log("📖 HISTÓRIA:", storyData);
+            console.log("📖 TÍTULO:", storyData.title);
 
-                setStoryTitle(storyData.title || "");
-            } else {
-                console.log(
-                    "❌ ERRO AO BUSCAR HISTÓRIA:",
-                    await storyResponse.text()
-                );
-            }
+            setStoryTitle(storyData.title || "");
 
             // ==========================================
             // BUSCAR PÁGINAS DA HISTÓRIA
             // ==========================================
 
-            const pagesUrl = `${API_URL}/stories/${id}/pages`;
-
-            console.log("📡 BUSCANDO PÁGINAS:", pagesUrl);
-
-            const pagesResponse = await fetch(pagesUrl);
+            const pagesResponse = await api.get(
+                `/stories/${id}/pages`
+            );
 
             console.log(
                 "📡 STATUS PÁGINAS:",
                 pagesResponse.status
             );
 
-            if (!pagesResponse.ok) {
-                const errorText = await pagesResponse.text();
-
-                console.log(
-                    "❌ ERRO AO BUSCAR PÁGINAS:",
-                    errorText
-                );
-
-                throw new Error("Erro ao buscar páginas");
-            }
-
             const pagesData: StoryPageData[] =
-                await pagesResponse.json();
+                pagesResponse.data;
 
             const orderedPages = pagesData.sort(
                 (a, b) => a.pageNumber - b.pageNumber
@@ -117,40 +86,11 @@ export const useStory = (storyId?: string) => {
             );
 
             // ==========================================
-            // BUSCAR TOKEN
-            // ==========================================
-
-            const token = await getToken();
-
-            if (!token) {
-                console.log("⚠️ TOKEN NÃO ENCONTRADO");
-
-                setCurrentPageNumber(1);
-
-                return;
-            }
-
-            // ==========================================
             // BUSCAR HISTÓRICO
             // ==========================================
 
-            const progressUrl =
-                `${API_URL}/stories/progress/me`;
-
-            console.log(
-                "📡 BUSCANDO HISTÓRICO:",
-                progressUrl
-            );
-
-            const historyResponse = await fetch(
-                progressUrl,
-                {
-                    method: "GET",
-                    headers: {
-                        Accept: "application/json",
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
+            const historyResponse = await api.get(
+                "/stories/progress/me"
             );
 
             console.log(
@@ -158,26 +98,13 @@ export const useStory = (storyId?: string) => {
                 historyResponse.status
             );
 
-            const historyText =
-                await historyResponse.text();
+            const historiesList =
+                historyResponse.data;
 
             console.log(
                 "📡 RESPOSTA HISTÓRICO:",
-                historyText
+                historiesList
             );
-
-            if (!historyResponse.ok) {
-                console.log(
-                    "❌ ERRO AO BUSCAR HISTÓRICO"
-                );
-
-                setCurrentPageNumber(1);
-
-                return;
-            }
-
-            const historiesList =
-                JSON.parse(historyText);
 
             const currentHistory =
                 historiesList.find(
@@ -219,11 +146,23 @@ export const useStory = (storyId?: string) => {
                 setHistory(null);
                 setCurrentPageNumber(1);
             }
-        } catch (error) {
+        } catch (error: any) {
             console.log(
                 "❌ ERRO AO CARREGAR HISTÓRIA:",
                 error
             );
+
+            if (error.response) {
+                console.log(
+                    "STATUS:",
+                    error.response.status
+                );
+
+                console.log(
+                    "RESPOSTA:",
+                    error.response.data
+                );
+            }
         } finally {
             setLoading(false);
         }
@@ -345,29 +284,11 @@ export const useStory = (storyId?: string) => {
 
             setSpeaking(false);
 
-            const token = await getToken();
-
-            if (!token) {
-                console.log(
-                    "❌ Usuário não autenticado."
-                );
-
-                return;
-            }
-
             const wasAlreadyCompleted =
                 history?.completed ?? false;
 
             const starsToEarn =
                 wasAlreadyCompleted ? 0 : 5;
-
-            const url =
-                `${API_URL}/stories/progress`;
-
-            console.log(
-                "📡 SALVANDO HISTÓRICO:",
-                url
-            );
 
             const body = {
                 storyId: Number(storyId),
@@ -377,28 +298,17 @@ export const useStory = (storyId?: string) => {
             };
 
             console.log(
+                "📡 SALVANDO HISTÓRICO:"
+            );
+
+            console.log(
                 "📦 DADOS DO HISTÓRICO:",
                 body
             );
 
-            const response = await fetch(
-                url,
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type":
-                            "application/json",
-
-                        Accept:
-                            "application/json",
-
-                        Authorization:
-                            `Bearer ${token}`,
-                    },
-
-                    body: JSON.stringify(body),
-                }
+            const response = await api.post(
+                "/stories/progress",
+                body
             );
 
             console.log(
@@ -406,24 +316,13 @@ export const useStory = (storyId?: string) => {
                 response.status
             );
 
-            const responseText =
-                await response.text();
+            const updatedHistory =
+                response.data;
 
             console.log(
                 "📡 RESPOSTA CONCLUSÃO:",
-                responseText
+                updatedHistory
             );
-
-            if (!response.ok) {
-                console.log(
-                    "❌ ERRO AO SALVAR HISTÓRICO"
-                );
-
-                return;
-            }
-
-            const updatedHistory =
-                JSON.parse(responseText);
 
             const newHistory: StoryHistory = {
                 id: updatedHistory.id,
@@ -451,11 +350,23 @@ export const useStory = (storyId?: string) => {
                 "⭐ ESTRELAS GANHAS:",
                 starsToEarn
             );
-        } catch (error) {
+        } catch (error: any) {
             console.log(
                 "❌ ERRO AO CONCLUIR HISTÓRIA:",
                 error
             );
+
+            if (error.response) {
+                console.log(
+                    "STATUS:",
+                    error.response.status
+                );
+
+                console.log(
+                    "RESPOSTA:",
+                    error.response.data
+                );
+            }
         } finally {
             setLoadingNext(false);
         }

@@ -20,9 +20,7 @@ import CapyGames from "../src/assets/images/capyImages/capyGames.svg";
 import Header from "@/src/components/Header/Header";
 
 import { router } from "expo-router";
-
-
-const API_URL = "http://192.168.100.22:3000";
+import api from "@/src/utils/api";
 
 type Game = {
   id: number;
@@ -43,17 +41,11 @@ const GamePages = () => {
 
   const carregarJogos = async () => {
     try {
-      const response = await fetch(`${API_URL}/games`);
+      const response = await api.get("/games");
 
-      if (!response.ok) {
-        throw new Error("Erro ao buscar jogos");
-      }
+      console.log("JOGOS RECEBIDOS:", response.data);
 
-      const data = await response.json();
-
-      console.log("JOGOS RECEBIDOS:", data);
-
-      setGames(data);
+      setGames(response.data);
     } catch (error) {
       console.error("Erro ao carregar jogos:", error);
     } finally {
