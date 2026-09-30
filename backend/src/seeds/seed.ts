@@ -5,6 +5,7 @@ import { Game } from "../models/Games";
 import { Story } from "../models/Story";
 import { StoryPage } from "../models/StoryPage";
 import { GameHistory } from "../models/GameHistory";
+import { Accessory } from "../models/Accessories";
 
 async function seed() {
     try {
@@ -17,9 +18,26 @@ async function seed() {
         const gameHistoryRepository = AppDataSource.getRepository(GameHistory);
         const storyRepository = AppDataSource.getRepository(Story);
         const storyPageRepository = AppDataSource.getRepository(StoryPage);
+        const accessoryRepository = AppDataSource.getRepository(Accessory);
 
         await storyPageRepository.query("DELETE FROM story_pages");
         await storyRepository.query("DELETE FROM stories");
+
+        const accessories = [
+            { id: 1, name: "Chapéu de Fazendeiro", imageUrl: "FarmerCapy.png", type: "hat", price: 0 },
+            { id: 2, name: "Chapéu de Pirata", imageUrl: "PirateCapy.png", type: "hat", price: 50 },
+            { id: 3, name: "Chapéu de Formando", imageUrl: "GradeCapy.png", type: "hat", price: 0 },
+            { id: 4, name: "Óculos", imageUrl: "CapyGlasses.png", type: "glasses", price: 80 },
+            { id: 5, name: "Boina de Intelectual", imageUrl: "ArtistCapy.png", type: "hat", price: 0 },
+            { id: 6, name: "Chapéu de Aventureiro", imageUrl: "AdventureCapy.png", type: "hat", price: 0 },
+        ];
+
+        for (const accessoryData of accessories) {
+            await accessoryRepository.save(accessoryData);
+            console.log(
+                `Acessório cadastrado: ${accessoryData.name} | ID: ${accessoryData.id}`
+            );
+        }
 
         const games = [
             {
@@ -283,7 +301,6 @@ async function seed() {
                     `História atualizada: ${story.title} | ID: ${story.id}`
                 );
 
-                // APAGA AS PÁGINAS ANTIGAS DESSA HISTÓRIA
                 await storyPageRepository.delete({
                     story: { id: story.id },
                 });

@@ -1,8 +1,4 @@
-import { Button } from "@/src/components/ui/Button";
-import { FadeInView } from "@/src/components/ui/FadeInView";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import api from "@/src/utils/api";
-import React, { useState } from "react";
+import React from "react";
 import {
   ImageBackground,
   View,
@@ -13,40 +9,46 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import logoImage from "../src/assets/images/small-logo.png";
-import BackgroundImage from "../src/assets/images/bg-login.png";
 import { Lock, User, Mail } from "lucide-react-native";
 import { router } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+import { Button } from "@/src/components/ui/Button";
+import { FadeInView } from "@/src/components/ui/FadeInView";
+import api from "@/src/utils/api";
+import logoImage from "../src/assets/images/small-logo.png";
+import BackgroundImage from "../src/assets/images/bg-login.png";
+
+
+import { registerSchema, RegisterFormData } from "@/src/schemas/registerSchema";
 
 export default function Register() {
-  const [nameUser, setNameUser] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      nameUser: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
 
-  const handleRegister = async () => {
-    if (!nameUser || !email || !password || !confirmPassword) {
-      Alert.alert("Atenção", "Preencha todos os campos.");
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      Alert.alert("Atenção", "As senhas não coincidem.");
-      return;
-    }
-
+  const handleRegister = async (data: RegisterFormData) => {
     try {
-      setLoading(true);
-
       const response = await api.post("/users", {
-        nameUser,
-        email,
-        password,
+        nameUser: data.nameUser,
+        email: data.email,
+        password: data.password,
       });
 
       console.log("Cadastro realizado:", response.data);
-
       const token = response.data.token;
 
       if (!token) {
@@ -54,7 +56,6 @@ export default function Register() {
       }
 
       await AsyncStorage.setItem("@ABCapy:token", token);
-
       console.log("TOKEN SALVO:", token);
 
       router.replace("/CharacterSelection");
@@ -69,8 +70,6 @@ export default function Register() {
         error.response?.data?.message ||
           "Não foi possível realizar o cadastro."
       );
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -85,7 +84,6 @@ export default function Register() {
             paddingHorizontal: 30,
           }}
         >
-          
           <FadeInView style={{ alignItems: "center" }}>
             <Image
               source={logoImage}
@@ -117,120 +115,166 @@ export default function Register() {
             </Text>
           </FadeInView>
 
-          {/* FORMULÁRIO */}
+        
           <FadeInView
             delay={200}
             style={{
               flexDirection: "column",
-              gap: 15,
-              marginTop: 40,
+              gap: 12,
+              marginTop: 30,
               width: "100%",
             }}
           >
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                backgroundColor: "#fff",
-                borderRadius: 10,
-                paddingHorizontal: 15,
-              }}
-            >
-              <User color="#666" size={20} />
-
-              <TextInput
-                placeholder="Nome do responsável"
-                value={nameUser}
-                onChangeText={setNameUser}
+            {/* Nome do Responsável */}
+            <View>
+              <View
                 style={{
-                  flex: 1,
-                  padding: 12,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  backgroundColor: "#fff",
+                  borderRadius: 10,
+                  paddingHorizontal: 15,
                 }}
-              />
+              >
+                <User color="#666" size={20} />
+                <Controller
+                  control={control}
+                  name="nameUser"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      placeholder="Nome do responsável"
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      style={{ flex: 1, padding: 12 }}
+                    />
+                  )}
+                />
+              </View>
+              {errors.nameUser && (
+                <Text style={{ color: "#E74C3C", fontSize: 12, marginTop: 4, marginLeft: 4 }}>
+                  {errors.nameUser.message}
+                </Text>
+              )}
             </View>
 
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                backgroundColor: "#fff",
-                borderRadius: 10,
-                paddingHorizontal: 15,
-              }}
-            >
-              <Mail color="#666" size={20} />
-
-              <TextInput
-                placeholder="Email"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
+            {/* E-mail */}
+            <View>
+              <View
                 style={{
-                  flex: 1,
-                  padding: 12,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  backgroundColor: "#fff",
+                  borderRadius: 10,
+                  paddingHorizontal: 15,
                 }}
-              />
+              >
+                <Mail color="#666" size={20} />
+                <Controller
+                  control={control}
+                  name="email"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      placeholder="Email"
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      style={{ flex: 1, padding: 12 }}
+                    />
+                  )}
+                />
+              </View>
+              {errors.email && (
+                <Text style={{ color: "#E74C3C", fontSize: 12, marginTop: 4, marginLeft: 4 }}>
+                  {errors.email.message}
+                </Text>
+              )}
             </View>
 
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                backgroundColor: "#fff",
-                borderRadius: 10,
-                paddingHorizontal: 15,
-              }}
-            >
-              <Lock color="#666" size={20} />
-
-              <TextInput
-                placeholder="Senha"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
+            {/* Senha */}
+            <View>
+              <View
                 style={{
-                  flex: 1,
-                  padding: 12,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  backgroundColor: "#fff",
+                  borderRadius: 10,
+                  paddingHorizontal: 15,
                 }}
-              />
+              >
+                <Lock color="#666" size={20} />
+                <Controller
+                  control={control}
+                  name="password"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      placeholder="Senha"
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      secureTextEntry
+                      style={{ flex: 1, padding: 12 }}
+                    />
+                  )}
+                />
+              </View>
+              {errors.password && (
+                <Text style={{ color: "#E74C3C", fontSize: 12, marginTop: 4, marginLeft: 4 }}>
+                  {errors.password.message}
+                </Text>
+              )}
             </View>
 
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                backgroundColor: "#fff",
-                borderRadius: 10,
-                paddingHorizontal: 15,
-              }}
-            >
-              <Lock color="#666" size={20} />
-
-              <TextInput
-                placeholder="Confirmar senha"
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                secureTextEntry
+            {/* Confirmar Senha */}
+            <View>
+              <View
                 style={{
-                  flex: 1,
-                  padding: 12,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  backgroundColor: "#fff",
+                  borderRadius: 10,
+                  paddingHorizontal: 15,
                 }}
-              />
+              >
+                <Lock color="#666" size={20} />
+                <Controller
+                  control={control}
+                  name="confirmPassword"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      placeholder="Confirmar senha"
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      secureTextEntry
+                      style={{ flex: 1, padding: 12 }}
+                    />
+                  )}
+                />
+              </View>
+              {errors.confirmPassword && (
+                <Text style={{ color: "#E74C3C", fontSize: 12, marginTop: 4, marginLeft: 4 }}>
+                  {errors.confirmPassword.message}
+                </Text>
+              )}
             </View>
 
             <Button
-              title={loading ? "Cadastrando..." : "Continuar"}
-              onPress={handleRegister}
-              style={{ marginTop: 20, width: "100%" }}
+              title={isSubmitting ? "Cadastrando..." : "Continuar"}
+              onPress={handleSubmit(handleRegister)}
+              disabled={isSubmitting}
+              style={{ marginTop: 15, width: "100%" }}
             />
 
-            {loading && <ActivityIndicator />}
+            {isSubmitting && <ActivityIndicator style={{ marginTop: 10 }} />}
 
             <Text
               onPress={() => router.push("/SignUpParent")}
               style={{
                 textAlign: "center",
+                marginTop: 10,
               }}
             >
               Já tem uma conta? Entre

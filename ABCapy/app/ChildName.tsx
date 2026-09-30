@@ -12,6 +12,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import BackgroundImage from "../src/assets/images/bg-login.png";
 
 export default function ChildName() {
@@ -41,6 +42,17 @@ export default function ChildName() {
 
       console.log("Criança criada:", response.data);
 
+      // Salva em cache para a Home já carregar as informações atualizadas imediatamente
+      if (response.data) {
+        await AsyncStorage.setItem(
+          "@ABCapy:child",
+          JSON.stringify(response.data)
+        );
+      }
+
+      // Limpa toda a pilha de telas anteriores (Login/Cadastro/Seleção de Personagem)
+      router.dismissAll();
+      // Substitui a rota atual pela Home, definindo-a como a tela raiz
       router.replace("/homePage");
     } catch (error: any) {
       console.error(
@@ -51,7 +63,7 @@ export default function ChildName() {
       Alert.alert(
         "Erro",
         error.response?.data?.message ||
-        "Não foi possível criar o perfil da criança."
+          "Não foi possível criar o perfil da criança."
       );
     } finally {
       setLoading(false);
@@ -97,7 +109,7 @@ export default function ChildName() {
           <Button
             title={loading ? "Salvando..." : "Continuar"}
             onPress={handleCreateChild}
-
+            disabled={loading}
           />
         </View>
       </ImageBackground>
