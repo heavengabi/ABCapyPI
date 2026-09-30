@@ -108,10 +108,7 @@ const GamePages = () => {
         </View>
 
         {loading ? (
-          <ActivityIndicator
-            size="large"
-            style={styles.loading}
-          />
+          <ActivityIndicator size="large" style={styles.loading} />
         ) : (
           games.map((game) => (
             <CardGame
@@ -125,7 +122,7 @@ const GamePages = () => {
                   "ID:",
                   game.id,
                   "TYPE:",
-                  game.type
+                  game.type,
                 );
 
                 router.push({
@@ -161,6 +158,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginTop: 20,
+    
   },
 
   textStyle: {

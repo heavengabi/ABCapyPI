@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect } from "react";
 
 import {
@@ -7,6 +8,7 @@ import {
   Image,
   ImageSourcePropType,
   Animated,
+  Easing,
 } from "react-native";
 
 type Props = {
@@ -28,25 +30,72 @@ const CardMemory = ({
   tamanho,
   corVerso,
 }: Props) => {
+  // Animação da virada
   const animatedValue = useRef(new Animated.Value(0)).current;
+
+  // Animação de escala
+  const scaleValue = useRef(new Animated.Value(1)).current;
+
+  // Animação quando encontra o par
+  const matchScale = useRef(new Animated.Value(1)).current;
 
   const deveMostrarFrente = isFlipped || isMatched;
 
   useEffect(() => {
-    Animated.timing(animatedValue, {
-      toValue: deveMostrarFrente ? 180 : 0,
+    Animated.parallel([
+      // Virada 3D
+      Animated.timing(animatedValue, {
+        toValue: deveMostrarFrente ? 180 : 0,
+        duration: 400,
+        easing: Easing.out(Easing.ease),
+        useNativeDriver: true,
+      }),
 
-      duration: 300,
-
-      useNativeDriver: true,
-    }).start();
+      // Pequeno zoom durante a virada
+      Animated.sequence([
+        Animated.timing(scaleValue, {
+          toValue: 1.08,
+          duration: 180,
+          easing: Easing.out(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.spring(scaleValue, {
+          toValue: 1,
+          friction: 5,
+          tension: 100,
+          useNativeDriver: true,
+        }),
+      ]),
+    ]).start();
   }, [deveMostrarFrente]);
 
+  // Animação especial quando acertou o par
+  useEffect(() => {
+    if (isMatched) {
+      Animated.sequence([
+        Animated.spring(matchScale, {
+          toValue: 1.12,
+          friction: 4,
+          tension: 150,
+          useNativeDriver: true,
+        }),
+        Animated.spring(matchScale, {
+          toValue: 1,
+          friction: 5,
+          tension: 100,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [isMatched]);
+
+  // Frente
   const frontInterpolate = animatedValue.interpolate({
     inputRange: [0, 180],
     outputRange: ["180deg", "360deg"],
   });
 
+  // Verso
   const backInterpolate = animatedValue.interpolate({
     inputRange: [0, 180],
     outputRange: ["0deg", "180deg"],
@@ -57,6 +106,9 @@ const CardMemory = ({
       {
         rotateY: frontInterpolate,
       },
+      {
+        scale: Animated.multiply(scaleValue, matchScale),
+      },
     ],
   };
 
@@ -65,6 +117,9 @@ const CardMemory = ({
       {
         rotateY: backInterpolate,
       },
+      {
+        scale: scaleValue,
+      },
     ],
   };
 
@@ -72,7 +127,7 @@ const CardMemory = ({
     <TouchableOpacity
       onPress={onPress}
       disabled={deveMostrarFrente}
-      activeOpacity={0.8}
+      activeOpacity={0.9}
       style={[
         styles.touchable,
         {
@@ -87,17 +142,19 @@ const CardMemory = ({
           styles.card,
           styles.cardFront,
           isMatched && styles.cardMatched,
-
-          frontAnimatedStyle,
           styles.cardAbsolute,
-
+          frontAnimatedStyle,
           {
             width: tamanho,
             height: tamanho * 1.25,
           },
         ]}
       >
-        <Image source={imagem} style={styles.cardImage} resizeMode="contain" />
+        <Image
+          source={imagem}
+          style={styles.cardImage}
+          resizeMode="contain"
+        />
       </Animated.View>
 
       {/* VERSO */}
@@ -105,9 +162,8 @@ const CardMemory = ({
         style={[
           styles.card,
           styles.cardBack,
-          backAnimatedStyle,
           styles.cardAbsolute,
-
+          backAnimatedStyle,
           {
             width: tamanho,
             height: tamanho * 1.25,
@@ -136,46 +192,37 @@ const styles = StyleSheet.create({
   },
 
   card: {
-    borderRadius: 10,
-
+    borderRadius: 14,
     justifyContent: "center",
     alignItems: "center",
 
-    elevation: 3,
+    elevation: 5,
 
     shadowColor: "#000",
-
     shadowOffset: {
       width: 0,
-      height: 1,
+      height: 2,
     },
-
-    shadowOpacity: 0.2,
-
-    shadowRadius: 1.41,
+    shadowOpacity: 0.22,
+    shadowRadius: 3,
   },
 
   cardBack: {
-    backgroundColor: "#F8C84E",
-    borderWidth: 7,
+    borderWidth: 6,
     borderColor: "#FFFFFF",
     borderRadius: 16,
   },
 
   cardFront: {
     backgroundColor: "#FFFFFF",
-
-    borderWidth: 2,
-
+    borderWidth: 3,
     borderColor: "#4A90E2",
   },
 
   cardMatched: {
     backgroundColor: "#E8F5E9",
-
     borderColor: "#81C784",
-
-    opacity: 0.6,
+    opacity: 0.75,
   },
 
   cardImage: {
@@ -184,8 +231,8 @@ const styles = StyleSheet.create({
   },
 
   cardTextBack: {
-    fontSize: 28,
-    fontWeight: "bold",
+    fontSize: 38,
+    fontWeight: "900",
     color: "#FFFFFF",
   },
 });

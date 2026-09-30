@@ -15,10 +15,12 @@ import { router, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
 import Header from "@/src/components/Header/Header";
+
 import easy from "@/src/assets/images/gameImages/easy.png";
 import medium from "@/src/assets/images/gameImages/medium.png";
 import hard from "@/src/assets/images/gameImages/hard.png";
 import capivarafeliz from "@/src/assets/images/gameImages/capivarafeliz.png";
+
 import CardMemory from "@/src/components/gameComponents/cardGames/cardMemory";
 
 import {
@@ -57,15 +59,10 @@ const MemoryGame = () => {
     },
   };
 
-  const difficultyKey =
-    typeof difficulty === "string"
-      ? difficulty
-      : "facil";
+  const difficultyKey = typeof difficulty === "string" ? difficulty : "facil";
 
   const jogo =
-    settings[
-    difficultyKey as keyof typeof settings
-    ] ?? settings.facil;
+    settings[difficultyKey as keyof typeof settings] ?? settings.facil;
 
   const dificuldadeHook: DificuldadeType =
     difficultyKey === "dificil"
@@ -91,18 +88,26 @@ const MemoryGame = () => {
     if (statusJogo === "vitoria") {
       registrarVitoriaMemoria(dificuldadeHook);
     }
-  }, [statusJogo]);
+  }, [statusJogo, dificuldadeHook]);
 
   const handleVoltarMenu = () => {
-    router.replace("/gamePages");
+    router.push({
+      pathname: "/dificultyPages",
+      params: {
+        game: "memoryGame",
+      },
+    });
   };
 
+  /*
+   * TAMANHO DAS CARTAS
+   *
+   * Fácil  = 6 cartas  = maiores
+   * Médio  = 10 cartas = tamanho médio
+   * Difícil = 12 cartas = menores para caber na tela
+   */
   const tamanhoCarta =
-    jogo.totalCartas === 6
-      ? 82
-      : jogo.totalCartas === 10
-        ? 72
-        : 66;
+    jogo.totalCartas === 6 ? 100 : jogo.totalCartas === 10 ? 85 : 76;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -110,7 +115,7 @@ const MemoryGame = () => {
         animationType="fade"
         transparent
         visible={modalVisivel}
-        onRequestClose={() => { }}
+        onRequestClose={() => {}}
       >
         <View style={styles.modalOverlay}>
           <Image
@@ -127,15 +132,12 @@ const MemoryGame = () => {
               },
             ]}
           >
+            {/* INÍCIO */}
             {statusJogo === "inicio" && (
               <>
-                <Text style={styles.modalTitle}>
-                  Jogo da Memória
-                </Text>
+                <Text style={styles.modalTitle}>Jogo da Memória</Text>
 
-                <Text style={styles.modalSubtitle}>
-                  Vamos brincar?
-                </Text>
+                <Text style={styles.modalSubtitle}>Vamos brincar?</Text>
 
                 <View
                   style={[
@@ -145,9 +147,7 @@ const MemoryGame = () => {
                     },
                   ]}
                 >
-                  <Text style={styles.difficultyText}>
-                    {jogo.titulo}
-                  </Text>
+                  <Text style={styles.difficultyText}>{jogo.titulo}</Text>
                 </View>
 
                 <Text style={styles.modalMessage}>
@@ -164,9 +164,7 @@ const MemoryGame = () => {
                   onPress={iniciarContagem}
                   activeOpacity={0.8}
                 >
-                  <Text style={styles.modalButtonText}>
-                    Começar
-                  </Text>
+                  <Text style={styles.modalButtonText}>Começar</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -174,13 +172,12 @@ const MemoryGame = () => {
                   onPress={handleVoltarMenu}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.backButtonText}>
-                    Voltar ao Menu
-                  </Text>
+                  <Text style={styles.backButtonText}>Voltar ao Menu</Text>
                 </TouchableOpacity>
               </>
             )}
 
+            {/* CONTAGEM */}
             {statusJogo === "contagem" && (
               <View style={styles.contagemContainer}>
                 <Text
@@ -194,17 +191,14 @@ const MemoryGame = () => {
                   {contagem === 0 ? "VAI!" : contagem}
                 </Text>
 
-                <Text style={styles.contagemSubtexto}>
-                  Prepare-se!
-                </Text>
+                <Text style={styles.contagemSubtexto}>Prepare-se!</Text>
               </View>
             )}
 
+            {/* VITÓRIA */}
             {statusJogo === "vitoria" && (
               <>
-                <Text style={styles.modalTitle}>
-                  Perfeito!
-                </Text>
+                <Text style={styles.modalTitle}>Perfeito!</Text>
 
                 <Text style={styles.modalSubtitle}>
                   Você encontrou todos os pares!
@@ -218,16 +212,10 @@ const MemoryGame = () => {
                     },
                   ]}
                 >
-                  <Text style={styles.scoreLabel}>
-                    Estrelas conquistadas
-                  </Text>
+                  <Text style={styles.scoreLabel}>Estrelas conquistadas</Text>
 
                   <View style={styles.scoreValue}>
-                    <Ionicons
-                      name="star"
-                      size={30}
-                      color={jogo.header}
-                    />
+                    <Ionicons name="star" size={30} color={jogo.header} />
 
                     <Text
                       style={[
@@ -252,9 +240,7 @@ const MemoryGame = () => {
                   onPress={reiniciarJogo}
                   activeOpacity={0.8}
                 >
-                  <Text style={styles.modalButtonText}>
-                    Jogar Novamente
-                  </Text>
+                  <Text style={styles.modalButtonText}>Jogar Novamente</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -262,9 +248,7 @@ const MemoryGame = () => {
                   onPress={handleVoltarMenu}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.backButtonText}>
-                    Voltar ao Menu
-                  </Text>
+                  <Text style={styles.backButtonText}>Voltar ao Menu</Text>
                 </TouchableOpacity>
               </>
             )}
@@ -272,15 +256,17 @@ const MemoryGame = () => {
         </View>
       </Modal>
 
+      {/* FUNDO DO JOGO */}
       <ImageBackground
         source={jogo.wallpaper}
         style={styles.background}
         resizeMode="cover"
       >
+        {/* HEADER */}
         <Header
           title="Jogo da Memória"
           icon="arrow-back"
-          onPress={() => router.push("/dificultyPages")}
+          onPress={handleVoltarMenu}
           headerStyle={{
             backgroundColor: jogo.header,
           }}
@@ -289,12 +275,12 @@ const MemoryGame = () => {
           }}
         />
 
+        {/* NÍVEL */}
         <View style={styles.infoContainer}>
-          <Text style={styles.nivelText}>
-            Nível: {jogo.titulo}
-          </Text>
+          <Text style={styles.nivelText}>Nível: {jogo.titulo}</Text>
         </View>
 
+        {/* GRID */}
         <View
           style={[
             styles.gridWrapper,
@@ -356,30 +342,34 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 10,
+    paddingHorizontal: 5,
   },
 
   gridFacil: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
   },
 
   gridMedio: {
-    paddingHorizontal: 5,
+    paddingHorizontal: 3,
   },
 
   gridDificil: {
-    paddingHorizontal: 5,
+    paddingHorizontal: 2,
   },
 
   grid: {
     width: "100%",
-    maxWidth: 360,
+    maxWidth: 390,
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "center",
     alignItems: "center",
-    gap: 10,
+    gap: 6,
   },
+
+  /* =========================
+     MODAL
+     ========================= */
 
   modalOverlay: {
     flex: 1,
@@ -497,6 +487,10 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 
+  /* =========================
+     CONTAGEM
+     ========================= */
+
   contagemContainer: {
     minHeight: 150,
     width: "100%",
@@ -516,6 +510,10 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     marginTop: 5,
   },
+
+  /* =========================
+     PONTUAÇÃO
+     ========================= */
 
   scoreContainer: {
     alignItems: "center",
@@ -546,4 +544,4 @@ const styles = StyleSheet.create({
     fontWeight: "900",
     textAlign: "center",
   },
-}); 
+});

@@ -8,6 +8,7 @@ import {
   Poppins_600SemiBold,
   Poppins_700Bold,
 } from "@expo-google-fonts/poppins";
+import { TalkBackProvider } from "@/src/context/TalkBackContext";
 
 // Impede que a tela de splash suma antes das fontes carregarem
 SplashScreen.preventAutoHideAsync();
@@ -31,9 +32,11 @@ const [fontsLoaded, fontError] = useFonts({
   return (
   
   (
+    
     <SafeAreaProvider>
       <Stack screenOptions={{ headerShown: false }} />
     </SafeAreaProvider>
+    
   )
   )
 }
