@@ -12,6 +12,7 @@ import {
 
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
 import Header from "@/src/components/Header/Header";
 
@@ -52,8 +53,7 @@ type NivelConfig = {
 
 const TAMANHO_BOLOTA = 105;
 const ESPACO_ENTRE_BOLOTAS = 20;
-const PASSO =
-  TAMANHO_BOLOTA + ESPACO_ENTRE_BOLOTAS;
+const PASSO = TAMANHO_BOLOTA + ESPACO_ENTRE_BOLOTAS;
 
 const gerarGrade = (
   linhas: number,
@@ -114,11 +114,10 @@ const SequencingGame = () => {
   const { difficulty, gameId } = useLocalSearchParams<{
     difficulty?: string;
     gameId?: string;
-  }>()
+  }>();
 
   const nivel: Nivel =
-    difficulty === "medio" ||
-      difficulty === "dificil"
+    difficulty === "medio" || difficulty === "dificil"
       ? difficulty
       : "facil";
 
@@ -147,13 +146,11 @@ const SequencingGame = () => {
 
   const larguraContainer =
     jogo.colunas * TAMANHO_BOLOTA +
-    (jogo.colunas - 1) *
-    ESPACO_ENTRE_BOLOTAS;
+    (jogo.colunas - 1) * ESPACO_ENTRE_BOLOTAS;
 
   const alturaContainer =
     jogo.linhas * TAMANHO_BOLOTA +
-    (jogo.linhas - 1) *
-    ESPACO_ENTRE_BOLOTAS;
+    (jogo.linhas - 1) * ESPACO_ENTRE_BOLOTAS;
 
   const handleVoltarMenu = () => {
     pararJogo();
@@ -200,25 +197,17 @@ const SequencingGame = () => {
               },
             ]}
           >
-            {jogo.bolotas.map(
-              (bolota, index) => (
-                <Bolota
-                  key={index}
-                  top={bolota.top}
-                  left={bolota.left}
-                  cor={bolota.cor}
-                  ativa={
-                    bolotaAtiva === index
-                  }
-                  explodiu={bolotasExplodidas.includes(
-                    index,
-                  )}
-                  onPress={() =>
-                    handleCliqueBolota(index)
-                  }
-                />
-              ),
-            )}
+            {jogo.bolotas.map((bolota, index) => (
+              <Bolota
+                key={index}
+                top={bolota.top}
+                left={bolota.left}
+                cor={bolota.cor}
+                ativa={bolotaAtiva === index}
+                explodiu={bolotasExplodidas.includes(index)}
+                onPress={() => handleCliqueBolota(index)}
+              />
+            ))}
           </View>
         </View>
 
@@ -228,8 +217,7 @@ const SequencingGame = () => {
               style={[
                 styles.btnStyle,
                 {
-                  backgroundColor:
-                    jogo.header,
+                  backgroundColor: jogo.header,
                 },
               ]}
               onPress={jogarNovaRodada}
@@ -279,66 +267,53 @@ const SequencingGame = () => {
                     style={[
                       styles.scoreContainer,
                       {
-                        backgroundColor:
-                          jogo.button,
+                        backgroundColor: jogo.button,
                       },
                     ]}
                   >
-                    <Text
-                      style={styles.scoreLabel}
-                    >
+                    <Text style={styles.scoreLabel}>
                       Estrelas da rodada
                     </Text>
 
-                    <Text
-                      style={[
-                        styles.scoreEarned,
-                        {
-                          color: jogo.header,
-                        },
-                      ]}
-                    >
-                      ⭐{" "}
-                      {
-                        ESTRELAS_SEQUENCING[
-                        nivel
-                        ]
-                      }
-                    </Text>
+                    <View style={styles.scoreValue}>
+                      <Ionicons
+                        name="star"
+                        size={30}
+                        color={jogo.header}
+                      />
+
+                      <Text
+                        style={[
+                          styles.scoreEarned,
+                          {
+                            color: jogo.header,
+                          },
+                        ]}
+                      >
+                        {ESTRELAS_SEQUENCING[nivel]}
+                      </Text>
+                    </View>
                   </View>
 
                   <Pressable
                     style={[
                       styles.modalButton,
                       {
-                        backgroundColor:
-                          jogo.header,
+                        backgroundColor: jogo.header,
                       },
                     ]}
-                    onPress={
-                      jogarNovaRodada
-                    }
+                    onPress={jogarNovaRodada}
                   >
-                    <Text
-                      style={
-                        styles.modalButtonText
-                      }
-                    >
+                    <Text style={styles.modalButtonText}>
                       Repetir
                     </Text>
                   </Pressable>
 
                   <Pressable
                     style={styles.backButton}
-                    onPress={
-                      handleVoltarMenu
-                    }
+                    onPress={handleVoltarMenu}
                   >
-                    <Text
-                      style={
-                        styles.backButtonText
-                      }
-                    >
+                    <Text style={styles.backButtonText}>
                       Sair
                     </Text>
                   </Pressable>
@@ -351,9 +326,7 @@ const SequencingGame = () => {
                     OPA, ERROU!
                   </Text>
 
-                  <Text
-                    style={styles.modalSubtitle}
-                  >
+                  <Text style={styles.modalSubtitle}>
                     Não tem problema! Vamos
                     tentar de novo?
                   </Text>
@@ -362,34 +335,21 @@ const SequencingGame = () => {
                     style={[
                       styles.modalButton,
                       {
-                        backgroundColor:
-                          jogo.header,
+                        backgroundColor: jogo.header,
                       },
                     ]}
-                    onPress={
-                      jogarNovaRodada
-                    }
+                    onPress={jogarNovaRodada}
                   >
-                    <Text
-                      style={
-                        styles.modalButtonText
-                      }
-                    >
+                    <Text style={styles.modalButtonText}>
                       Tentar Novamente
                     </Text>
                   </Pressable>
 
                   <Pressable
                     style={styles.backButton}
-                    onPress={
-                      handleVoltarMenu
-                    }
+                    onPress={handleVoltarMenu}
                   >
-                    <Text
-                      style={
-                        styles.backButtonText
-                      }
-                    >
+                    <Text style={styles.backButtonText}>
                       Sair
                     </Text>
                   </Pressable>
@@ -531,6 +491,13 @@ const styles = StyleSheet.create({
     color: "#555",
     fontWeight: "700",
     marginBottom: 2,
+  },
+
+  scoreValue: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
   },
 
   scoreEarned: {

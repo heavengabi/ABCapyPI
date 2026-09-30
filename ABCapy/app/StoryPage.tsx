@@ -8,20 +8,14 @@ import {
   Modal,
   ImageSourcePropType,
 } from "react-native";
-
 import React, { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
 import { Volume2 } from "lucide-react-native";
-
+import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-
 import { useLocalSearchParams, useRouter } from "expo-router";
-
 import storysBack from "../src/assets/storiesImages/storysBack.png";
-
 import CardStory from "@/src/components/Story/CardStory";
-
 import { useStory } from "@/src/hooks/useStory";
 
 const storyImages: Record<string, ImageSourcePropType> = {
@@ -126,7 +120,13 @@ const StoryPage = () => {
     if (loadingNext) return;
 
     nextPage();
-  }, [progressLoaded, savedPage, currentPageNumber, loadingNext, nextPage]);
+  }, [
+    progressLoaded,
+    savedPage,
+    currentPageNumber,
+    loadingNext,
+    nextPage,
+  ]);
 
   useEffect(() => {
     const saveProgress = async () => {
@@ -164,7 +164,9 @@ const StoryPage = () => {
         <View style={styles.loading}>
           <ActivityIndicator size="large" color="#69B9F7" />
 
-          <Text style={styles.loadingText}>Carregando história...</Text>
+          <Text style={styles.loadingText}>
+            Carregando história...
+          </Text>
         </View>
       </SafeAreaView>
     );
@@ -174,7 +176,9 @@ const StoryPage = () => {
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.loading}>
-          <Text style={styles.loadingText}>Nenhuma página encontrada.</Text>
+          <Text style={styles.loadingText}>
+            Nenhuma página encontrada.
+          </Text>
         </View>
       </SafeAreaView>
     );
@@ -184,7 +188,9 @@ const StoryPage = () => {
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.loading}>
-          <Text style={styles.loadingText}>Página não encontrada.</Text>
+          <Text style={styles.loadingText}>
+            Página não encontrada.
+          </Text>
         </View>
       </SafeAreaView>
     );
@@ -218,7 +224,9 @@ const StoryPage = () => {
               onPress={previousPage}
               disabled={currentPageNumber === 1}
             >
-              <Text style={styles.navigationText}>Voltar</Text>
+              <Text style={styles.navigationText}>
+                Voltar
+              </Text>
             </Pressable>
 
             {isLastPage ? (
@@ -237,13 +245,18 @@ const StoryPage = () => {
                 onPress={nextPage}
                 disabled={loadingNext}
               >
-                <Text style={styles.navigationText}>Próxima</Text>
+                <Text style={styles.navigationText}>
+                  Próxima
+                </Text>
               </Pressable>
             )}
           </View>
 
           <Pressable
-            style={[styles.speakButton, speaking && styles.speakingButton]}
+            style={[
+              styles.speakButton,
+              speaking && styles.speakingButton,
+            ]}
             onPress={speakPage}
           >
             <Volume2 size={32} color="#000" />
@@ -258,18 +271,45 @@ const StoryPage = () => {
         >
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>História concluída! 🎉</Text>
+              <Text style={styles.modalTitle}>
+                História concluída!
+              </Text>
 
               {isFirstCompletion ? (
-                <Text style={styles.modalText}>Você ganhou 5 estrelas! ⭐</Text>
+                <View style={styles.rewardContainer}>
+                  <Text style={styles.modalText}>
+                    Você ganhou
+                  </Text>
+
+                  <View style={styles.rewardValue}>
+                    <Ionicons
+                      name="star"
+                      size={30}
+                      color="#F8C84E"
+                    />
+
+                    <Text style={styles.rewardText}>
+                      5
+                    </Text>
+
+                    <Text style={styles.modalText}>
+                      estrelas!
+                    </Text>
+                  </View>
+                </View>
               ) : (
                 <Text style={styles.modalText}>
                   Você já concluiu essa história.
                 </Text>
               )}
 
-              <Pressable style={styles.modalButton} onPress={handleReadAgain}>
-                <Text style={styles.modalButtonText}>Ler novamente</Text>
+              <Pressable
+                style={styles.modalButton}
+                onPress={handleReadAgain}
+              >
+                <Text style={styles.modalButtonText}>
+                  Ler novamente
+                </Text>
               </Pressable>
 
               <Pressable
@@ -384,7 +424,24 @@ const styles = StyleSheet.create({
   modalText: {
     fontSize: 18,
     textAlign: "center",
+  },
+
+  rewardContainer: {
+    alignItems: "center",
     marginBottom: 20,
+  },
+
+  rewardValue: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+  },
+
+  rewardText: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#F8C84E",
   },
 
   modalButton: {

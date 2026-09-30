@@ -22,7 +22,7 @@ import Header from "@/src/components/Header/Header";
 import { router } from "expo-router";
 
 
-const API_URL = "http://172.20.86.127:3000";
+const API_URL = "http://192.168.100.22:3000";
 
 type Game = {
   id: number;

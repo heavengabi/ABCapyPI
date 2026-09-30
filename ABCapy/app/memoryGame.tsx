@@ -12,6 +12,7 @@ import {
 
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
 import Header from "@/src/components/Header/Header";
 import easy from "@/src/assets/images/gameImages/easy.png";
@@ -25,7 +26,7 @@ import {
   DificuldadeType,
   ESTRELAS_MEMORIA,
   registrarVitoriaMemoria,
-} from "@/src/logics/gamesLogic/memoryLogic";
+} from "../src/logics/gamesLogic/memoryLogic";
 
 const MemoryGame = () => {
   const { difficulty } = useLocalSearchParams();
@@ -38,6 +39,7 @@ const MemoryGame = () => {
       wallpaper: easy,
       totalCartas: 6,
     },
+
     medio: {
       titulo: "MÉDIO",
       header: "#F8C84E",
@@ -45,6 +47,7 @@ const MemoryGame = () => {
       wallpaper: medium,
       totalCartas: 10,
     },
+
     dificil: {
       titulo: "DIFÍCIL",
       header: "#F47A7A",
@@ -107,6 +110,7 @@ const MemoryGame = () => {
         animationType="fade"
         transparent
         visible={modalVisivel}
+        onRequestClose={() => { }}
       >
         <View style={styles.modalOverlay}>
           <Image
@@ -146,7 +150,7 @@ const MemoryGame = () => {
                   </Text>
                 </View>
 
-                <Text style={styles.instructions}>
+                <Text style={styles.modalMessage}>
                   Encontre todos os pares de cartas!
                 </Text>
 
@@ -199,7 +203,7 @@ const MemoryGame = () => {
             {statusJogo === "vitoria" && (
               <>
                 <Text style={styles.modalTitle}>
-                  🎉 Perfeito! 🎉
+                  Perfeito!
                 </Text>
 
                 <Text style={styles.modalSubtitle}>
@@ -218,16 +222,24 @@ const MemoryGame = () => {
                     Estrelas conquistadas
                   </Text>
 
-                  <Text
-                    style={[
-                      styles.scoreEarned,
-                      {
-                        color: jogo.header,
-                      },
-                    ]}
-                  >
-                    ⭐ {ESTRELAS_MEMORIA[dificuldadeHook]}
-                  </Text>
+                  <View style={styles.scoreValue}>
+                    <Ionicons
+                      name="star"
+                      size={30}
+                      color={jogo.header}
+                    />
+
+                    <Text
+                      style={[
+                        styles.scoreEarned,
+                        {
+                          color: jogo.header,
+                        },
+                      ]}
+                    >
+                      {ESTRELAS_MEMORIA[dificuldadeHook]}
+                    </Text>
+                  </View>
                 </View>
 
                 <TouchableOpacity
@@ -390,7 +402,7 @@ const styles = StyleSheet.create({
     width: "88%",
     backgroundColor: "#FFFFFF",
     borderRadius: 30,
-    borderWidth: 4,
+    borderWidth: 5,
     paddingTop: 42,
     paddingBottom: 25,
     paddingHorizontal: 28,
@@ -441,7 +453,7 @@ const styles = StyleSheet.create({
     color: "#333",
   },
 
-  instructions: {
+  modalMessage: {
     fontSize: 15,
     color: "#666",
     textAlign: "center",
@@ -522,9 +534,16 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
 
+  scoreValue: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+  },
+
   scoreEarned: {
     fontSize: 32,
     fontWeight: "900",
     textAlign: "center",
   },
-});
+}); 

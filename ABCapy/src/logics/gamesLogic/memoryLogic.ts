@@ -1,25 +1,27 @@
 import { useState, useEffect } from "react";
 import { ImageSourcePropType } from "react-native";
 
-import img1 from "@/src/assets/gameImages/1memory.png";
-import img2 from "@/src/assets/gameImages/2memory.png";
-import img3 from "@/src/assets/gameImages/3memory.png";
-import img4 from "@/src/assets/gameImages/4memory.png";
-import img5 from "@/src/assets/gameImages/5memory.png";
-import img6 from "@/src/assets/gameImages/6memory.png";
-import img7 from "@/src/assets/gameImages/7memory.png";
-import img8 from "@/src/assets/gameImages/8memory.png";
-import { registrarPartida } from "./gameHistoryLogic";
+// Caminho corrigido conforme a estrutura de pastas da imagem
+import memory1 from "../../assets/images/gameImages/1memory.png"
+import memory2 from "../../assets/images/gameImages/2memory.png";
+import memory3 from "../../assets/images/gameImages/3memory.png";
+import memory4 from "../../assets/images/gameImages/4memory.png";
+import memory5 from "../../assets/images/gameImages/5memory.png";
+import memory6 from "../../assets/images/gameImages/6memory.png";
+import memory7 from "../../assets/images/gameImages/7memory.png";
+import memory8 from "../../assets/images/gameImages/8memory.png";
+
+import { registrarPartida } from "../gamesLogic/gameHistoryLogic";
 
 const imagensCartas: Record<number, ImageSourcePropType> = {
-  1: img1,
-  2: img2,
-  3: img3,
-  4: img4,
-  5: img5,
-  6: img6,
-  7: img7,
-  8: img8,
+  1: memory1,
+  2: memory2,
+  3: memory3,
+  4: memory4,
+  5: memory5,
+  6: memory6,
+  7: memory7,
+  8: memory8,
 };
 
 export type DificuldadeType = "facil" | "medio" | "hard";
@@ -70,7 +72,7 @@ export const useMemoryGame = ({
   const [bloquearCliques, setBloquearCliques] = useState(false);
 
   const inicializarCartas = () => {
-    const quantidadePares = totalCartas / 2;
+    const quantidadePares = Math.floor(totalCartas / 2);
 
     const listaOriginal: CartaType[] = [];
 
@@ -93,7 +95,7 @@ export const useMemoryGame = ({
     }
 
     const cartasEmbaralhadas = [...listaOriginal].sort(
-      () => Math.random() - 0.5,
+      () => Math.random() - 0.5
     );
 
     setCartas(cartasEmbaralhadas);
@@ -130,9 +132,10 @@ export const useMemoryGame = ({
       return;
     }
 
-    const novasCartas = [...cartas];
-
-    novasCartas[indexClicado].isFlipped = true;
+    // Criando novo objeto para evitar mutação do estado original
+    const novasCartas = cartas.map((carta, index) =>
+      index === indexClicado ? { ...carta, isFlipped: true } : carta
+    );
 
     setCartas(novasCartas);
 
@@ -150,17 +153,18 @@ export const useMemoryGame = ({
         novasCartas[segundoIndex].valorOriginal
       ) {
         setTimeout(() => {
-          const cartasComMatch = [...novasCartas];
-
-          cartasComMatch[primeiroIndex].isMatched = true;
-          cartasComMatch[segundoIndex].isMatched = true;
+          const cartasComMatch = novasCartas.map((carta, index) =>
+            index === primeiroIndex || index === segundoIndex
+              ? { ...carta, isMatched: true }
+              : carta
+          );
 
           setCartas(cartasComMatch);
           setCartasSelecionadas([]);
           setBloquearCliques(false);
 
           const todasCombinadas = cartasComMatch.every(
-            (carta) => carta.isMatched,
+            (carta) => carta.isMatched
           );
 
           if (todasCombinadas) {
@@ -173,10 +177,11 @@ export const useMemoryGame = ({
         }, 500);
       } else {
         setTimeout(() => {
-          const cartasDesviradas = [...novasCartas];
-
-          cartasDesviradas[primeiroIndex].isFlipped = false;
-          cartasDesviradas[segundoIndex].isFlipped = false;
+          const cartasDesviradas = novasCartas.map((carta, index) =>
+            index === primeiroIndex || index === segundoIndex
+              ? { ...carta, isFlipped: false }
+              : carta
+          );
 
           setCartas(cartasDesviradas);
           setCartasSelecionadas([]);

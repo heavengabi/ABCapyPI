@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+
 import {
   Text,
   ImageBackground,
@@ -8,8 +9,10 @@ import {
   Pressable,
   Image,
 } from "react-native";
+
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
 import Header from "@/src/components/Header/Header";
 import { MainCard } from "../src/components/gameComponents/cardGames/MainCard";
@@ -150,9 +153,7 @@ const EqualityGame = () => {
 
   const jogarNovamente = () => {
     setRodadaAtual(1);
-
     setEstrelas(0);
-
     setCorretasEncontradas([]);
 
     setRodada(
@@ -248,12 +249,8 @@ const EqualityGame = () => {
                     />
 
                     {jaAcertou && (
-                      <View
-                        style={styles.checkMark}
-                      >
-                        <Text
-                          style={styles.checkText}
-                        >
+                      <View style={styles.checkMark}>
+                        <Text style={styles.checkText}>
                           ✓
                         </Text>
                       </View>
@@ -269,9 +266,7 @@ const EqualityGame = () => {
           visible={modal !== null}
           transparent
           animationType="fade"
-          onRequestClose={() =>
-            setModal(null)
-          }
+          onRequestClose={() => setModal(null)}
         >
           <View style={styles.modalOverlay}>
             <Image
@@ -291,18 +286,14 @@ const EqualityGame = () => {
               {modal === "erro" && (
                 <>
                   <Text style={styles.modalTitle}>
-                    OPA! 😅
+                    OPA!
                   </Text>
 
-                  <Text
-                    style={styles.modalSubtitle}
-                  >
+                  <Text style={styles.modalSubtitle}>
                     Essa não é igual!
                   </Text>
 
-                  <Text
-                    style={styles.modalMessage}
-                  >
+                  <Text style={styles.modalMessage}>
                     Não tem problema!
                     {"\n"}
                     Vamos tentar novamente?
@@ -316,15 +307,9 @@ const EqualityGame = () => {
                           jogo.header,
                       },
                     ]}
-                    onPress={
-                      tentarNovamente
-                    }
+                    onPress={tentarNovamente}
                   >
-                    <Text
-                      style={
-                        styles.modalButtonText
-                      }
-                    >
+                    <Text style={styles.modalButtonText}>
                       Tentar novamente
                     </Text>
                   </Pressable>
@@ -333,11 +318,7 @@ const EqualityGame = () => {
                     style={styles.backButton}
                     onPress={sairDoJogo}
                   >
-                    <Text
-                      style={
-                        styles.backButtonText
-                      }
-                    >
+                    <Text style={styles.backButtonText}>
                       Sair
                     </Text>
                   </Pressable>
@@ -347,18 +328,14 @@ const EqualityGame = () => {
               {modal === "finalizado" && (
                 <>
                   <Text style={styles.modalTitle}>
-                    PARABÉNS! 🎉
+                    PARABÉNS!
                   </Text>
 
-                  <Text
-                    style={styles.modalSubtitle}
-                  >
+                  <Text style={styles.modalSubtitle}>
                     Você terminou o nível!
                   </Text>
 
-                  <Text
-                    style={styles.modalMessage}
-                  >
+                  <Text style={styles.modalMessage}>
                     Muito bem! Você encontrou
                     todas as imagens iguais.
                   </Text>
@@ -372,22 +349,28 @@ const EqualityGame = () => {
                       },
                     ]}
                   >
-                    <Text
-                      style={styles.scoreLabel}
-                    >
+                    <Text style={styles.scoreLabel}>
                       Estrelas conquistadas
                     </Text>
 
-                    <Text
-                      style={[
-                        styles.scoreEarned,
-                        {
-                          color: jogo.header,
-                        },
-                      ]}
-                    >
-                      ⭐ {estrelas}
-                    </Text>
+                    <View style={styles.scoreValue}>
+                      <Ionicons
+                        name="star"
+                        size={30}
+                        color={jogo.header}
+                      />
+
+                      <Text
+                        style={[
+                          styles.scoreEarned,
+                          {
+                            color: jogo.header,
+                          },
+                        ]}
+                      >
+                        {estrelas}
+                      </Text>
+                    </View>
                   </View>
 
                   <Pressable
@@ -398,15 +381,9 @@ const EqualityGame = () => {
                           jogo.header,
                       },
                     ]}
-                    onPress={
-                      jogarNovamente
-                    }
+                    onPress={jogarNovamente}
                   >
-                    <Text
-                      style={
-                        styles.modalButtonText
-                      }
-                    >
+                    <Text style={styles.modalButtonText}>
                       Jogar novamente
                     </Text>
                   </Pressable>
@@ -415,11 +392,7 @@ const EqualityGame = () => {
                     style={styles.backButton}
                     onPress={sairDoJogo}
                   >
-                    <Text
-                      style={
-                        styles.backButtonText
-                      }
-                    >
+                    <Text style={styles.backButtonText}>
                       Sair
                     </Text>
                   </Pressable>
@@ -525,81 +498,97 @@ const styles = StyleSheet.create({
 
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.45)",
+    backgroundColor: "rgba(0, 0, 0, 0.72)",
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 25,
+    paddingHorizontal: 20,
   },
 
   capivaraModal: {
-    width: 150,
-    height: 150,
-    marginBottom: -25,
-    zIndex: 2,
+    position: "absolute",
+    width: 115,
+    height: 115,
+    top: "20%",
+    right: "9%",
+    zIndex: 1,
   },
 
   modalContent: {
-    width: "100%",
+    width: "88%",
     maxWidth: 380,
     backgroundColor: "#FFFFFF",
-    borderRadius: 28,
+    borderRadius: 30,
     borderWidth: 5,
-    paddingHorizontal: 25,
-    paddingTop: 45,
+    paddingTop: 42,
     paddingBottom: 25,
+    paddingHorizontal: 28,
     alignItems: "center",
-    elevation: 10,
+    elevation: 12,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
-      height: 4,
+      height: 6,
     },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.3,
     shadowRadius: 8,
+    position: "relative",
+    overflow: "visible",
+    zIndex: 2,
   },
 
   modalTitle: {
-    fontSize: 28,
-    fontWeight: "bold",
+    fontSize: 27,
+    fontWeight: "900",
+    color: "#333",
+    marginBottom: 5,
     textAlign: "center",
-    color: "#333333",
-    marginBottom: 10,
   },
 
   modalSubtitle: {
-    fontSize: 20,
-    fontWeight: "bold",
+    fontSize: 17,
+    color: "#777",
+    marginBottom: 15,
+    fontWeight: "700",
     textAlign: "center",
-    color: "#555555",
-    marginBottom: 8,
   },
 
   modalMessage: {
     fontSize: 16,
     lineHeight: 23,
     textAlign: "center",
-    color: "#777777",
+    color: "#777",
     marginBottom: 20,
+    fontWeight: "600",
   },
 
   scoreContainer: {
-    width: "100%",
-    borderRadius: 18,
-    paddingVertical: 15,
     alignItems: "center",
-    marginVertical: 15,
+    justifyContent: "center",
+    marginVertical: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 25,
+    borderRadius: 16,
+    width: "100%",
   },
 
   scoreLabel: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#444444",
-    marginBottom: 5,
+    fontSize: 14,
+    color: "#555",
+    fontWeight: "700",
+    marginBottom: 2,
+  },
+
+  scoreValue: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
   },
 
   scoreEarned: {
-    fontSize: 34,
-    fontWeight: "bold",
+    fontSize: 32,
+    fontWeight: "900",
+    textAlign: "center",
   },
 
   modalButton: {
@@ -607,25 +596,33 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     borderRadius: 16,
     alignItems: "center",
-    marginTop: 10,
+    justifyContent: "center",
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.18,
+    shadowRadius: 4,
   },
 
   modalButtonText: {
     color: "#FFFFFF",
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: "900",
   },
 
   backButton: {
+    marginTop: 9,
+    paddingVertical: 10,
     width: "100%",
-    paddingVertical: 12,
     alignItems: "center",
-    marginTop: 8,
   },
 
   backButtonText: {
-    color: "#555555",
-    fontSize: 17,
-    fontWeight: "bold",
+    color: "#777",
+    fontSize: 15,
+    fontWeight: "700",
   },
 });
