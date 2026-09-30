@@ -98,7 +98,7 @@ export default function Stories() {
     if (!historiaLiberada(storyId)) {
       Alert.alert(
         "História bloqueada 🔒",
-        "Complete a história anterior para desbloquear esta!"
+        "Complete a história anterior para desbloquear esta!",
       );
       return;
     }
@@ -120,9 +120,7 @@ export default function Stories() {
 
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={styles.container}>
-            <Text style={styles.text1}>
-              Se aventure por essas histórias
-            </Text>
+            <Text style={styles.text1}>Se aventure por essas histórias</Text>
           </View>
 
           <View style={styles.conteudo}>
@@ -136,13 +134,10 @@ export default function Stories() {
                 style={[
                   styles.btnContainer,
                   { top: -30, right: "64%" },
-                  !historiaLiberada(2) && styles.bloqueado
+                  !historiaLiberada(2) && styles.bloqueado,
                 ]}
               >
-                <Botao
-                  image={a}
-                  onPress={() => abrirHistoria(2)}
-                />
+                <Botao image={a} onPress={() => abrirHistoria(2)} />
                 <Recompensa quantidade={5} imagem={starStory} />
               </View>
 
@@ -151,13 +146,10 @@ export default function Stories() {
                 style={[
                   styles.btnContainer,
                   { top: 185, left: "50%" },
-                  !historiaLiberada(3) && styles.bloqueado
+                  !historiaLiberada(3) && styles.bloqueado,
                 ]}
               >
-                <Botao
-                  image={b}
-                  onPress={() => abrirHistoria(3)}
-                />
+                <Botao image={b} onPress={() => abrirHistoria(3)} />
                 <Recompensa quantidade={5} imagem={starStory} />
               </View>
 
@@ -166,13 +158,10 @@ export default function Stories() {
                 style={[
                   styles.btnContainer,
                   { top: 340, right: "75%" },
-                  !historiaLiberada(4) && styles.bloqueado
+                  !historiaLiberada(4) && styles.bloqueado,
                 ]}
               >
-                <Botao
-                  image={c}
-                  onPress={() => abrirHistoria(4)}
-                />
+                <Botao image={c} onPress={() => abrirHistoria(4)} />
                 <Recompensa quantidade={5} imagem={starStory} />
               </View>
 
@@ -181,13 +170,10 @@ export default function Stories() {
                 style={[
                   styles.btnContainer,
                   { top: 480, left: "55%" },
-                  !historiaLiberada(5) && styles.bloqueado
+                  !historiaLiberada(5) && styles.bloqueado,
                 ]}
               >
-                <Botao
-                  image={d}
-                  onPress={() => abrirHistoria(5)}
-                />
+                <Botao image={d} onPress={() => abrirHistoria(5)} />
                 <Recompensa quantidade={5} imagem={starStory} />
               </View>
 
@@ -196,13 +182,10 @@ export default function Stories() {
                 style={[
                   styles.btnContainer,
                   { top: 650, right: "75%" },
-                  !historiaLiberada(6) && styles.bloqueado
+                  !historiaLiberada(6) && styles.bloqueado,
                 ]}
               >
-                <Botao
-                  image={e}
-                  onPress={() => abrirHistoria(6)}
-                />
+                <Botao image={e} onPress={() => abrirHistoria(6)} />
                 <Recompensa quantidade={5} imagem={starStory} />
               </View>
 
@@ -211,13 +194,10 @@ export default function Stories() {
                 style={[
                   styles.btnContainer,
                   { top: 800, left: "55%" },
-                  !historiaLiberada(7) && styles.bloqueado
+                  !historiaLiberada(7) && styles.bloqueado,
                 ]}
               >
-                <Botao
-                  image={f}
-                  onPress={() => abrirHistoria(7)}
-                />
+                <Botao image={f} onPress={() => abrirHistoria(7)} />
                 <Recompensa quantidade={5} imagem={starStory} />
               </View>
 
@@ -226,13 +206,10 @@ export default function Stories() {
                 style={[
                   styles.btnContainer,
                   { top: 950, right: "75%" },
-                  !historiaLiberada(8) && styles.bloqueado
+                  !historiaLiberada(8) && styles.bloqueado,
                 ]}
               >
-                <Botao
-                  image={g}
-                  onPress={() => abrirHistoria(8)}
-                />
+                <Botao image={g} onPress={() => abrirHistoria(8)} />
                 <Recompensa quantidade={5} imagem={starStory} />
               </View>
             </View>

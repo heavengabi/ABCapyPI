@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-
 import {
   View,
   Text,
@@ -9,12 +8,12 @@ import {
   StyleSheet,
   Modal,
 } from "react-native";
-
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
 import Header from "@/src/components/Header/Header";
+import Bolota from "@/src/components/gameComponents/SequencingGame/Bolota";
 
 import easySeq from "@/src/assets/images/gameImages/easySeq.png";
 import mediumSeq from "@/src/assets/images/gameImages/mediumSeq.png";
@@ -24,14 +23,10 @@ import capivarafeliz from "@/src/assets/images/gameImages/capivarafeliz.png";
 import {
   useSequencingGame,
   ESTRELAS_SEQUENCING,
+  registrarVitoriaSequencing,
 } from "@/src/logics/gamesLogic/sequencingLogic";
 
-import { registrarVitoriaSequencing } from "@/src/logics/gamesLogic/sequencingLogic";
-
-import Bolota from "@/src/components/gameComponents/SequencingGame/Bolota";
-
 type Nivel = "facil" | "medio" | "dificil";
-
 type Cor = "verde" | "amarela" | "vermelha";
 
 type BolotaConfig = {
@@ -117,9 +112,7 @@ const SequencingGame = () => {
   }>();
 
   const nivel: Nivel =
-    difficulty === "medio" || difficulty === "dificil"
-      ? difficulty
-      : "facil";
+    difficulty === "medio" || difficulty === "dificil" ? difficulty : "facil";
 
   const jogo = settings[nivel];
 
@@ -137,20 +130,15 @@ const SequencingGame = () => {
 
   useEffect(() => {
     if (fase === "acertou" && gameId) {
-      registrarVitoriaSequencing(
-        Number(gameId),
-        nivel,
-      );
+      registrarVitoriaSequencing(Number(gameId), nivel);
     }
   }, [fase, gameId, nivel]);
 
   const larguraContainer =
-    jogo.colunas * TAMANHO_BOLOTA +
-    (jogo.colunas - 1) * ESPACO_ENTRE_BOLOTAS;
+    jogo.colunas * TAMANHO_BOLOTA + (jogo.colunas - 1) * ESPACO_ENTRE_BOLOTAS;
 
   const alturaContainer =
-    jogo.linhas * TAMANHO_BOLOTA +
-    (jogo.linhas - 1) * ESPACO_ENTRE_BOLOTAS;
+    jogo.linhas * TAMANHO_BOLOTA + (jogo.linhas - 1) * ESPACO_ENTRE_BOLOTAS;
 
   const handleVoltarMenu = () => {
     pararJogo();
@@ -179,13 +167,9 @@ const SequencingGame = () => {
           }}
         />
 
-        <Text style={styles.text1}>
-          {jogo.titulo}
-        </Text>
+        <Text style={styles.text1}>{jogo.titulo}</Text>
 
-        <Text style={styles.text2}>
-          SIGA A SEQUÊNCIA DAS BOLHAS
-        </Text>
+        <Text style={styles.text2}>SIGA A SEQUÊNCIA DAS BOLHAS</Text>
 
         <View style={styles.gameArea}>
           <View
@@ -222,21 +206,16 @@ const SequencingGame = () => {
               ]}
               onPress={jogarNovaRodada}
             >
-              <Text style={styles.textBtn}>
-                COMEÇAR
-              </Text>
+              <Text style={styles.textBtn}>COMEÇAR</Text>
             </Pressable>
           </View>
         )}
 
         <Modal
-          visible={
-            fase === "acertou" ||
-            fase === "errou"
-          }
+          visible={fase === "acertou" || fase === "errou"}
           transparent
           animationType="fade"
-          onRequestClose={() => { }}
+          onRequestClose={() => {}}
         >
           <View style={styles.modalOverlay}>
             <Image
@@ -255,9 +234,7 @@ const SequencingGame = () => {
             >
               {fase === "acertou" && (
                 <>
-                  <Text style={styles.modalTitle}>
-                    Perfeito!
-                  </Text>
+                  <Text style={styles.modalTitle}>Perfeito!</Text>
 
                   <Text style={styles.modalSubtitle}>
                     Você acertou a sequência!
@@ -271,16 +248,10 @@ const SequencingGame = () => {
                       },
                     ]}
                   >
-                    <Text style={styles.scoreLabel}>
-                      Estrelas da rodada
-                    </Text>
+                    <Text style={styles.scoreLabel}>Estrelas da rodada</Text>
 
                     <View style={styles.scoreValue}>
-                      <Ionicons
-                        name="star"
-                        size={30}
-                        color={jogo.header}
-                      />
+                      <Ionicons name="star" size={30} color={jogo.header} />
 
                       <Text
                         style={[
@@ -304,31 +275,24 @@ const SequencingGame = () => {
                     ]}
                     onPress={jogarNovaRodada}
                   >
-                    <Text style={styles.modalButtonText}>
-                      Repetir
-                    </Text>
+                    <Text style={styles.modalButtonText}>Repetir</Text>
                   </Pressable>
 
                   <Pressable
                     style={styles.backButton}
                     onPress={handleVoltarMenu}
                   >
-                    <Text style={styles.backButtonText}>
-                      Sair
-                    </Text>
+                    <Text style={styles.backButtonText}>Sair</Text>
                   </Pressable>
                 </>
               )}
 
               {fase === "errou" && (
                 <>
-                  <Text style={styles.modalTitle}>
-                    OPA, ERROU!
-                  </Text>
+                  <Text style={styles.modalTitle}>OPA, ERROU!</Text>
 
                   <Text style={styles.modalSubtitle}>
-                    Não tem problema! Vamos
-                    tentar de novo?
+                    Não tem problema! Vamos{"\n"}tentar de novo?
                   </Text>
 
                   <Pressable
@@ -340,18 +304,14 @@ const SequencingGame = () => {
                     ]}
                     onPress={jogarNovaRodada}
                   >
-                    <Text style={styles.modalButtonText}>
-                      Tentar Novamente
-                    </Text>
+                    <Text style={styles.modalButtonText}>Tentar Novamente</Text>
                   </Pressable>
 
                   <Pressable
                     style={styles.backButton}
                     onPress={handleVoltarMenu}
                   >
-                    <Text style={styles.backButtonText}>
-                      Sair
-                    </Text>
+                    <Text style={styles.backButtonText}>Sair</Text>
                   </Pressable>
                 </>
               )}
@@ -455,8 +415,6 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.3,
     shadowRadius: 8,
-    position: "relative",
-    overflow: "visible",
     zIndex: 2,
   },
 

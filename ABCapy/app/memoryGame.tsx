@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-
 import {
   Text,
   Image,
@@ -9,7 +8,6 @@ import {
   Modal,
   TouchableOpacity,
 } from "react-native";
-
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -41,7 +39,6 @@ const MemoryGame = () => {
       wallpaper: easy,
       totalCartas: 6,
     },
-
     medio: {
       titulo: "MÉDIO",
       header: "#F8C84E",
@@ -49,7 +46,6 @@ const MemoryGame = () => {
       wallpaper: medium,
       totalCartas: 10,
     },
-
     dificil: {
       titulo: "DIFÍCIL",
       header: "#F47A7A",
@@ -99,13 +95,6 @@ const MemoryGame = () => {
     });
   };
 
-  /*
-   * TAMANHO DAS CARTAS
-   *
-   * Fácil  = 6 cartas  = maiores
-   * Médio  = 10 cartas = tamanho médio
-   * Difícil = 12 cartas = menores para caber na tela
-   */
   const tamanhoCarta =
     jogo.totalCartas === 6 ? 100 : jogo.totalCartas === 10 ? 85 : 76;
 
@@ -132,7 +121,6 @@ const MemoryGame = () => {
               },
             ]}
           >
-            {/* INÍCIO */}
             {statusJogo === "inicio" && (
               <>
                 <Text style={styles.modalTitle}>Jogo da Memória</Text>
@@ -177,7 +165,6 @@ const MemoryGame = () => {
               </>
             )}
 
-            {/* CONTAGEM */}
             {statusJogo === "contagem" && (
               <View style={styles.contagemContainer}>
                 <Text
@@ -195,7 +182,6 @@ const MemoryGame = () => {
               </View>
             )}
 
-            {/* VITÓRIA */}
             {statusJogo === "vitoria" && (
               <>
                 <Text style={styles.modalTitle}>Perfeito!</Text>
@@ -256,13 +242,11 @@ const MemoryGame = () => {
         </View>
       </Modal>
 
-      {/* FUNDO DO JOGO */}
       <ImageBackground
         source={jogo.wallpaper}
         style={styles.background}
         resizeMode="cover"
       >
-        {/* HEADER */}
         <Header
           title="Jogo da Memória"
           icon="arrow-back"
@@ -275,12 +259,10 @@ const MemoryGame = () => {
           }}
         />
 
-        {/* NÍVEL */}
         <View style={styles.infoContainer}>
           <Text style={styles.nivelText}>Nível: {jogo.titulo}</Text>
         </View>
 
-        {/* GRID */}
         <View
           style={[
             styles.gridWrapper,
@@ -323,11 +305,9 @@ const styles = StyleSheet.create({
   },
 
   infoContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 24,
     marginTop: 15,
+    paddingHorizontal: 24,
   },
 
   nivelText: {
@@ -367,10 +347,6 @@ const styles = StyleSheet.create({
     gap: 6,
   },
 
-  /* =========================
-     MODAL
-     ========================= */
-
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.72)",
@@ -405,8 +381,6 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.3,
     shadowRadius: 8,
-    position: "relative",
-    overflow: "visible",
     zIndex: 2,
   },
 
@@ -487,10 +461,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 
-  /* =========================
-     CONTAGEM
-     ========================= */
-
   contagemContainer: {
     minHeight: 150,
     width: "100%",
@@ -510,10 +480,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     marginTop: 5,
   },
-
-  /* =========================
-     PONTUAÇÃO
-     ========================= */
 
   scoreContainer: {
     alignItems: "center",

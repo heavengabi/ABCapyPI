@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-
 import {
   Text,
   ImageBackground,
@@ -9,20 +8,16 @@ import {
   Pressable,
   Image,
 } from "react-native";
-
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-
 import Header from "@/src/components/Header/Header";
 import { MainCard } from "../src/components/gameComponents/cardGames/MainCard";
 import { OptionCard } from "../src/components/gameComponents/cardGames/OptionCard";
-
 import easy from "@/src/assets/images/gameImages/easy.png";
 import medium from "@/src/assets/images/gameImages/medium.png";
 import hard from "@/src/assets/images/gameImages/hard.png";
 import capivarafeliz from "@/src/assets/images/gameImages/capivarafeliz.png";
-
 import {
   gerarRodada,
   GameRound,
@@ -30,7 +25,6 @@ import {
   registrarVitoriaEquality,
   ESTRELAS_EQUALITY,
 } from "../src/logics/gamesLogic/equalityGame";
-
 const settings = {
   facil: {
     titulo: "FÁCIL",
@@ -41,7 +35,6 @@ const settings = {
     corretas: 1,
     opcoes: 3,
   },
-
   medio: {
     titulo: "MÉDIO",
     header: "#F8C84E",
@@ -51,7 +44,6 @@ const settings = {
     corretas: 2,
     opcoes: 4,
   },
-
   dificil: {
     titulo: "DIFÍCIL",
     header: "#F47A7A",
@@ -67,7 +59,7 @@ const EqualityGame = () => {
   const { difficulty } = useLocalSearchParams();
 
   const dificuldade =
-    (difficulty as keyof typeof settings) ?? "facil";
+    difficulty === "medio" || difficulty === "dificil" ? difficulty : "facil";
 
   const jogo = settings[dificuldade];
 
@@ -77,19 +69,14 @@ const EqualityGame = () => {
     gerarRodada(jogo.opcoes, jogo.corretas),
   );
 
-  const [corretasEncontradas, setCorretasEncontradas] =
-    useState<string[]>([]);
+  const [corretasEncontradas, setCorretasEncontradas] = useState<string[]>([]);
 
   const [estrelas, setEstrelas] = useState(0);
 
-  const [modal, setModal] = useState<
-    "erro" | "finalizado" | null
-  >(null);
+  const [modal, setModal] = useState<"erro" | "finalizado" | null>(null);
 
   const handleSelectOption = async (optionId: string) => {
-    const opcao = rodada.opcoes.find(
-      (item) => item.optionId === optionId,
-    );
+    const opcao = rodada.opcoes.find((item) => item.optionId === optionId);
 
     if (!opcao) {
       return;
@@ -104,47 +91,36 @@ const EqualityGame = () => {
       return;
     }
 
-    const novasCorretas = [
-      ...corretasEncontradas,
-      optionId,
-    ];
+    const novasCorretas = [...corretasEncontradas, optionId];
 
     setCorretasEncontradas(novasCorretas);
 
-    if (novasCorretas.length === jogo.corretas) {
-      const ultimaRodada =
-        rodadaAtual >= jogo.rodadas;
+    if (novasCorretas.length !== jogo.corretas) {
+      return;
+    }
 
-      if (ultimaRodada) {
-        const estrelasConquistadas =
-          ESTRELAS_EQUALITY[dificuldade];
+    const ultimaRodada = rodadaAtual >= jogo.rodadas;
 
-        setEstrelas(estrelasConquistadas);
+    if (ultimaRodada) {
+      const estrelasConquistadas = ESTRELAS_EQUALITY[dificuldade];
 
-        try {
-          await registrarVitoriaEquality(dificuldade);
-        } catch (error) {
-          console.error(
-            "Erro ao registrar partida:",
-            error,
-          );
-        }
+      setEstrelas(estrelasConquistadas);
 
-        setModal("finalizado");
-        return;
+      try {
+        await registrarVitoriaEquality(dificuldade);
+      } catch (error) {
+        console.error("Erro ao registrar partida:", error);
       }
 
-      setRodadaAtual((prev) => prev + 1);
-
-      setRodada(
-        gerarRodada(
-          jogo.opcoes,
-          jogo.corretas,
-        ),
-      );
-
-      setCorretasEncontradas([]);
+      setModal("finalizado");
+      return;
     }
+
+    setRodadaAtual((prev) => prev + 1);
+
+    setRodada(gerarRodada(jogo.opcoes, jogo.corretas));
+
+    setCorretasEncontradas([]);
   };
 
   const tentarNovamente = () => {
@@ -156,12 +132,7 @@ const EqualityGame = () => {
     setEstrelas(0);
     setCorretasEncontradas([]);
 
-    setRodada(
-      gerarRodada(
-        jogo.opcoes,
-        jogo.corretas,
-      ),
-    );
+    setRodada(gerarRodada(jogo.opcoes, jogo.corretas));
 
     setModal(null);
   };
@@ -190,9 +161,7 @@ const EqualityGame = () => {
         />
 
         <View style={styles.contentContainer}>
-          <Text style={styles.text1}>
-            {jogo.titulo}
-          </Text>
+          <Text style={styles.text1}>{jogo.titulo}</Text>
 
           <Text style={styles.roundText}>
             Rodada {rodadaAtual} de {jogo.rodadas}
@@ -201,8 +170,7 @@ const EqualityGame = () => {
           <View
             style={[
               styles.mainCardsContainer,
-              rodada.corretas.length > 1 &&
-              styles.mainCardsMultiple,
+              rodada.corretas.length > 1 && styles.mainCardsMultiple,
             ]}
           >
             {rodada.corretas.map((item) => (
@@ -210,55 +178,39 @@ const EqualityGame = () => {
                 key={item.id}
                 imageSource={item.image}
                 cardColor={jogo.button}
-                small={
-                  rodada.corretas.length > 1
-                }
+                small={rodada.corretas.length > 1}
               />
             ))}
           </View>
 
-          <Text style={styles.text2}>
-            CLIQUE NA IMAGEM IGUAL
-          </Text>
+          <Text style={styles.text2}>CLIQUE NA IMAGEM IGUAL</Text>
 
           <View style={styles.optionsContainer}>
-            {rodada.opcoes.map(
-              (opcao: GameOption) => {
-                const jaAcertou =
-                  corretasEncontradas.includes(
-                    opcao.optionId,
-                  );
+            {rodada.opcoes.map((opcao: GameOption) => {
+              const jaAcertou = corretasEncontradas.includes(opcao.optionId);
 
-                return (
-                  <View
-                    key={opcao.optionId}
-                    style={[
-                      styles.optionWrapper,
-                      jaAcertou &&
-                      styles.optionFound,
-                    ]}
-                  >
-                    <OptionCard
-                      imageSource={opcao.image}
-                      cardColor={jogo.button}
-                      onPress={() =>
-                        handleSelectOption(
-                          opcao.optionId,
-                        )
-                      }
-                    />
+              return (
+                <View
+                  key={opcao.optionId}
+                  style={[
+                    styles.optionWrapper,
+                    jaAcertou && styles.optionFound,
+                  ]}
+                >
+                  <OptionCard
+                    imageSource={opcao.image}
+                    cardColor={jogo.button}
+                    onPress={() => handleSelectOption(opcao.optionId)}
+                  />
 
-                    {jaAcertou && (
-                      <View style={styles.checkMark}>
-                        <Text style={styles.checkText}>
-                          ✓
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-                );
-              },
-            )}
+                  {jaAcertou && (
+                    <View style={styles.checkMark}>
+                      <Text style={styles.checkText}>✓</Text>
+                    </View>
+                  )}
+                </View>
+              );
+            })}
           </View>
         </View>
 
@@ -285,13 +237,9 @@ const EqualityGame = () => {
             >
               {modal === "erro" && (
                 <>
-                  <Text style={styles.modalTitle}>
-                    OPA!
-                  </Text>
+                  <Text style={styles.modalTitle}>OPA!</Text>
 
-                  <Text style={styles.modalSubtitle}>
-                    Essa não é igual!
-                  </Text>
+                  <Text style={styles.modalSubtitle}>Essa não é igual!</Text>
 
                   <Text style={styles.modalMessage}>
                     Não tem problema!
@@ -303,33 +251,23 @@ const EqualityGame = () => {
                     style={[
                       styles.modalButton,
                       {
-                        backgroundColor:
-                          jogo.header,
+                        backgroundColor: jogo.header,
                       },
                     ]}
                     onPress={tentarNovamente}
                   >
-                    <Text style={styles.modalButtonText}>
-                      Tentar novamente
-                    </Text>
+                    <Text style={styles.modalButtonText}>Tentar novamente</Text>
                   </Pressable>
 
-                  <Pressable
-                    style={styles.backButton}
-                    onPress={sairDoJogo}
-                  >
-                    <Text style={styles.backButtonText}>
-                      Sair
-                    </Text>
+                  <Pressable style={styles.backButton} onPress={sairDoJogo}>
+                    <Text style={styles.backButtonText}>Sair</Text>
                   </Pressable>
                 </>
               )}
 
               {modal === "finalizado" && (
                 <>
-                  <Text style={styles.modalTitle}>
-                    PARABÉNS!
-                  </Text>
+                  <Text style={styles.modalTitle}>PARABÉNS!</Text>
 
                   <Text style={styles.modalSubtitle}>
                     Você terminou o nível!
@@ -337,6 +275,7 @@ const EqualityGame = () => {
 
                   <Text style={styles.modalMessage}>
                     Muito bem! Você encontrou
+                    {"\n"}
                     todas as imagens iguais.
                   </Text>
 
@@ -344,21 +283,14 @@ const EqualityGame = () => {
                     style={[
                       styles.scoreContainer,
                       {
-                        backgroundColor:
-                          jogo.button,
+                        backgroundColor: jogo.button,
                       },
                     ]}
                   >
-                    <Text style={styles.scoreLabel}>
-                      Estrelas conquistadas
-                    </Text>
+                    <Text style={styles.scoreLabel}>Estrelas conquistadas</Text>
 
                     <View style={styles.scoreValue}>
-                      <Ionicons
-                        name="star"
-                        size={30}
-                        color={jogo.header}
-                      />
+                      <Ionicons name="star" size={30} color={jogo.header} />
 
                       <Text
                         style={[
@@ -377,24 +309,16 @@ const EqualityGame = () => {
                     style={[
                       styles.modalButton,
                       {
-                        backgroundColor:
-                          jogo.header,
+                        backgroundColor: jogo.header,
                       },
                     ]}
                     onPress={jogarNovamente}
                   >
-                    <Text style={styles.modalButtonText}>
-                      Jogar novamente
-                    </Text>
+                    <Text style={styles.modalButtonText}>Jogar novamente</Text>
                   </Pressable>
 
-                  <Pressable
-                    style={styles.backButton}
-                    onPress={sairDoJogo}
-                  >
-                    <Text style={styles.backButtonText}>
-                      Sair
-                    </Text>
+                  <Pressable style={styles.backButton} onPress={sairDoJogo}>
+                    <Text style={styles.backButtonText}>Sair</Text>
                   </Pressable>
                 </>
               )}
