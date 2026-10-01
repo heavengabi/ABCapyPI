@@ -18,7 +18,7 @@ import Bolota from "@/src/components/gameComponents/SequencingGame/Bolota";
 import easySeq from "@/src/assets/images/gameImages/easySeq.png";
 import mediumSeq from "@/src/assets/images/gameImages/mediumSeq.png";
 import hardSeq from "@/src/assets/images/gameImages/hardSeq.png";
-import capivarafeliz from "@/src/assets/images/gameImages/capivarafeliz.png";
+
 
 import {
   useSequencingGame,
@@ -219,7 +219,6 @@ const SequencingGame = () => {
         >
           <View style={styles.modalOverlay}>
             <Image
-              source={capivarafeliz}
               style={styles.capivaraModal}
               resizeMode="contain"
             />

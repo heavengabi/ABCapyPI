@@ -43,7 +43,6 @@ const GamePages = () => {
     try {
       const response = await api.get("/games");
 
-      console.log("JOGOS RECEBIDOS:", response.data);
 
       setGames(response.data);
     } catch (error) {

@@ -108,7 +108,6 @@ const MemoryGame = () => {
       >
         <View style={styles.modalOverlay}>
           <Image
-            source={capivarafeliz}
             style={styles.capivaraModal}
             resizeMode="contain"
           />
