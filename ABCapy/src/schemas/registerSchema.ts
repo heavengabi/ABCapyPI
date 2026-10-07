@@ -22,7 +22,7 @@ export const registerSchema = z
       .string()
       .min(6, "A senha deve ter no mínimo 6 caracteres")
       .regex(/[*@!#%&()^~{}]+/, "A senha deve conter pelo menos 1 caractere especial")
-      .regex(/[aA]/, "A senha deve conter a letra 'A'"),
+      .regex(/[A-Z]/, { message: "A senha deve conter pelo menos uma letra maiúscula (A-Z)" }),
 
     confirmPassword: z
       .string()
