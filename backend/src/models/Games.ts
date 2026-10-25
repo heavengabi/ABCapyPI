@@ -15,8 +15,10 @@ export class Game {
   thumbnailUrl: string;
 
   @Column({ length: 50, nullable: false })
-  type: string; 
+  type: string;
 
   @Column({ type: "int", default: 1 })
   difficultyLevel: number;
+  @Column({ default: 0 })
+  order: number;
 }

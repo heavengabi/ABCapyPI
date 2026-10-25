@@ -1,19 +1,22 @@
 import React from "react";
-import { Pressable, StyleProp, StyleSheet, Text, ViewStyle, TextStyle} from "react-native";
+import { Pressable, StyleProp, StyleSheet, Text, ViewStyle, TextStyle } from "react-native";
 import { Themes } from "../../global";
-import { ViewProps } from "react-native-svg/lib/typescript/fabric/utils";
 
 type ButtonProps = {
   title: string;
   onPress: () => void;
-  style?: StyleProp<ViewStyle>
-  textStyle?: StyleProp<TextStyle>
+  disabled?: boolean;
+  style?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
 };
 
-
-export function Button({ title, onPress, style, textStyle }: ButtonProps) {
+export function Button({ title, onPress, disabled, style, textStyle }: ButtonProps) {
   return (
-    <Pressable style={[styles.button, style]} onPress={onPress}>
+    <Pressable
+      style={[styles.button, style, disabled && styles.disabledButton]}
+      onPress={onPress}
+      disabled={disabled}
+    >
       <Text style={[styles.buttonText, textStyle]}>{title}</Text>
     </Pressable>
   );
@@ -23,16 +26,20 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: Themes.colors.primary,
     padding: 2,
-    borderRadius: 20 ,
+    borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
     width: 240,
     height: 45,
   },
+  disabledButton: {
+    backgroundColor: "#A0AEC0",
+    opacity: 0.7,
+  },
   buttonText: {
     color: "#fff",
-    fontFamily:"Poppins_500Medium",
+    fontFamily: "Poppins_500Medium",
     textAlign: "center",
-    fontSize:20
+    fontSize: 20,
   },
 });

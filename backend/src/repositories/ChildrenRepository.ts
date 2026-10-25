@@ -22,10 +22,15 @@ export const childrenRepository = {
       relations: ["user"],
     });
   },
-
 async update(id: number, data: Partial<Children>) {
-  await repo.update(id, data);
-  return await repo.findOne({ where: { id }, relations: ["user"] });
+  const child = await repo.findOneBy({ id });
+  if (!child) return null;
+  
+  // Mescla os novos dados (ex: stars) na entidade existente
+  repo.merge(child, data);
+  
+  // Salva no banco de dados
+  return await repo.save(child);
 },
 
   async delete(id: number) {

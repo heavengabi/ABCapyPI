@@ -1,431 +1,850 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  ScrollView,
-  Text,
-  View,
-  StyleSheet,
-  TouchableOpacity,
-  Image as RNImage,
-  Modal,
-  TouchableWithoutFeedback,
-  Pressable,
-  TextInput,
   ActivityIndicator,
   Alert,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Pencil, Lock, X, User } from "lucide-react-native";
+import {
+  Pencil,
+  Lock,
+  X,
+  User,
+  Trophy,
+  Award,
+  Sparkles,
+} from "lucide-react-native";
 import { useNavigation, useFocusEffect } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Image } from "expo-image";
-import api from "@/src/utils/api";
-
-import menu from "../../src/assets/images/homeImages/menu.png";
+import api from "../../src/utils/api";
 import Footer from "@/src/components/Footer/Footer";
+import { useTalkBack } from "@/src/context/TalkBackContext";
 
-const CAPY_AVATARS: Record<string, any> = {
-  aventureira: require("../../src/assets/charactersImages/AdventureCapy.png"),
-  sabida: require("../../src/assets/charactersImages/StudentCapy.png"),
-};
-
-const CATEGORIES = [
-  { id: "1", name: "nenhum" },
-  { id: "2", name: "chapéus", icon: "🎩" },
-  { id: "3", name: "óculos", icon: "👓" },
-];
-
-const ITEMS = [
-  { id: "101", image: require("../../src/assets/characterAccessories/FarmerCapy.png") },
-  { id: "102", image: require("../../src/assets/characterAccessories/FarmerCapy.png") },
-  { id: "103", image: require("../../src/assets/characterAccessories/PirateCapy.png") },
-  { id: "104", image: require("../../src/assets/characterAccessories/FarmerCapy.png") },
-];
-
+const CACHE_KEY = "@ABCapy:child";
 const NAME_SUGGESTIONS = ["Capy", "Paçoca", "Pipoca"];
 
-interface ActionModalProps {
-  handleClose: () => void;
-  userName: string;
+const menuIcon = require("../../src/assets/images/homeImages/menu.png");
+const starIcon = require("../../src/assets/images/solar_star-bold-duotone.png");
+
+// Thumbnails da loja
+const pirateImg = require("../../src/assets/characterAccessories/PirateCapy.png");
+const farmerImg = require("../../src/assets/characterAccessories/FarmerCapy.png");
+const gradCapThumb = require("../../src/assets/characterAccessories/GradeCapy.png");
+const glassesThumb = require("../../src/assets/characterAccessories/CapyGlasses.png");
+const beretThumb = require("../../src/assets/characterAccessories/ArtistCapy.png");
+const adventurerHatThumb = require("../../src/assets/characterAccessories/AdventureCapy.png");
+
+// Mídias base das capivaras
+const adventureImg = require("../../src/assets/charactersImages/AdventureCapy.png");
+const studentImg = require("../../src/assets/charactersImages/StudentCapy.png");
+
+// Capivaras usando acessórios (1 a 6)
+const adventurePirateImg = require("../../src/assets/characterAccessories/capyUsingAcessories/1.png");
+const adventureFarmerImg = require("../../src/assets/characterAccessories/capyUsingAcessories/2.png");
+const studentGraduationImg = require("../../src/assets/characterAccessories/capyUsingAcessories/3.png");
+const studentGlassesImg = require("../../src/assets/characterAccessories/capyUsingAcessories/4.png");
+const studentBeretImg = require("../../src/assets/characterAccessories/capyUsingAcessories/5.png");
+const adventureHatImg = require("../../src/assets/characterAccessories/capyUsingAcessories/6.png");
+
+const CATEGORIES = [
+  { id: "none", name: "nenhum" },
+  { id: "hat", name: "chapéus", icon: "🎩" },
+  { id: "glasses", name: "óculos", icon: "👓" },
+];
+
+const ACCESSORIES = [
+  // Acessórios da Aventureira
+  {
+    id: "farmer",
+    backendId: 1,
+    category: "hat",
+    name: "Chapéu de Fazendeiro",
+    price: 0,
+    requiredStars: 0,
+    thumb: farmerImg,
+    allowedCapy: "aventureira",
+  },
+  {
+    id: "pirate",
+    backendId: 2,
+    category: "hat",
+    name: "Chapéu de Pirata",
+    price: 50,
+    requiredStars: 0,
+    thumb: pirateImg,
+    allowedCapy: "aventureira",
+  },
+  {
+    id: "adventurer_hat",
+    backendId: 6,
+    category: "hat",
+    name: "Chapéu de Aventureiro",
+    price: 0,
+    requiredStars: 10,
+    thumb: adventurerHatThumb,
+    allowedCapy: "aventureira",
+  },
+
+  // Acessórios da Sabida
+  {
+    id: "graduation",
+    backendId: 3,
+    category: "hat",
+    name: "Chapéu de Formando",
+    price: 0,
+    requiredStars: 0,
+    thumb: gradCapThumb,
+    allowedCapy: "sabida",
+  },
+  {
+    id: "glasses",
+    backendId: 4,
+    category: "glasses",
+    name: "Óculos",
+    price: 80,
+    requiredStars: 0,
+    thumb: glassesThumb,
+    allowedCapy: "sabida",
+  },
+  {
+    id: "beret",
+    backendId: 5,
+    category: "hat",
+    name: "Boina de Intelectual",
+    price: 0,
+    requiredStars: 10,
+    thumb: beretThumb,
+    allowedCapy: "sabida",
+  },
+];
+
+const CAPY_IMAGES: Record<string, Record<string, any>> = {
+  aventureira: {
+    base: adventureImg,
+    farmer: adventureFarmerImg,
+    pirate: adventurePirateImg,
+    adventurer_hat: adventureHatImg,
+  },
+  sabida: {
+    base: studentImg,
+    graduation: studentGraduationImg,
+    glasses: studentGlassesImg,
+    beret: studentBeretImg,
+  },
+};
+
+const getCapyImage = (capy?: string, accessory?: string | null) => {
+  const set = CAPY_IMAGES[capy ?? ""] ?? CAPY_IMAGES.aventureira;
+  return (accessory && set[accessory]) || set.base;
+};
+
+interface Child {
+  childName: string;
+  capy: string;
+  stars: number; // Saldo real de moedas no banco
+  totalStars?: number; // Total histórico acumulado
+  accessory?: string | null;
 }
 
-// Modal de Personalização de Acessórios
-function ActionModalContent({ handleClose, userName }: ActionModalProps) {
-  const [selectedCategory, setSelectedCategory] = useState("2");
-  const [selectedItem, setSelectedItem] = useState("103");
-
-  return (
-    <View style={modalStyle.modalContainer}>
-      <TouchableOpacity style={modalStyle.closeButton} onPress={handleClose} hitSlop={10}>
-        <X size={20} color="#000" />
-      </TouchableOpacity>
-
-      <Text style={modalStyle.title}>Acessórios</Text>
-      <Text style={modalStyle.subtitle}>Personalize {userName}</Text>
-
-      <View style={modalStyle.categoriesRow}>
-        {CATEGORIES.map((cat) => (
-          <TouchableOpacity
-            key={cat.id}
-            onPress={() => setSelectedCategory(cat.id)}
-            style={[
-              modalStyle.categoryTab,
-              selectedCategory === cat.id && modalStyle.categoryTabSelected,
-            ]}
-          >
-            {cat.icon && <Text style={{ marginRight: 6 }}>{cat.icon}</Text>}
-            <Text
-              style={[
-                modalStyle.categoryText,
-                selectedCategory === cat.id && modalStyle.categoryTextSelected,
-              ]}
-            >
-              {cat.name}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      <View style={modalStyle.gridContainer}>
-        {ITEMS.map((item) => (
-          <TouchableOpacity
-            key={item.id}
-            onPress={() => setSelectedItem(item.id)}
-            style={[
-              modalStyle.itemCard,
-              selectedItem === item.id && modalStyle.itemCardSelected,
-            ]}
-          >
-            <RNImage source={item.image} style={modalStyle.itemImage} />
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      <View style={modalStyle.footer}>
-        <View style={modalStyle.starPriceRow}>
-          <RNImage
-            source={require("../../src/assets/images/solar_star-bold-duotone.png")}
-            style={{ width: 22, height: 22 }}
-          />
-          <Text style={modalStyle.starPriceText}>50</Text>
-        </View>
-
-        <TouchableOpacity style={modalStyle.confirmButton} onPress={handleClose}>
-          <Text style={modalStyle.confirmButtonText}>confirmar</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
+interface InventoryItem {
+  id: number;
+  equipped: boolean;
+  accessory: { id: number; name: string; price: number };
 }
 
-// Modal de Alteração de Nome
-interface EditNameModalProps {
-  visible: boolean;
-  currentName: string;
-  onClose: () => void;
-  onSave: (newName: string) => Promise<void>;
-}
-
-function EditNameModal({ visible, currentName, onClose, onSave }: EditNameModalProps) {
-  const [name, setName] = useState(currentName);
+function AccessoryModal({
+  visible,
+  userName,
+  userStars,
+  userTotalStars,
+  userCapy,
+  currentAccessory,
+  inventory,
+  onClose,
+  onRefreshInventory,
+  onUpdateChildState,
+}: any) {
+  const { speak } = useTalkBack();
+  const [category, setCategory] = useState("hat");
+  const [selectedId, setSelectedId] = useState<string | null>(currentAccessory);
   const [loading, setLoading] = useState(false);
 
-  React.useEffect(() => {
-    setName(currentName);
-  }, [currentName, visible]);
+  useEffect(() => {
+    if (visible) {
+      setSelectedId(currentAccessory);
+      speak(
+        `Modal de acessórios aberto. Escolha um acessório para ${userName}`,
+      );
+    }
+  }, [visible, currentAccessory]);
 
-  async function handleConfirm() {
-    if (!name.trim()) {
-      Alert.alert("Atenção", "O nome não pode ficar em branco.");
+  const items = useMemo(
+    () => ACCESSORIES.filter((a) => a.category === category),
+    [category],
+  );
+  const selectedAccessory = ACCESSORIES.find((a) => a.id === selectedId);
+  const price = selectedAccessory?.price ?? 0;
+  const requiredStars = selectedAccessory?.requiredStars ?? 0;
+
+  const isAllowedForCurrentCapy = useMemo(() => {
+    if (!selectedAccessory) return true;
+    return selectedAccessory.allowedCapy === (userCapy ?? "aventureira");
+  }, [selectedAccessory, userCapy]);
+
+  const hasEnoughStarsForUnlock = userTotalStars >= requiredStars;
+
+  const purchasedItem = useMemo(() => {
+    if (!selectedAccessory) return null;
+    return inventory.find(
+      (inv: InventoryItem) => inv.accessory.id === selectedAccessory.backendId,
+    );
+  }, [inventory, selectedAccessory]);
+
+  const currentlyEquippedItem = useMemo(
+    () => inventory.find((inv: InventoryItem) => inv.equipped),
+    [inventory],
+  );
+  const isPurchased = !!purchasedItem || (price === 0 && requiredStars === 0);
+
+  const confirm = async () => {
+    if (!isAllowedForCurrentCapy && selectedId !== null) {
+      const capyName =
+        userCapy === "sabida" ? "Capivara Sabida" : "Capivara Aventureira";
+      const errorMsg = `Este acessório é exclusivo do outro personagem e não pode ser usado na ${capyName}.`;
+      speak(errorMsg);
+      Alert.alert("Acessório Indisponível", errorMsg);
+      return;
+    }
+
+    if (!hasEnoughStarsForUnlock && selectedId !== null) {
+      const errorMsg = `Você precisa acumular ${requiredStars} estrelas no total para desbloquear este acessório misterioso!`;
+      speak(errorMsg);
+      Alert.alert("Recompensa Bloqueada", errorMsg);
       return;
     }
 
     try {
       setLoading(true);
-      await onSave(name.trim());
+
+      if (!selectedId) {
+        speak("Removendo acessórios");
+        if (currentlyEquippedItem) {
+          await api.patch(`/inventory/${currentlyEquippedItem.id}/equip`);
+        }
+      } else if (purchasedItem) {
+        speak(`Equipando ${selectedAccessory?.name}`);
+        if (!purchasedItem.equipped) {
+          await api.patch(`/inventory/${purchasedItem.id}/equip`);
+        }
+      } else {
+        if (userStars < price) {
+          const msg = `Estrelas insuficientes. Você precisa de ${price} estrelas de saldo.`;
+          speak(msg);
+          Alert.alert("Estrelas Insuficientes", msg);
+          return;
+        }
+
+        if (selectedAccessory) {
+          speak(`Comprando e equipando ${selectedAccessory.name}`);
+          const { data: boughtItem } = await api.post("/inventory/buy", {
+            accessoryId: selectedAccessory.backendId,
+          });
+
+          if (boughtItem && !boughtItem.equipped) {
+            await api.patch(`/inventory/${boughtItem.id}/equip`);
+          }
+        }
+      }
+
+      await onRefreshInventory();
+      await onUpdateChildState();
       onClose();
     } catch (err: any) {
-      Alert.alert(
-        "Erro",
-        err.response?.data?.message || "Não foi possível atualizar o nome."
-      );
+      const errorMsg =
+        err.response?.data?.message || "Não foi possível realizar a ação.";
+      speak(errorMsg);
+      Alert.alert("Erro", errorMsg);
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <TouchableWithoutFeedback onPress={onClose}>
-        <View style={nameModalStyle.overlay}>
-          <TouchableWithoutFeedback>
-            <View style={nameModalStyle.sheetContainer}>
-             
-           
-              <View style={nameModalStyle.userAvatarBadge}>
-                <User size={22} color="#297AB8" />
-              </View>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={onClose}
+    >
+      <Pressable style={accStyle.overlay} onPress={onClose}>
+        <Pressable style={accStyle.container}>
+          <TouchableOpacity
+            style={accStyle.close}
+            onPress={() => {
+              speak("Fechar acessórios");
+              onClose();
+            }}
+            hitSlop={10}
+          >
+            <X size={20} color="#000" />
+          </TouchableOpacity>
 
-             
-              <Text style={nameModalStyle.title}>mudar dados</Text>
-              <Text style={nameModalStyle.subtitle}>como voce quer ser chamado?</Text>
+          <Text style={accStyle.title}>Acessórios</Text>
+          <Text style={accStyle.subtitle}>Personalize {userName}</Text>
 
-             
-              <View style={nameModalStyle.inputShadowWrapper}>
-                <TextInput
-                  style={nameModalStyle.input}
-                  value={name}
-                  onChangeText={(val) => {
-                    if (val.length <= 20) setName(val);
+          <View style={accStyle.categories}>
+            {CATEGORIES.map((c) => (
+              <TouchableOpacity
+                key={c.id}
+                onPress={() => {
+                  setCategory(c.id);
+                  if (c.id === "none") {
+                    setSelectedId(null);
+                    speak("Categoria nenhum acessório selecionada");
+                  } else {
+                    speak(`Categoria ${c.name} selecionada`);
+                  }
+                }}
+                style={[
+                  accStyle.tab,
+                  category === c.id && accStyle.tabSelected,
+                ]}
+              >
+                <Text
+                  style={[
+                    accStyle.tabText,
+                    category === c.id && accStyle.tabTextSelected,
+                  ]}
+                >
+                  {c.icon ? `${c.icon} ` : ""}
+                  {c.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          <View style={accStyle.grid}>
+            {items.map((item) => {
+              const isAllowed =
+                item.allowedCapy === (userCapy ?? "aventureira");
+              const isUnlockedByStars = userTotalStars >= item.requiredStars;
+              const isBlocked = !isAllowed || !isUnlockedByStars;
+              const isRewardItem = item.requiredStars === 10;
+
+              return (
+                <TouchableOpacity
+                  key={item.id}
+                  onPress={() => {
+                    setSelectedId(item.id);
+                    if (!isAllowed) {
+                      speak(`${item.name}. Indisponível para este personagem.`);
+                    } else if (!isUnlockedByStars) {
+                      speak(
+                        `Acessório misterioso de recompensa. Requer 10 estrelas conquistadas para desbloquear.`,
+                      );
+                    } else {
+                      speak(`${item.name}. Preço: ${item.price} estrelas`);
+                    }
                   }}
-                  placeholder="Nome"
-                  placeholderTextColor="#A0AEC0"
-                  maxLength={20}
-                  textAlign="center"
-                />
-              </View>
-
-              <Text style={nameModalStyle.counterText}>{name.length}/20 caracteres</Text>
-
-           
-              <Text style={nameModalStyle.suggestionsLabel}>Sujestões</Text>
-              <View style={nameModalStyle.suggestionsRow}>
-                {NAME_SUGGESTIONS.map((item, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    style={nameModalStyle.suggestionChip}
-                    onPress={() => setName(item)}
-                    activeOpacity={0.7}
-                  >
-                    <Text style={nameModalStyle.suggestionText}>{item}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-
-              {/* Botões de Ação */}
-              <View style={nameModalStyle.actionsRow}>
-                <TouchableOpacity
-                  style={[nameModalStyle.actionBtn, nameModalStyle.cancelBtn]}
-                  onPress={onClose}
-                  disabled={loading}
+                  style={[
+                    accStyle.card,
+                    selectedId === item.id && accStyle.cardSelected,
+                    isBlocked && accStyle.cardDisabled,
+                  ]}
                 >
-                  <Text style={nameModalStyle.actionBtnText}>cancelar</Text>
-                </TouchableOpacity>
+                  <Image
+                    source={item.thumb}
+                    style={[
+                      accStyle.cardImage,
+                      isRewardItem &&
+                        !isUnlockedByStars &&
+                        accStyle.mysteryImageLocked,
+                      !isRewardItem && isBlocked && { opacity: 0.3 },
+                    ]}
+                    contentFit="contain"
+                  />
 
-                <TouchableOpacity
-                  style={[nameModalStyle.actionBtn, nameModalStyle.confirmBtn]}
-                  onPress={handleConfirm}
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <ActivityIndicator size="small" color="#297AB8" />
-                  ) : (
-                    <Text style={nameModalStyle.actionBtnText}>confirmar</Text>
+                  {isBlocked && (
+                    <View style={accStyle.lockBadge}>
+                      <Lock size={12} color="#FFF" />
+                    </View>
                   )}
                 </TouchableOpacity>
+              );
+            })}
+          </View>
+
+          {selectedId != null &&
+            !isPurchased &&
+            isAllowedForCurrentCapy &&
+            hasEnoughStarsForUnlock && (
+              <View style={accStyle.price}>
+                <Image source={starIcon} style={{ width: 22, height: 22 }} />
+                <Text style={{ fontSize: 18, fontWeight: "bold" }}>
+                  {price}
+                </Text>
               </View>
+            )}
+
+          <TouchableOpacity
+            style={[
+              accStyle.confirm,
+              (!isAllowedForCurrentCapy || !hasEnoughStarsForUnlock) &&
+                selectedId !== null &&
+                accStyle.confirmDisabled,
+            ]}
+            onPress={confirm}
+            disabled={
+              loading ||
+              ((!isAllowedForCurrentCapy || !hasEnoughStarsForUnlock) &&
+                selectedId !== null)
+            }
+          >
+            {loading ? (
+              <ActivityIndicator size="small" color="#297AB8" />
+            ) : (
+              <Text
+                style={[
+                  accStyle.confirmText,
+                  (!isAllowedForCurrentCapy || !hasEnoughStarsForUnlock) &&
+                    selectedId !== null && { color: "#A0AEC0" },
+                ]}
+              >
+                {selectedId === null
+                  ? "confirmar"
+                  : !isAllowedForCurrentCapy
+                    ? "indisponível"
+                    : !hasEnoughStarsForUnlock
+                      ? "bloqueado (10 ★)"
+                      : isPurchased
+                        ? "equipar"
+                        : "comprar e equipar"}
+              </Text>
+            )}
+          </TouchableOpacity>
+        </Pressable>
+      </Pressable>
+    </Modal>
+  );
+}
+
+function EditNameModal({ visible, currentName, onClose, onSave }: any) {
+  const { speak } = useTalkBack();
+  const [name, setName] = useState(currentName);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (visible) {
+      setName(currentName);
+      speak("Modal de alteração de nome aberto.");
+    }
+  }, [currentName, visible]);
+
+  const confirm = async () => {
+    if (!name.trim()) {
+      speak("O nome não pode ficar em branco.");
+      return Alert.alert("Atenção", "O nome não pode ficar em branco.");
+    }
+    try {
+      setLoading(true);
+      speak(`Salvando nome ${name.trim()}`);
+      await onSave(name.trim());
+      onClose();
+    } catch (err: any) {
+      speak("Erro ao atualizar nome.");
+      Alert.alert("Erro", err.response?.data?.message || "Erro ao atualizar.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={onClose}
+    >
+      <Pressable style={nameStyle.overlay} onPress={onClose}>
+        <Pressable style={nameStyle.sheet}>
+          <View style={nameStyle.headerRow}>
+            <View style={nameStyle.avatarBadge}>
+              <User size={22} color="#297AB8" />
             </View>
-          </TouchableWithoutFeedback>
-        </View>
-      </TouchableWithoutFeedback>
+            <View style={nameStyle.headerTextContainer}>
+              <Text style={nameStyle.title}>mudar dados</Text>
+              <Text style={nameStyle.subtitle}>
+                como você quer ser chamado?
+              </Text>
+            </View>
+          </View>
+
+          <View style={nameStyle.inputWrapper}>
+            <TextInput
+              style={nameStyle.input}
+              value={name}
+              onChangeText={setName}
+              maxLength={20}
+              textAlign="center"
+              placeholder="Digite seu nome"
+              placeholderTextColor="#A0AEC0"
+            />
+          </View>
+
+          <Text style={nameStyle.suggestionsLabel}>sugestões de nomes:</Text>
+
+          <View style={nameStyle.suggestionsRow}>
+            {NAME_SUGGESTIONS.map((item) => (
+              <TouchableOpacity
+                key={item}
+                style={nameStyle.chip}
+                onPress={() => {
+                  setName(item);
+                  speak(`Sugestão ${item} selecionada`);
+                }}
+                activeOpacity={0.7}
+              >
+                <Text style={nameStyle.chipText}>{item}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          <View style={nameStyle.actionsRow}>
+            <TouchableOpacity
+              style={[nameStyle.actionBtn, nameStyle.cancelBtn]}
+              onPress={() => {
+                speak("Cancelar alteração de nome");
+                onClose();
+              }}
+              disabled={loading}
+              activeOpacity={0.7}
+            >
+              <Text style={nameStyle.cancelText}>cancelar</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[nameStyle.actionBtn, nameStyle.confirmBtn]}
+              onPress={confirm}
+              disabled={loading}
+              activeOpacity={0.7}
+            >
+              {loading ? (
+                <ActivityIndicator size="small" color="#FFF" />
+              ) : (
+                <Text style={nameStyle.confirmText}>confirmar</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </Pressable>
+      </Pressable>
     </Modal>
   );
 }
 
 export default function UserPage() {
-  const [visibleModal, setVisibleModal] = useState(false);
-  const [isEditingName, setIsEditingName] = useState(false);
-  const [childData, setChildData] = useState<{
-    childName: string;
-    capy: string;
-    stars: number;
-  } | null>(null);
-
+  const { speak } = useTalkBack();
+  const [child, setChild] = useState<Child | null>(null);
+  const [inventory, setInventory] = useState<InventoryItem[]>([]);
+  const [showAccessories, setShowAccessories] = useState(false);
+  const [showName, setShowName] = useState(false);
   const navigation = useNavigation<any>();
 
-  useFocusEffect(
-    React.useCallback(() => {
-      async function carregar() {
-        try {
-          const cache = await AsyncStorage.getItem("@ABCapy:child");
-          if (cache) {
-            setChildData(JSON.parse(cache));
-          }
+  const fetchInventory = async () => {
+    try {
+      const { data } = await api.get("/inventory/me");
+      if (data) setInventory(data);
+    } catch (e) {}
+  };
 
-          const res = await api.get("/children/me");
-          if (res.data) {
-            setChildData(res.data);
-            await AsyncStorage.setItem("@ABCapy:child", JSON.stringify(res.data));
-          }
-        } catch (e) {
-          console.error("Erro ao carregar dados do usuário:", e);
-        }
+  const fetchChildProfile = async () => {
+    try {
+      const { data } = await api.get("/children/me");
+      if (data) {
+        setChild(data);
+        await AsyncStorage.setItem(CACHE_KEY, JSON.stringify(data));
       }
+    } catch (e) {}
+  };
 
-      carregar();
-    }, [])
+  useFocusEffect(
+    useCallback(() => {
+      (async () => {
+        const cache = await AsyncStorage.getItem(CACHE_KEY);
+        let currentChild = cache ? JSON.parse(cache) : null;
+        if (currentChild) setChild(currentChild);
+
+        await fetchChildProfile();
+        await fetchInventory();
+
+        const childName = currentChild?.childName || "Amiguinho";
+        const childStars = currentChild?.stars ?? 0;
+        speak(
+          `Página de perfil de ${childName}. Você tem ${childStars} estrelas.`,
+        );
+      })();
+    }, []),
   );
 
-  // Requisição PUT integrada com o back-end e atualização do cache local
-  const handleUpdateName = async (newName: string) => {
-    const res = await api.put("/children/me", { childName: newName });
-    const updatedData = { ...childData, ...res.data, childName: newName };
-
-    setChildData(updatedData);
-    await AsyncStorage.setItem("@ABCapy:child", JSON.stringify(updatedData));
+  const updateChild = async (patch: Partial<Child>) => {
+    const { data } = await api.put("/children/me", patch);
+    const next = { ...child, ...data, ...patch } as Child;
+    setChild(next);
+    await AsyncStorage.setItem(CACHE_KEY, JSON.stringify(next));
   };
 
-  const openMenu = () => {
-    navigation.dispatch({ type: "OPEN_DRAWER" });
+  const equippedAccessory = useMemo(() => {
+    const item = inventory.find((i) => i.equipped);
+    if (!item) return null;
+    return (
+      ACCESSORIES.find((a) => a.backendId === item.accessory.id)?.id ?? null
+    );
+  }, [inventory]);
+
+  const name = child?.childName || "Amiguinho";
+  const stars = child?.stars ?? 0; // Saldo do banco (gastável)
+  const totalStars = child?.totalStars ?? child?.stars ?? 0; // Estrelas conquistadas (histórico imutável)
+
+  const getLevelInfo = (starsAmount: number) => {
+    if (starsAmount >= 200)
+      return { level: "Nível 5", label: "Mestre Capy", color: "#8B5CF6" };
+    if (starsAmount >= 100)
+      return { level: "Nível 4", label: "Sábio", color: "#EC4899" };
+    if (starsAmount >= 50)
+      return { level: "Nível 3", label: "Aventureiro", color: "#3B82F6" };
+    if (starsAmount >= 20)
+      return { level: "Nível 2", label: "Estudioso", color: "#10B981" };
+    return { level: "Nível 1", label: "Explorador", color: "#e3cc1c" };
   };
 
-  const displayName = childData?.childName || "Amiguinho";
-  const displayStars = childData?.stars ?? 0;
-  const avatarSource =
-    childData?.capy && CAPY_AVATARS[childData.capy]
-      ? CAPY_AVATARS[childData.capy]
-      : CAPY_AVATARS.sabida;
+  const currentLevel = getLevelInfo(totalStars);
+  const equippedName =
+    ACCESSORIES.find((a) => a.id === equippedAccessory)?.name ||
+    "nenhum acessório";
+  const badge = ACCESSORIES.find((a) => a.id === equippedAccessory)?.thumb;
+
+  // Lógica dinâmica para a recompensa de 10 estrelas baseada na Capivara atual
+  const isSabida = child?.capy === "sabida";
+  const rewardName = isSabida
+    ? "Boina de Intelectual"
+    : "Chapéu de Aventureiro";
+  const rewardThumb = isSabida ? beretThumb : adventurerHatThumb;
+  const isRewardUnlocked = totalStars >= 10;
 
   return (
-    <SafeAreaView edges={["top", "bottom"]} style={style.safeArea}>
+    <SafeAreaView
+      edges={["top", "bottom"]}
+      style={{ flex: 1, backgroundColor: "#FFF" }}
+    >
       <ScrollView
-        style={{ flex: 1 }}
         contentContainerStyle={style.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         <View style={style.topBar}>
-          <Pressable onPress={openMenu} hitSlop={10}>
-            <RNImage source={menu} style={style.menuIcon} />
+          <Pressable
+            onPress={() => {
+              speak("Abrir menu de navegação");
+              navigation.dispatch({ type: "OPEN_DRAWER" });
+            }}
+          >
+            <Image
+              source={menuIcon}
+              style={{ width: 31, height: 31 }}
+              contentFit="contain"
+            />
           </Pressable>
 
-          <View style={style.headerStars}>
-            <RNImage
-              source={require("../../src/assets/images/solar_star-bold-duotone.png")}
-              style={{ width: 24, height: 24 }}
-            />
-            <Text style={style.starsText}>{displayStars}</Text>
-          </View>
+          <Pressable
+            style={{ flexDirection: "row", alignItems: "center", gap: 4 }}
+            onPress={() => speak(`Você possui ${stars} estrelas disponíveis`)}
+          >
+            <Image source={starIcon} style={{ width: 24, height: 24 }} />
+            <Text style={{ fontSize: 18, fontWeight: "bold" }}>{stars}</Text>
+          </Pressable>
         </View>
 
         <Text style={style.pageTitle}>Perfil</Text>
 
-        {/* Tocar no avatar abre a troca de acessórios */}
         <TouchableOpacity
-          style={style.avatarWrapper}
+          style={{ marginBottom: 15 }}
           activeOpacity={0.8}
-          onPress={() => setVisibleModal(true)}
+          onPress={() => {
+            speak(
+              `Sua capivara está usando ${equippedName}. Toque para personalizar.`,
+            );
+            setShowAccessories(true);
+          }}
         >
           <View style={style.circuloOpcao}>
             <Image
-              source={avatarSource}
-              style={style.imagemPersonagem}
+              source={getCapyImage(child?.capy, equippedAccessory)}
+              style={{ width: "85%", height: "85%" }}
               contentFit="contain"
             />
           </View>
-
-          <View style={style.badgeAcessorio}>
-            <RNImage
-              source={require("../../src/assets/characterAccessories/FarmerCapy.png")}
-              style={{ width: 52, height: 32, resizeMode: "cover" }}
-            />
-          </View>
+          {badge && (
+            <View style={style.badgeAcessorio}>
+              <Image
+                source={badge}
+                style={{ width: 52, height: 32 }}
+                contentFit="cover"
+              />
+            </View>
+          )}
         </TouchableOpacity>
 
-        {/* Linha do nome com lápis abrindo o modal de edição */}
-        <View style={style.userNameRow}>
-          <Text style={style.userNameText}>{displayName}</Text>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 10,
+            marginBottom: 25,
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 24,
+              fontFamily: "Poppins_600SemiBold",
+              color: "#297AB8",
+            }}
+          >
+            {name}
+          </Text>
           <TouchableOpacity
             style={style.editButton}
-            onPress={() => setIsEditingName(true)}
-            hitSlop={10}
+            onPress={() => {
+              speak("Editar nome do perfil");
+              setShowName(true);
+            }}
           >
             <Pencil color="#0284C7" size={16} />
           </TouchableOpacity>
         </View>
 
-        <View style={style.progressSection}>
-          <View style={style.progressBarContainer}>
+        {/* CAMINHO DE RECOMPENSA (Dinâmico para Sabida ou Aventureira) */}
+        <Pressable
+          style={{ width: "100%", alignItems: "center", marginBottom: 25 }}
+          onPress={() =>
+            isRewardUnlocked
+              ? speak(
+                  `Recompensa desbloqueada! ${rewardName} disponível nos seus acessórios.`,
+                )
+              : speak(
+                  `Progresso de recompensas. Faltam ${10 - totalStars} estrelas para desbloquear o ${rewardName}.`,
+                )
+          }
+        >
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
             <View style={style.progressBarBackground}>
               <View
                 style={[
                   style.progressBarFill,
-                  { width: `${Math.min(displayStars * 10, 100)}%` },
+                  { width: `${Math.min((totalStars / 10) * 100, 100)}%` },
                 ]}
               />
             </View>
-
             <View style={style.rewardContainer}>
-              <RNImage
-                source={require("../../src/assets/characterAccessories/PirateCapy.png")}
-                style={style.rewardImageLocked}
+              <Image
+                source={rewardThumb}
+                style={[
+                  style.rewardImage,
+                  !isRewardUnlocked && style.rewardImageLocked,
+                ]}
+                contentFit="cover"
               />
-              <Lock size={18} color="#000" style={style.lockIcon} />
+              {!isRewardUnlocked && (
+                <Lock size={18} color="#000" style={{ position: "absolute" }} />
+              )}
             </View>
           </View>
-
-          <Text style={style.progressSubtext}>
-            Faltam {Math.max(0, 10 - (displayStars % 10))} estrelas para a próxima recompensa
+          <Text style={{ color: "#297AB8", fontSize: 12, marginTop: 8 }}>
+            {isRewardUnlocked
+              ? "Recompensa desbloqueada!"
+              : `Faltam ${10 - totalStars} estrelas para o ${rewardName}`}
           </Text>
-        </View>
+        </Pressable>
 
-        <View style={style.gamesCard}>
-          <View style={style.gamesTitleBadge}>
-            <Text style={style.gamesTitleText}>jogos mais jogados</Text>
+        <Pressable
+          style={style.achievementsCard}
+          onPress={() =>
+            speak(
+              `Suas conquistas. Você está no ${currentLevel.level}, ${currentLevel.label}, com ${totalStars} estrelas acumuladas.`,
+            )
+          }
+        >
+          <View style={style.achievementsBadge}>
+            <Trophy size={18} color="#297AB8" style={{ marginRight: 6 }} />
+            <Text
+              style={{
+                color: "#297AB8",
+                fontFamily: "Poppins_700Bold",
+                fontSize: 15,
+              }}
+            >
+              minhas conquistas
+            </Text>
           </View>
 
-          <View style={style.podiumPlaceholder} />
-
-          <View style={style.statsRow}>
-            <View style={style.statBox}>
-              <Text style={style.statNumber}>0</Text>
-              <Text style={style.statLabel}>total de jogadas</Text>
+          <View style={style.achievementRow}>
+            <View style={style.achievementItem}>
+              <View style={[style.iconCircle]}>
+                <Sparkles size={22} color={currentLevel.color} />
+              </View>
+              <Text style={style.achievementNumber}>{currentLevel.level}</Text>
+              <Text style={style.achievementLabel}>{currentLevel.label}</Text>
             </View>
 
-            <View style={style.statBox}>
-              <Text style={style.statNumber}>0</Text>
-              <Text style={style.statLabel}>Jogos experimentados</Text>
+            <View style={style.achievementItem}>
+              <View style={[style.iconCircle]}>
+                <Award size={22} color="#297AB8" />
+              </View>
+              <Text style={style.achievementNumber}>{inventory.length}</Text>
+              <Text style={style.achievementLabel}>Itens Comprados</Text>
             </View>
           </View>
-        </View>
+        </Pressable>
 
-        <View style={style.finalCard}>
-          <Text style={style.finalCardLabel}>estrelas conquistadas</Text>
+        <Pressable
+          style={style.finalCard}
+          onPress={() => speak(`Total de ${totalStars} estrelas conquistadas`)}
+        >
+          <Text style={{ fontSize: 14, color: "#297AB8", marginBottom: 4 }}>
+            estrelas conquistadas
+          </Text>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-            <Text style={style.finalCardValue}>{displayStars}</Text>
-            <RNImage
-              source={require("../../src/assets/images/solar_star-bold-duotone.png")}
-              style={{ width: 22, height: 22 }}
-            />
+            <Text style={{ fontSize: 20, fontFamily: "Poppins_700Bold" }}>
+              {totalStars}
+            </Text>
+            <Image source={starIcon} style={{ width: 22, height: 22 }} />
           </View>
-        </View>
+        </Pressable>
       </ScrollView>
 
-      {/* Modal de Acessórios */}
-      <Modal
-        visible={visibleModal}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setVisibleModal(false)}
-      >
-        <TouchableWithoutFeedback onPress={() => setVisibleModal(false)}>
-          <View style={style.modalOverlay}>
-            <TouchableWithoutFeedback>
-              <View style={{ width: "100%" }}>
-                <ActionModalContent
-                  handleClose={() => setVisibleModal(false)}
-                  userName={displayName}
-                />
-              </View>
-            </TouchableWithoutFeedback>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
+      <AccessoryModal
+        visible={showAccessories}
+        userName={name}
+        userStars={stars}
+        userTotalStars={totalStars}
+        userCapy={child?.capy}
+        currentAccessory={equippedAccessory}
+        inventory={inventory}
+        onClose={() => setShowAccessories(false)}
+        onRefreshInventory={fetchInventory}
+        onUpdateChildState={fetchChildProfile}
+      />
 
-    
       <EditNameModal
-        visible={isEditingName}
-        currentName={displayName}
-        onClose={() => setIsEditingName(false)}
-        onSave={handleUpdateName}
+        visible={showName}
+        currentName={name}
+        onClose={() => setShowName(false)}
+        onSave={(childName: string) => updateChild({ childName })}
       />
 
       <Footer />
@@ -434,10 +853,6 @@ export default function UserPage() {
 }
 
 const style = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#FFFFFF",
-  },
   scrollContent: {
     paddingHorizontal: 20,
     paddingBottom: 100,
@@ -450,31 +865,11 @@ const style = StyleSheet.create({
     alignItems: "center",
     marginTop: 10,
   },
-  menuIcon: {
-    width: 31,
-    height: 31,
-    resizeMode: "contain",
-  },
-  headerStars: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  starsText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#000",
-  },
   pageTitle: {
     color: "#297AB8",
     fontSize: 34,
     fontFamily: "Poppins_700Bold",
-    marginTop: 10,
-    marginBottom: 20,
-  },
-  avatarWrapper: {
-    position: "relative",
-    marginBottom: 15,
+    marginVertical: 10,
   },
   circuloOpcao: {
     width: 140,
@@ -487,10 +882,6 @@ const style = StyleSheet.create({
     borderWidth: 8,
     overflow: "hidden",
   },
-  imagemPersonagem: {
-    width: "85%",
-    height: "85%",
-  },
   badgeAcessorio: {
     position: "absolute",
     bottom: 0,
@@ -498,23 +889,12 @@ const style = StyleSheet.create({
     backgroundColor: "#93CCF733",
     width: 46,
     height: 46,
-    borderRadius: 100,
+    borderRadius: 23,
     justifyContent: "flex-end",
     alignItems: "center",
     borderWidth: 2,
     borderColor: "#FFF",
     overflow: "hidden",
-  },
-  userNameRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    marginBottom: 25,
-  },
-  userNameText: {
-    fontSize: 24,
-    fontFamily: "Poppins_600SemiBold",
-    color: "#297AB8",
   },
   editButton: {
     backgroundColor: "#C5E5FF",
@@ -523,18 +903,6 @@ const style = StyleSheet.create({
     borderRadius: 15,
     justifyContent: "center",
     alignItems: "center",
-  },
-  progressSection: {
-    width: "100%",
-    alignItems: "center",
-    marginBottom: 25,
-  },
-  progressBarContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    width: "100%",
-    justifyContent: "center",
   },
   progressBarBackground: {
     height: 20,
@@ -552,28 +920,14 @@ const style = StyleSheet.create({
   rewardContainer: {
     width: 60,
     height: 60,
-    borderRadius: 35,
+    borderRadius: 30,
     backgroundColor: "#DDF0FF",
     justifyContent: "center",
     alignItems: "center",
-    position: "relative",
   },
-  rewardImageLocked: {
-    width: 42,
-    height: 42,
-    resizeMode: "cover",
-    tintColor: "rgba(80, 80, 80, 0.6)",
-  },
-  lockIcon: {
-    position: "absolute",
-  },
-  progressSubtext: {
-    color: "#297AB8",
-    fontSize: 12,
-    marginTop: 8,
-    textAlign: "center",
-  },
-  gamesCard: {
+  rewardImage: { width: 42, height: 42 },
+  rewardImageLocked: { tintColor: "rgba(80,80,80,0.6)" },
+  achievementsCard: {
     width: "100%",
     backgroundColor: "#E3F2FD",
     borderRadius: 24,
@@ -581,145 +935,87 @@ const style = StyleSheet.create({
     alignItems: "center",
     marginBottom: 16,
   },
-  gamesTitleBadge: {
-    backgroundColor: "#FFFFFF",
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+  achievementsBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFF",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
     borderRadius: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
+    marginBottom: 16,
     elevation: 2,
-    marginBottom: 20,
   },
-  gamesTitleText: {
-    color: "#297AB8",
-    fontSize: 16,
-    fontFamily: "Poppins_700Bold",
-  },
-  podiumPlaceholder: {
-    height: 120,
-    width: "100%",
-  },
-  statsRow: {
+  achievementRow: {
     flexDirection: "row",
     justifyContent: "space-around",
     width: "100%",
-    marginTop: 10,
   },
-  statBox: {
+  achievementItem: { alignItems: "center" },
+  iconCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: "center",
     alignItems: "center",
+    marginBottom: 6,
   },
-  statNumber: {
-    fontSize: 18,
+  achievementNumber: {
+    fontSize: 16,
     fontFamily: "Poppins_700Bold",
-    color: "#000",
+    color: "#2C3E50",
   },
-  statLabel: {
-    fontSize: 12,
-    color: "#297AB8",
-    fontFamily: "Poppins_400Regular",
-    marginTop: 2,
-  },
+  achievementLabel: { fontSize: 12, color: "#297AB8", marginTop: 2 },
   finalCard: {
     width: "100%",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#FFF",
     borderRadius: 18,
     paddingVertical: 14,
     alignItems: "center",
     marginBottom: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
     elevation: 2,
-  },
-  finalCardLabel: {
-    fontSize: 14,
-    color: "#297AB8",
-    marginBottom: 4,
-    fontFamily: "Poppins_400Regular",
-  },
-  finalCardValue: {
-    fontSize: 20,
-    fontFamily: "Poppins_700Bold",
-    color: "#000",
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.4)",
-    justifyContent: "flex-end",
   },
 });
 
-const modalStyle = StyleSheet.create({
-  modalContainer: {
-    backgroundColor: "#FFFFFF",
+const accStyle = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "flex-end",
+  },
+  container: {
+    backgroundColor: "#FFF",
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
-    paddingHorizontal: 20,
-    paddingTop: 24,
+    padding: 24,
     paddingBottom: 34,
     alignItems: "center",
-    width: "100%",
-    position: "relative",
   },
-  closeButton: {
-    position: "absolute",
-    right: 20,
-    top: 20,
-    zIndex: 10,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: "#297AB8",
-    marginBottom: 2,
-  },
-  subtitle: {
-    fontSize: 13,
-    color: "#A0AEC0",
-    marginBottom: 20,
-  },
-  categoriesRow: {
-    flexDirection: "row",
-    gap: 8,
-    marginBottom: 20,
-    width: "100%",
-    justifyContent: "center",
-  },
-  categoryTab: {
-    flexDirection: "row",
-    alignItems: "center",
+  close: { position: "absolute", right: 20, top: 20, zIndex: 10 },
+  title: { fontSize: 20, fontWeight: "800", color: "#297AB8" },
+  subtitle: { fontSize: 13, color: "#A0AEC0", marginBottom: 20 },
+  categories: { flexDirection: "row", gap: 8, marginBottom: 20 },
+  tab: {
     paddingVertical: 8,
     paddingHorizontal: 14,
     borderRadius: 12,
     backgroundColor: "#F3F4F6",
   },
-  categoryTabSelected: {
-    backgroundColor: "#FFFFFF",
+  tabSelected: {
+    backgroundColor: "#FFF",
     borderWidth: 2,
     borderColor: "#93CCF7",
   },
-  categoryText: {
-    fontSize: 14,
-    color: "#4A5568",
-    fontWeight: "500",
-  },
-  categoryTextSelected: {
-    color: "#297AB8",
-    fontWeight: "bold",
-  },
-  gridContainer: {
+  tabText: { fontSize: 14, color: "#4A5568", fontWeight: "500" },
+  tabTextSelected: { color: "#297AB8", fontWeight: "bold" },
+  grid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "flex-start",
     width: "100%",
     gap: 12,
+    minHeight: 80,
     marginBottom: 16,
   },
-  itemCard: {
+  card: {
     width: "22%",
     aspectRatio: 1,
     backgroundColor: "#F3F4F6",
@@ -728,187 +1024,159 @@ const modalStyle = StyleSheet.create({
     alignItems: "center",
     borderWidth: 2,
     borderColor: "transparent",
+    position: "relative",
   },
-  itemCardSelected: {
-    backgroundColor: "#EBF8FF",
-    borderColor: "#93CCF7",
+  cardSelected: { backgroundColor: "#EBF8FF", borderColor: "#93CCF7" },
+  cardDisabled: { backgroundColor: "#EDF2F7", borderColor: "#CBD5E0" },
+  cardImage: { width: "75%", height: "75%" },
+  mysteryImageLocked: {
+    tintColor: "rgba(44, 62, 80, 0.75)",
+    opacity: 0.6,
   },
-  itemImage: {
-    width: "75%",
-    height: "75%",
-    resizeMode: "contain",
+  lockBadge: {
+    position: "absolute",
+    top: 4,
+    right: 4,
+    backgroundColor: "#718096",
+    borderRadius: 8,
+    padding: 3,
   },
-  footer: {
-    width: "100%",
-    alignItems: "center",
-    marginTop: 8,
-  },
-  starPriceRow: {
+  price: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
     marginBottom: 16,
   },
-  starPriceText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#000",
-  },
-  confirmButton: {
+  confirm: {
     backgroundColor: "#F3F4F6",
     width: "60%",
     paddingVertical: 12,
     borderRadius: 14,
     alignItems: "center",
   },
-  confirmButtonText: {
-    color: "#297AB8",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
+  confirmDisabled: { backgroundColor: "#EDF2F7" },
+  confirmText: { color: "#297AB8", fontWeight: "bold", fontSize: 16 },
 });
 
-const nameModalStyle = StyleSheet.create({
+const nameStyle = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.25)",
+    backgroundColor: "rgba(0,0,0,0.35)",
     justifyContent: "flex-end",
   },
-  sheetContainer: {
-    backgroundColor: "#FFFFFF",
-    borderTopLeftRadius: 36,
-    borderTopRightRadius: 36,
-    borderWidth: 4,
+  sheet: {
+    backgroundColor: "#FFF",
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    borderWidth: 3,
     borderBottomWidth: 0,
     borderColor: "#88D48E",
     paddingHorizontal: 24,
-    paddingTop: 24,
-    paddingBottom: 40,
+    paddingTop: 28,
+    paddingBottom: 36,
     alignItems: "center",
-    position: "relative",
   },
-  leavesContainer: {
-    position: "absolute",
-    top: -18,
-    left: 45,
-    right: 45,
+  headerRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%",
+    marginBottom: 20,
+    gap: 14,
   },
-  leafIcon: {
-    fontSize: 22,
-    transform: [{ rotate: "15deg" }],
-  },
-  userAvatarBadge: {
-    position: "absolute",
-    left: 20,
-    top: 20,
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+  avatarBadge: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: "#E2F2FD",
     justifyContent: "center",
     alignItems: "center",
+  },
+  headerTextContainer: {
+    flex: 1,
   },
   title: {
     fontSize: 20,
     fontWeight: "bold",
     color: "#297AB8",
-    textAlign: "center",
-    marginTop: 6,
   },
   subtitle: {
-    fontSize: 14,
-    color: "#99A8B6",
-    textAlign: "center",
-    marginTop: 6,
-    marginBottom: 16,
+    fontSize: 13,
+    color: "#718096",
+    marginTop: 2,
   },
-  inputShadowWrapper: {
-    width: "80%",
+  inputWrapper: {
+    width: "100%",
     borderRadius: 16,
-    backgroundColor: "#F2F6F8",
+    backgroundColor: "#F8FAFC",
     borderWidth: 1.5,
     borderColor: "#B4DBF7",
-    shadowColor: "#297AB8",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.18,
-    shadowRadius: 5,
-    elevation: 3,
+    marginBottom: 20,
+    elevation: 1,
   },
   input: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#607485",
-    paddingVertical: 10,
+    color: "#2D3748",
+    paddingVertical: 12,
     paddingHorizontal: 16,
-  },
-  counterText: {
-    fontSize: 13,
-    color: "#99A8B6",
-    marginTop: 6,
-    marginBottom: 26,
   },
   suggestionsLabel: {
     alignSelf: "flex-start",
-    fontSize: 15,
-    fontWeight: "bold",
-    color: "#297AB8",
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#A0AEC0",
     marginBottom: 10,
+    marginLeft: 2,
   },
   suggestionsRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
     width: "100%",
-    gap: 12,
-    marginBottom: 32,
+    gap: 10,
+    marginBottom: 28,
   },
-  suggestionChip: {
+  chip: {
     flex: 1,
-    height: 46,
-    backgroundColor: "#F2F6F8",
-    borderRadius: 14,
+    paddingVertical: 10,
+    backgroundColor: "#F1F5F9",
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: "#E2E8F0",
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
-    elevation: 2,
   },
-  suggestionText: {
+  chipText: {
     color: "#4A5568",
-    fontSize: 14,
     fontWeight: "600",
+    fontSize: 14,
   },
   actionsRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    gap: 14,
     width: "100%",
-    gap: 16,
   },
   actionBtn: {
     flex: 1,
-    backgroundColor: "#F3F7FA",
-    borderRadius: 18,
-    paddingVertical: 12,
+    borderRadius: 16,
+    paddingVertical: 14,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "#E5ECF0",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
   },
-  cancelBtn: {},
-  confirmBtn: {},
-  actionBtnText: {
-    color: "#297AB8",
-    fontSize: 16,
+  cancelBtn: {
+    backgroundColor: "#F1F5F9",
+    borderWidth: 1,
+    borderColor: "#CBD5E1",
+  },
+  cancelText: {
+    color: "#64748B",
+    fontSize: 15,
+    fontWeight: "bold",
+  },
+  confirmBtn: {
+    backgroundColor: "#297AB8",
+  },
+  confirmText: {
+    color: "#FFF",
+    fontSize: 15,
     fontWeight: "bold",
   },
 });

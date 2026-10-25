@@ -6,172 +6,195 @@ import {
   View,
   ActivityIndicator,
   Modal,
+  ImageSourcePropType,
 } from "react-native";
 import React, { useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Volume2 } from "lucide-react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useLocalSearchParams, router } from "expo-router";
-
+import { useLocalSearchParams, useRouter } from "expo-router";
 import storysBack from "../src/assets/storiesImages/storysBack.png";
 import CardStory from "@/src/components/Story/CardStory";
-import api from "../src/utils/api";
+import { useStory } from "@/src/hooks/useStory";
 
-type StoryPageData = {
-  id: number;
-  pageNumber: number;
-  text: string;
-  illustration: string | null;
-  audioUrl: string | null;
-};
+const storyImages: Record<string, ImageSourcePropType> = {
+  "amigo1.png": require("../src/assets/storiesImages/storyPage/amigo1.png"),
+  "amigo2.png": require("../src/assets/storiesImages/storyPage/amigo2.png"),
+  "amigo3.png": require("../src/assets/storiesImages/storyPage/amigo3.png"),
+  "amigo4.png": require("../src/assets/storiesImages/storyPage/amigo4.png"),
 
-type Story = {
-  id: number;
-  title: string;
-  cover: string;
+  "arrumar1.png": require("../src/assets/storiesImages/storyPage/arrumar1.png"),
+  "arrumar2.png": require("../src/assets/storiesImages/storyPage/arrumar2.png"),
+  "arrumar3.png": require("../src/assets/storiesImages/storyPage/arrumar3.png"),
+  "arrumar4.png": require("../src/assets/storiesImages/storyPage/arrumar4.png"),
+
+  "brinquedo1.png": require("../src/assets/storiesImages/storyPage/brinquedo1.png"),
+  "brinquedo2.png": require("../src/assets/storiesImages/storyPage/brinquedo2.png"),
+  "brinquedo3.png": require("../src/assets/storiesImages/storyPage/brinquedo3.png"),
+  "brinquedo4.png": require("../src/assets/storiesImages/storyPage/brinquedo4.png"),
+
+  "chuva1.png": require("../src/assets/storiesImages/storyPage/chuva1.png"),
+  "chuva2.png": require("../src/assets/storiesImages/storyPage/chuva2.png"),
+  "chuva3.png": require("../src/assets/storiesImages/storyPage/chuva3.png"),
+  "chuva4.png": require("../src/assets/storiesImages/storyPage/chuva4.png"),
+
+  "festa1.png": require("../src/assets/storiesImages/storyPage/festa1.png"),
+  "festa2.png": require("../src/assets/storiesImages/storyPage/festa2.png"),
+  "festa3.png": require("../src/assets/storiesImages/storyPage/festa3.png"),
+  "festa4.png": require("../src/assets/storiesImages/storyPage/festa4.png"),
+
+  "parque1.png": require("../src/assets/storiesImages/storyPage/parque1.png"),
+  "parque2.png": require("../src/assets/storiesImages/storyPage/parque2.png"),
+  "parque3.png": require("../src/assets/storiesImages/storyPage/parque3.png"),
+  "parque4.png": require("../src/assets/storiesImages/storyPage/parque4.png"),
+
+  "rotina1.png": require("../src/assets/storiesImages/storyPage/rotina1.png"),
+  "rotina2.png": require("../src/assets/storiesImages/storyPage/rotina2.png"),
+  "rotina3.png": require("../src/assets/storiesImages/storyPage/rotina3.png"),
+  "rotina4.png": require("../src/assets/storiesImages/storyPage/rotina4.png"),
 };
 
 const StoryPage = () => {
-  const { storyId } = useLocalSearchParams();
+  const { storyId } = useLocalSearchParams<{
+    storyId?: string;
+  }>();
 
-  const [story, setStory] = useState<Story | null>(null);
-  const [pages, setPages] = useState<StoryPageData[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
-  // Modais de Conclusão
-  const [showModalFirstTime, setShowModalFirstTime] = useState(false); // Primeira vez (Ganha Estrela)
-  const [showModalReplayed, setShowModalReplayed] = useState(false);   // Já leu antes (Sem Estrela)
+  const [progressLoaded, setProgressLoaded] = useState(false);
+  const [savedPage, setSavedPage] = useState(1);
 
-  const [completed, setCompleted] = useState(false);
-  const [loadingComplete, setLoadingComplete] = useState(false);
+  const {
+    pages,
+    storyTitle,
+    currentPage,
+    currentPageNumber,
+    loading,
+    loadingNext,
+    speaking,
+    showModal,
+    isFirstCompletion,
+    isLastPage,
+    setShowModal,
+    speakPage,
+    previousPage,
+    nextPage,
+    completeStory,
+    handleReadAgain,
+  } = useStory(storyId);
 
   useEffect(() => {
-    if (storyId) {
-      loadStory();
-    }
-  }, [storyId]);
-
-  const loadStory = async () => {
-    try {
-      setLoading(true);
-
-      const id = Number(storyId);
-
-      if (!id || isNaN(id)) {
-        console.log("Story ID inválido:", storyId);
+    const loadProgress = async () => {
+      if (!storyId) {
+        setProgressLoaded(true);
         return;
       }
 
-      const storyResponse = await api.get<Story>(`/api/stories/${id}`);
-      setStory(storyResponse.data);
+      try {
+        const key = `story_progress_${storyId}`;
 
-      const pagesResponse = await api.get<StoryPageData[]>(
-        `/api/stories/${id}/pages`
-      );
+        const savedProgress = await AsyncStorage.getItem(key);
 
-      const orderedPages = [...pagesResponse.data].sort(
-        (a, b) => a.pageNumber - b.pageNumber
-      );
+        if (savedProgress) {
+          const page = Number(savedProgress);
 
-      setPages(orderedPages);
-      setCurrentPage(1);
-    } catch (error: any) {
-      console.log(
-        "ERRO AO CARREGAR HISTÓRIA:",
-        error?.response?.data || error?.message
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const saveProgress = async (page: number, finished = false) => {
-    try {
-      const id = Number(storyId);
-      if (!id) return null;
-
-      const response = await api.post("/api/stories/progress", {
-        storyId: id,
-        currentPage: page,
-        completed: finished,
-      });
-
-      return response.data;
-    } catch (error: any) {
-      console.log(
-        "ERRO AO SALVAR PROGRESSO:",
-        error?.response?.data || error?.message
-      );
-      return null;
-    }
-  };
-
-  const previousPage = () => {
-    if (currentPage <= 1) return;
-    setCurrentPage((page) => page - 1);
-  };
-
-  const nextPage = async () => {
-    if (currentPage >= pages.length) return;
-
-    const nextPageNumber = currentPage + 1;
-    setCurrentPage(nextPageNumber);
-    await saveProgress(nextPageNumber, false);
-  };
-
-  const completeStory = async () => {
-    if (loadingComplete || completed) return;
-
-    try {
-      setLoadingComplete(true);
-      const progressData = await saveProgress(pages.length, true);
-      setCompleted(true);
-
-      // Checa pelo retorno do backend se ela já tinha completado antes
-      if (progressData?.alreadyCompleted) {
-        setShowModalReplayed(true); // Abre modal de releitura
-      } else {
-        setShowModalFirstTime(true); // Abre modal de 1ª vez com estrela
+          if (!Number.isNaN(page) && page > 1) {
+            setSavedPage(page);
+          }
+        }
+      } catch (error) {
+        console.error("Erro ao carregar progresso:", error);
+      } finally {
+        setProgressLoaded(true);
       }
-    } catch (error: any) {
-      console.log(
-        "ERRO AO CONCLUIR:",
-        error?.response?.data || error?.message
-      );
-    } finally {
-      setLoadingComplete(false);
-    }
-  };
+    };
 
-  const voltarParaHistorias = () => {
-    setShowModalFirstTime(false);
-    setShowModalReplayed(false);
-    router.replace("/Stories"); // Volta para a tela principal do mapa de histórias
+    loadProgress();
+  }, [storyId]);
+
+  useEffect(() => {
+    if (!progressLoaded) return;
+    if (savedPage <= 1) return;
+    if (currentPageNumber >= savedPage) return;
+    if (loadingNext) return;
+
+    nextPage();
+  }, [
+    progressLoaded,
+    savedPage,
+    currentPageNumber,
+    loadingNext,
+    nextPage,
+  ]);
+
+  useEffect(() => {
+    const saveProgress = async () => {
+      if (!progressLoaded) return;
+      if (!storyId) return;
+      if (currentPageNumber <= 1) return;
+
+      try {
+        const key = `story_progress_${storyId}`;
+
+        await AsyncStorage.setItem(key, String(currentPageNumber));
+      } catch (error) {
+        console.error("Erro ao salvar progresso:", error);
+      }
+    };
+
+    saveProgress();
+  }, [currentPageNumber, storyId, progressLoaded]);
+
+  const handleCompleteStory = async () => {
+    try {
+      if (storyId) {
+        await AsyncStorage.removeItem(`story_progress_${storyId}`);
+      }
+    } catch (error) {
+      console.error("Erro ao limpar progresso:", error);
+    }
+
+    completeStory();
   };
 
   if (loading) {
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.loading}>
-          <ActivityIndicator size="large" color="#297AB8" />
-          <Text>Carregando história...</Text>
+          <ActivityIndicator size="large" color="#69B9F7" />
+
+          <Text style={styles.loadingText}>
+            Carregando história...
+          </Text>
         </View>
       </SafeAreaView>
     );
   }
 
-  if (!story || pages.length === 0) {
+  if (pages.length === 0) {
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.loading}>
-          <Text>História ou páginas não encontradas.</Text>
+          <Text style={styles.loadingText}>
+            Nenhuma página encontrada.
+          </Text>
         </View>
       </SafeAreaView>
     );
   }
 
-  const page = pages[currentPage - 1];
-  const isLastPage = currentPage === pages.length;
+  if (!currentPage) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.loading}>
+          <Text style={styles.loadingText}>
+            Página não encontrada.
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -181,103 +204,128 @@ const StoryPage = () => {
         resizeMode="cover"
       >
         <View style={styles.container}>
-          <View style={styles.micContainer}>
-            <Pressable style={styles.btnMic}>
-              <Volume2 size={28} color="#2699D6" />
-            </Pressable>
-          </View>
+          <CardStory
+            titulo={storyTitle}
+            imagem={
+              currentPage.illustration
+                ? (storyImages[currentPage.illustration] ?? storysBack)
+                : storysBack
+            }
+            subtitulo={`Página ${currentPageNumber}`}
+            paragrafo={currentPage.text}
+          />
 
-          <View style={styles.titleContainer}>
-            <Text style={styles.title}>{story.title}</Text>
-          </View>
-
-          <View style={styles.cardContainer}>
-            <CardStory
-              imagem={{ uri: page.illustration || "" }}
-              subtitulo={page.text}
-              paragrafo={page.text}
-            />
-          </View>
-
-          <View style={styles.containerBtn}>
+          <View style={styles.navigation}>
             <Pressable
               style={[
-                styles.btn,
-                currentPage <= 1 && styles.btnDisabled,
+                styles.navigationButton,
+                currentPageNumber === 1 && styles.disabledButton,
               ]}
               onPress={previousPage}
-              disabled={currentPage <= 1}
+              disabled={currentPageNumber === 1}
             >
-              <Text style={styles.text1}>Anterior</Text>
-            </Pressable>
-
-            <Text style={styles.text2}>{currentPage}</Text>
-
-            <Pressable
-              style={[
-                styles.btn,
-                loadingComplete && styles.btnDisabled,
-              ]}
-              onPress={isLastPage ? completeStory : nextPage}
-              disabled={loadingComplete}
-            >
-              <Text style={styles.text1}>
-                {isLastPage ? "Concluir" : "Próxima"}
+              <Text style={styles.navigationText}>
+                Voltar
               </Text>
             </Pressable>
+
+            {isLastPage ? (
+              <Pressable
+                style={styles.navigationButton}
+                onPress={handleCompleteStory}
+                disabled={loadingNext}
+              >
+                <Text style={styles.navigationText}>
+                  {loadingNext ? "Concluindo..." : "Concluir"}
+                </Text>
+              </Pressable>
+            ) : (
+              <Pressable
+                style={styles.navigationButton}
+                onPress={nextPage}
+                disabled={loadingNext}
+              >
+                <Text style={styles.navigationText}>
+                  Próxima
+                </Text>
+              </Pressable>
+            )}
           </View>
 
-          {/* 1º MODAL: PRIMEIRA VEZ CONCLUINDO (GANHA ESTRELA) */}
-          <Modal
-            visible={showModalFirstTime}
-            transparent
-            animationType="fade"
-            onRequestClose={voltarParaHistorias}
+          <Pressable
+            style={[
+              styles.speakButton,
+              speaking && styles.speakingButton,
+            ]}
+            onPress={speakPage}
           >
-            <View style={styles.modalOverlay}>
-              <View style={styles.modal}>
-                <Text style={styles.modalStar}>⭐</Text>
-                <Text style={styles.modalTitle}>História Concluída!</Text>
-                <Text style={styles.modalText}>
-                  Parabéns! Você concluiu a história pela primeira vez e ganhou uma estrela!
-                </Text>
-                <Text style={styles.modalReward}>+1 ⭐</Text>
-                <Pressable
-                  style={styles.modalButton}
-                  onPress={voltarParaHistorias}
-                >
-                  <Text style={styles.modalButtonText}>Voltar às Histórias</Text>
-                </Pressable>
-              </View>
-            </View>
-          </Modal>
-
-          {/* 2º MODAL: RELEITURA (MENSAGEM DE PARABÉNS SEM GANHAR ESTRELA + BOTÃO VOLTAR) */}
-          <Modal
-            visible={showModalReplayed}
-            transparent
-            animationType="fade"
-            onRequestClose={voltarParaHistorias}
-          >
-            <View style={styles.modalOverlay}>
-              <View style={styles.modal}>
-                <Text style={styles.modalStar}>📖</Text>
-                <Text style={styles.modalTitle}>Muito Bem!</Text>
-                <Text style={styles.modalText}>
-                  Você leu essa história novamente! Como você já concluiu ela antes, não há novas estrelas desta vez.
-                </Text>
-
-                <Pressable
-                  style={[styles.modalButton, { marginTop: 15 }]}
-                  onPress={voltarParaHistorias}
-                >
-                  <Text style={styles.modalButtonText}>Voltar às Histórias</Text>
-                </Pressable>
-              </View>
-            </View>
-          </Modal>
-
+            <Volume2 size={32} color="#000" />
+          </Pressable>
         </View>
+
+        <Modal
+          visible={showModal}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setShowModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>
+                História concluída!
+              </Text>
+
+              {isFirstCompletion ? (
+                <View style={styles.rewardContainer}>
+                  <Text style={styles.modalText}>
+                    Você ganhou
+                  </Text>
+
+                  <View style={styles.rewardValue}>
+                    <Ionicons
+                      name="star"
+                      size={30}
+                      color="#F8C84E"
+                    />
+
+                    <Text style={styles.rewardText}>
+                      5
+                    </Text>
+
+                    <Text style={styles.modalText}>
+                      estrelas!
+                    </Text>
+                  </View>
+                </View>
+              ) : (
+                <Text style={styles.modalText}>
+                  Você já concluiu essa história.
+                </Text>
+              )}
+
+              <Pressable
+                style={styles.modalButton}
+                onPress={handleReadAgain}
+              >
+                <Text style={styles.modalButtonText}>
+                  Ler novamente
+                </Text>
+              </Pressable>
+
+              <Pressable
+                style={styles.modalButton}
+                onPress={() => {
+                  setShowModal(false);
+                  router.push("/(drawer)/Stories");
+                }}
+              >
+                <Text style={styles.modalButtonText}>
+                  Voltar para histórias
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </Modal>
       </ImageBackground>
     </SafeAreaView>
   );
@@ -286,93 +334,128 @@ const StoryPage = () => {
 export default StoryPage;
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1 },
-  background: { flex: 1, width: "100%", height: "100%" },
+  safeArea: {
+    flex: 1,
+  },
+
+  background: {
+    flex: 1,
+  },
+
   container: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 20,
   },
-  titleContainer: { width: "100%", alignItems: "center", marginBottom: 10 },
-  title: { fontSize: 24, fontWeight: "bold", color: "#297AB8", textAlign: "center" },
-  cardContainer: {
-    width: "100%",
+
+  loading: {
+    flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    bottom: -40,
+    gap: 12,
   },
-  containerBtn: {
-    width: "100%",
+
+  loadingText: {
+    fontSize: 18,
+  },
+
+  navigation: {
     flexDirection: "row",
-    alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
-    marginTop: 40,
-    bottom: -50,
+    width: 330,
+    marginTop: 20,
   },
-  btn: {
-    width: 107,
-    height: 38,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 10,
+
+  navigationButton: {
+    backgroundColor: "#69B9F7",
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    borderRadius: 15,
+  },
+
+  disabledButton: {
+    opacity: 0.5,
+  },
+
+  navigationText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+
+  speakButton: {
+    position: "absolute",
+    right: 25,
+    bottom: 25,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.18,
-    shadowRadius: 3,
-    elevation: 4,
+    backgroundColor: "#fff",
   },
-  btnDisabled: { opacity: 0.5 },
-  text1: { textAlign: "center" },
-  text2: { fontSize: 30 },
-  micContainer: {
-    width: "100%",
-    alignItems: "flex-end",
-    paddingRight: 5,
-    marginBottom: -20,
+
+  speakingButton: {
+    opacity: 0.6,
   },
-  btnMic: {
-    backgroundColor: "#A7DAFF",
-    width: 50,
-    height: 50,
-    borderRadius: 40,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  loading: { flex: 1, alignItems: "center", justifyContent: "center", gap: 10 },
+
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.45)",
+    backgroundColor: "rgba(0,0,0,0.5)",
     alignItems: "center",
     justifyContent: "center",
   },
-  modal: {
+
+  modalContent: {
     width: "80%",
-    backgroundColor: "#FFFFFF",
-    borderRadius: 25,
-    padding: 30,
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    padding: 25,
     alignItems: "center",
-    elevation: 10,
   },
-  modalStar: { fontSize: 60, marginBottom: 10 },
+
   modalTitle: {
     fontSize: 24,
     fontWeight: "bold",
     textAlign: "center",
-    color: "#297AB8",
-    marginBottom: 10,
+    marginBottom: 15,
   },
-  modalText: { fontSize: 16, textAlign: "center", color: "#555", marginBottom: 10 },
-  modalReward: { fontSize: 25, fontWeight: "bold", color: "#E5A900", marginBottom: 20 },
-  modalButton: {
-    width: "100%",
-    height: 48,
-    borderRadius: 12,
-    backgroundColor: "#297AB8",
+
+  modalText: {
+    fontSize: 18,
+    textAlign: "center",
+  },
+
+  rewardContainer: {
+    alignItems: "center",
+    marginBottom: 20,
+  },
+
+  rewardValue: {
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    gap: 6,
   },
-  modalButtonText: { fontSize: 16, fontWeight: "bold", color: "#FFFFFF" },
+
+  rewardText: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#F8C84E",
+  },
+
+  modalButton: {
+    width: "100%",
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: "#78D46B",
+    alignItems: "center",
+    marginTop: 10,
+  },
+
+  modalButtonText: {
+    fontSize: 17,
+    fontWeight: "bold",
+    color: "#fff",
+  },
 });

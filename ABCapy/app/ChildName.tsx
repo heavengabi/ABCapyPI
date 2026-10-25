@@ -1,4 +1,5 @@
 import { Button } from "@/src/components/ui/Button";
+import api from "@/src/utils/api";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -9,24 +10,24 @@ import {
   Text,
   TextInput,
   View,
-  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import api from "@/src/utils/api";
-
 import BackgroundImage from "../src/assets/images/bg-login.png";
 
 export default function ChildName() {
-  const params = useLocalSearchParams<{ capy?: string }>();
-  const personagem = params.capy || "sabida";
-
   const [nome, setNome] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handleContinuar() {
+  const { personagem } = useLocalSearchParams<{
+    personagem?: string;
+  }>();
+
+  const personagemSelecionado = personagem || "sabida";
+
+  const handleCreateChild = async () => {
     if (!nome.trim()) {
-      Alert.alert("Atenção", "Por favor, digite o nome da criança!");
+      Alert.alert("Atenção", "Digite o nome da criança.");
       return;
     }
 
@@ -35,25 +36,39 @@ export default function ChildName() {
 
       const response = await api.post("/children", {
         childName: nome.trim(),
-        capy: personagem,
+        capy: personagemSelecionado,
         stars: 0,
       });
 
-      // Salva o perfil da criança no cache local
-      await AsyncStorage.setItem(
-        "@ABCapy:child",
-        JSON.stringify(response.data),
-      );
+      console.log("Criança criada:", response.data);
 
+      // Salva em cache para a Home já carregar as informações atualizadas imediatamente
+      if (response.data) {
+        await AsyncStorage.setItem(
+          "@ABCapy:child",
+          JSON.stringify(response.data)
+        );
+      }
+
+      // Limpa toda a pilha de telas anteriores (Login/Cadastro/Seleção de Personagem)
+      router.dismissAll();
+      // Substitui a rota atual pela Home, definindo-a como a tela raiz
       router.replace("/homePage");
     } catch (error: any) {
-      const msg =
-        error.response?.data?.message || "Não foi possível cadastrar o perfil.";
-      Alert.alert("Erro", msg);
+      console.error(
+        "Erro ao criar criança:",
+        error.response?.data || error.message
+      );
+
+      Alert.alert(
+        "Erro",
+        error.response?.data?.message ||
+          "Não foi possível criar o perfil da criança."
+      );
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -65,7 +80,7 @@ export default function ChildName() {
         <View style={styles.circuloCentral}>
           <Image
             source={
-              personagem === "aventureira"
+              personagemSelecionado === "aventureira"
                 ? require("../src/assets/charactersImages/AdventureCapy.png")
                 : require("../src/assets/charactersImages/StudentCapy.png")
             }
@@ -84,16 +99,18 @@ export default function ChildName() {
           underlineColorAndroid="transparent"
         />
 
-        <View style={{ width: "90%", marginTop: 40 }}>
-          {loading ? (
-            <ActivityIndicator size="large" color="#1565C0" />
-          ) : (
-            <Button
-              title="Continuar"
-              onPress={handleContinuar}
-              style={{ width: "100%" }}
-            />
-          )}
+        <View
+          style={{
+            flexDirection: "column",
+            gap: 20,
+            marginTop: 150,
+          }}
+        >
+          <Button
+            title={loading ? "Salvando..." : "Continuar"}
+            onPress={handleCreateChild}
+            disabled={loading}
+          />
         </View>
       </ImageBackground>
     </SafeAreaView>
@@ -105,12 +122,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#E2F2FD",
   },
+
   background: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
     padding: 20,
   },
+
   circuloCentral: {
     width: 150,
     height: 150,
@@ -123,17 +142,20 @@ const styles = StyleSheet.create({
     borderColor: "#A5F8C3",
     marginBottom: 25,
   },
+
   imagemPersonagem: {
     width: "85%",
     height: "85%",
     resizeMode: "contain",
   },
+
   titulo: {
     fontSize: 24,
     fontWeight: "900",
     color: "#1565C0",
     marginBottom: 25,
   },
+
   input: {
     width: "90%",
     height: 55,
@@ -145,6 +167,22 @@ const styles = StyleSheet.create({
     elevation: 1,
     borderColor: "#93CCF7",
     borderWidth: 3,
-    marginBottom: 20,
+    marginBottom: 40,
+  },
+
+  botao: {
+    backgroundColor: "#2575B7",
+    paddingVertical: 14,
+    paddingHorizontal: 50,
+    borderRadius: 25,
+    position: "absolute",
+    bottom: 40,
+  },
+
+  textoBotao: {
+    color: "#FFF",
+    fontWeight: "bold",
+    fontSize: 16,
+    letterSpacing: 0.5,
   },
 });

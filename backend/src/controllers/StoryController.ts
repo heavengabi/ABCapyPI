@@ -1,9 +1,4 @@
-import {
-  NextFunction,
-  Request,
-  Response,
-} from "express";
-
+import { NextFunction, Request, Response } from "express";
 import { StoryService } from "../services/StoryService";
 
 export class StoryController {
@@ -13,8 +8,7 @@ export class StoryController {
     next: NextFunction
   ) {
     try {
-      const stories =
-        await StoryService.listAll();
+      const stories = await StoryService.listAll();
 
       return res.status(200).json(stories);
     } catch (error) {
@@ -30,8 +24,7 @@ export class StoryController {
     try {
       const id = Number(req.params.id);
 
-      const story =
-        await StoryService.getById(id);
+      const story = await StoryService.getById(id);
 
       return res.status(200).json(story);
     } catch (error) {
@@ -45,11 +38,9 @@ export class StoryController {
     next: NextFunction
   ) {
     try {
-      const storyId =
-        Number(req.params.id);
+      const storyId = Number(req.params.id);
 
-      const pages =
-        await StoryService.getPages(storyId);
+      const pages = await StoryService.getPages(storyId);
 
       return res.status(200).json(pages);
     } catch (error) {
@@ -63,8 +54,7 @@ export class StoryController {
     next: NextFunction
   ) {
     try {
-      const story =
-        await StoryService.create(req.body);
+      const story = await StoryService.create(req.body);
 
       return res.status(201).json(story);
     } catch (error) {
@@ -78,14 +68,12 @@ export class StoryController {
     next: NextFunction
   ) {
     try {
-      const storyId =
-        Number(req.params.id);
+      const storyId = Number(req.params.id);
 
-      const page =
-        await StoryService.addPage(
-          storyId,
-          req.body
-        );
+      const page = await StoryService.addPage(
+        storyId,
+        req.body
+      );
 
       return res.status(201).json(page);
     } catch (error) {

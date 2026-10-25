@@ -1,17 +1,8 @@
-import {
-  storyRepository
-} from "../repositories/StoryRepository";
-
-import {
-  BadRequestError,
-  NotFoundError
-} from "../errors/AppError";
+import { storyRepository } from "../repositories/StoryRepository";
+import { BadRequestError, NotFoundError } from "../errors/AppError";
 
 export const StoryService = {
-  async create(data: {
-    title: string;
-    cover: string;
-  }) {
+  async create(data: { title: string; cover: string }) {
     if (!data.title || !data.cover) {
       throw new BadRequestError(
         "Título e imagem de capa são obrigatórios!"
@@ -26,37 +17,23 @@ export const StoryService = {
   },
 
   async getById(id: number) {
-    const story =
-      await storyRepository.findById(id);
+    const story = await storyRepository.findById(id);
 
     if (!story) {
-      throw new NotFoundError(
-        "História não encontrada!"
-      );
+      throw new NotFoundError("História não encontrada!");
     }
 
-    const pages =
-      await storyRepository.findPagesByStoryId(id);
-
-    return {
-      ...story,
-      pages,
-    };
+    return story;
   },
 
   async getPages(storyId: number) {
-    const story =
-      await storyRepository.findById(storyId);
+    const story = await storyRepository.findById(storyId);
 
     if (!story) {
-      throw new NotFoundError(
-        "História não encontrada!"
-      );
+      throw new NotFoundError("História não encontrada!");
     }
 
-    return await storyRepository.findPagesByStoryId(
-      storyId
-    );
+    return await storyRepository.findPagesByStoryId(storyId);
   },
 
   async addPage(
@@ -68,13 +45,10 @@ export const StoryService = {
       audioUrl?: string;
     }
   ) {
-    const story =
-      await storyRepository.findById(storyId);
+    const story = await storyRepository.findById(storyId);
 
     if (!story) {
-      throw new NotFoundError(
-        "História não encontrada!"
-      );
+      throw new NotFoundError("História não encontrada!");
     }
 
     if (!data.pageNumber || !data.text) {
@@ -83,20 +57,14 @@ export const StoryService = {
       );
     }
 
-    return await storyRepository.addPage(
-      storyId,
-      data
-    );
+    return await storyRepository.addPage(storyId, data);
   },
 
   async delete(id: number) {
-    const result =
-      await storyRepository.delete(id);
+    const result = await storyRepository.delete(id);
 
     if (result.affected === 0) {
-      throw new NotFoundError(
-        "História não encontrada!"
-      );
+      throw new NotFoundError("História não encontrada!");
     }
   },
 };

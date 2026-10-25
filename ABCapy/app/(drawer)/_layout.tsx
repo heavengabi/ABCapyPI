@@ -2,9 +2,11 @@ import React from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Drawer from "expo-router/drawer";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { TalkBackProvider } from "@/src/context/TalkBackContext";
 
 export default function RootLayout() {
   return (
+   <TalkBackProvider>
     <SafeAreaProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <Drawer
@@ -56,5 +58,7 @@ export default function RootLayout() {
         </Drawer>
       </GestureHandlerRootView>
     </SafeAreaProvider>
+    </TalkBackProvider>
+   
   );
 }

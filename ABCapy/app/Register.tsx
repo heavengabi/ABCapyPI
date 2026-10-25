@@ -1,5 +1,4 @@
-import { Button } from "@/src/components/ui/Button";
-import React, { useState } from "react";
+import React from "react";
 import {
   ImageBackground,
   View,
@@ -8,96 +7,71 @@ import {
   Text,
   Alert,
   ActivityIndicator,
-  TouchableOpacity,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import logoImage from "../src/assets/images/small-logo.png";
-import BackgroundImage from "../src/assets/images/bg-login.png";
+import { Lock, User, Mail } from "lucide-react-native";
+import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import { Lock, User as UserIcon, Mail } from "lucide-react-native";
-import { router } from "expo-router";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+import { Button } from "@/src/components/ui/Button";
+import { FadeInView } from "@/src/components/ui/FadeInView";
 import api from "@/src/utils/api";
+import logoImage from "../src/assets/images/small-logo.png";
+import BackgroundImage from "../src/assets/images/bg-login.png";
 
-export default function Cadastro() {
-  const [nameUser, setNameUser] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  async function handleRegister() {
-    if (!nameUser || !email || !password || !confirmPassword) {
-      Alert.alert("Atenção", "Preencha todos os campos!");
-      return;
-    }
+import { registerSchema, RegisterFormData } from "@/src/schemas/registerSchema";
 
-    if (password !== confirmPassword) {
-      Alert.alert("Atenção", "As senhas não coincidem!");
-      return;
-    }
+export default function Register() {
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      nameUser: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
 
-    if (password.length < 6) {
-      Alert.alert("Atenção", "A senha deve ter no mínimo 6 caracteres.");
-      return;
-    }
-
+  const handleRegister = async (data: RegisterFormData) => {
     try {
-      setLoading(true);
-
-      console.log("CADASTRANDO USUÁRIO...");
-      console.log({
-        nameUser,
-        email,
+      const response = await api.post("/users", {
+        nameUser: data.nameUser,
+        email: data.email,
+        password: data.password,
       });
 
-      // 1. Cadastra o usuário
-      const registerResponse = await api.post("/users", {
-        nameUser,
-        email,
-        password,
-      });
+      console.log("Cadastro realizado:", response.data);
+      const token = response.data.token;
 
-      console.log("USUÁRIO CADASTRADO:", registerResponse.data);
+      if (!token) {
+        throw new Error("Token não recebido.");
+      }
 
-      // 2. Faz login automático
-      console.log("FAZENDO LOGIN...");
+      await AsyncStorage.setItem("@ABCapy:token", token);
+      console.log("TOKEN SALVO:", token);
 
-      const loginResponse = await api.post("/login", {
-        email,
-        password,
-      });
-
-      console.log("LOGIN REALIZADO:", loginResponse.data);
-
-      const { token, user } = loginResponse.data;
-
-      // 3. Salva token e usuário
-      await AsyncStorage.setItem("@abcapy:token", token);
-
-      await AsyncStorage.setItem("@abcapy:user", JSON.stringify(user));
-
-      // 4. Configura o token para as próximas requisições
-      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-
-      // 5. Vai para seleção do personagem
-      router.push("/CharacterSelection");
+      router.replace("/CharacterSelection");
     } catch (error: any) {
-      console.log("ERRO NO CADASTRO:", error?.response?.status);
+      console.error(
+        "Erro no cadastro:",
+        error.response?.data || error.message
+      );
 
-      console.log("RESPOSTA DO BACKEND:", error?.response?.data);
-
-      console.log("ERRO:", error?.message);
-
-      const message =
-        error?.response?.data?.message ||
-        "Não foi possível criar sua conta. Tente novamente.";
-
-      Alert.alert("Erro no Cadastro", message);
-    } finally {
-      setLoading(false);
+      Alert.alert(
+        "Erro",
+        error.response?.data?.message ||
+          "Não foi possível realizar o cadastro."
+      );
     }
-  }
+  };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -110,139 +84,202 @@ export default function Cadastro() {
             paddingHorizontal: 30,
           }}
         >
-          <Image
-            source={require("@/src/assets/images/small-logo.png")}
-            style={{ width: 100, height: 100 }}
-          />
-          <Text
-            style={{
-              fontSize: 24,
-              fontWeight: "800",
-              textAlign: "center",
-              marginTop: 30,
-            }}
-          >
-            CADASTRO
-          </Text>
-          <Text
-            style={{ textAlign: "center", fontSize: 12, fontWeight: "800" }}
-          >
-            Junte-se à aventura com a Capy
-          </Text>
+          <FadeInView style={{ alignItems: "center" }}>
+            <Image
+              source={logoImage}
+              style={{
+                width: 100,
+                height: 100,
+              }}
+            />
 
-          <View
+            <Text
+              style={{
+                fontSize: 24,
+                fontWeight: "800",
+                textAlign: "center",
+                marginTop: 50,
+              }}
+            >
+              CADASTRO
+            </Text>
+
+            <Text
+              style={{
+                textAlign: "center",
+                fontSize: 12,
+                fontWeight: "800",
+              }}
+            >
+              Junte-se à aventura com a Capy
+            </Text>
+          </FadeInView>
+
+        
+          <FadeInView
+            delay={200}
             style={{
               flexDirection: "column",
-              gap: 15,
+              gap: 12,
               marginTop: 30,
               width: "100%",
             }}
           >
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                backgroundColor: "white",
-                height: 48,
-                borderRadius: 15,
-                paddingHorizontal: 12,
-                gap: 10,
-              }}
-            >
-              <UserIcon color="#666" size={20} />
-              <TextInput
-                placeholder="Nome do responsável"
-                value={nameUser}
-                onChangeText={setNameUser}
-                style={{ flex: 1 }}
-              />
+            {/* Nome do Responsável */}
+            <View>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  backgroundColor: "#fff",
+                  borderRadius: 10,
+                  paddingHorizontal: 15,
+                }}
+              >
+                <User color="#666" size={20} />
+                <Controller
+                  control={control}
+                  name="nameUser"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      placeholder="Nome do responsável"
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      style={{ flex: 1, padding: 12 }}
+                    />
+                  )}
+                />
+              </View>
+              {errors.nameUser && (
+                <Text style={{ color: "#E74C3C", fontSize: 12, marginTop: 4, marginLeft: 4 }}>
+                  {errors.nameUser.message}
+                </Text>
+              )}
             </View>
 
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                backgroundColor: "white",
-                height: 48,
-                borderRadius: 15,
-                paddingHorizontal: 12,
-                gap: 10,
-              }}
-            >
-              <Mail color="#666" size={20} />
-              <TextInput
-                placeholder="Email"
-                value={email}
-                onChangeText={setEmail}
-                style={{ flex: 1 }}
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
+            {/* E-mail */}
+            <View>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  backgroundColor: "#fff",
+                  borderRadius: 10,
+                  paddingHorizontal: 15,
+                }}
+              >
+                <Mail color="#666" size={20} />
+                <Controller
+                  control={control}
+                  name="email"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      placeholder="Email"
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      style={{ flex: 1, padding: 12 }}
+                    />
+                  )}
+                />
+              </View>
+              {errors.email && (
+                <Text style={{ color: "#E74C3C", fontSize: 12, marginTop: 4, marginLeft: 4 }}>
+                  {errors.email.message}
+                </Text>
+              )}
             </View>
 
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                backgroundColor: "white",
-                height: 48,
-                borderRadius: 15,
-                paddingHorizontal: 12,
-                gap: 10,
-              }}
-            >
-              <Lock color="#666" size={20} />
-              <TextInput
-                placeholder="Senha"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-                style={{ flex: 1 }}
-              />
+            {/* Senha */}
+            <View>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  backgroundColor: "#fff",
+                  borderRadius: 10,
+                  paddingHorizontal: 15,
+                }}
+              >
+                <Lock color="#666" size={20} />
+                <Controller
+                  control={control}
+                  name="password"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      placeholder="Senha"
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      secureTextEntry
+                      style={{ flex: 1, padding: 12 }}
+                    />
+                  )}
+                />
+              </View>
+              {errors.password && (
+                <Text style={{ color: "#E74C3C", fontSize: 12, marginTop: 4, marginLeft: 4 }}>
+                  {errors.password.message}
+                </Text>
+              )}
             </View>
 
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                backgroundColor: "white",
-                height: 48,
-                borderRadius: 15,
-                paddingHorizontal: 12,
-                gap: 10,
-              }}
-            >
-              <Lock color="#666" size={20} />
-              <TextInput
-                placeholder="Confirmar senha"
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                secureTextEntry
-                style={{ flex: 1 }}
-              />
+            {/* Confirmar Senha */}
+            <View>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  backgroundColor: "#fff",
+                  borderRadius: 10,
+                  paddingHorizontal: 15,
+                }}
+              >
+                <Lock color="#666" size={20} />
+                <Controller
+                  control={control}
+                  name="confirmPassword"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      placeholder="Confirmar senha"
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      secureTextEntry
+                      style={{ flex: 1, padding: 12 }}
+                    />
+                  )}
+                />
+              </View>
+              {errors.confirmPassword && (
+                <Text style={{ color: "#E74C3C", fontSize: 12, marginTop: 4, marginLeft: 4 }}>
+                  {errors.confirmPassword.message}
+                </Text>
+              )}
             </View>
 
-            {loading ? (
-              <ActivityIndicator
-                size="large"
-                color="#000"
-                style={{ marginTop: 20 }}
-              />
-            ) : (
-              <Button
-                title="Continuar"
-                onPress={handleRegister}
-                style={{ marginTop: 20, width: "100%" }}
-              />
-            )}
+            <Button
+              title={isSubmitting ? "Cadastrando..." : "Continuar"}
+              onPress={handleSubmit(handleRegister)}
+              disabled={isSubmitting}
+              style={{ marginTop: 15, width: "100%" }}
+            />
 
-            <TouchableOpacity onPress={() => router.push("/SignUpParent")}>
-              <Text style={{ textAlign: "center", marginTop: 10 }}>
-                Já tem uma conta?{" "}
-                <Text style={{ fontWeight: "bold" }}>Entre</Text>
-              </Text>
-            </TouchableOpacity>
-          </View>
+            {isSubmitting && <ActivityIndicator style={{ marginTop: 10 }} />}
+
+            <Text
+              onPress={() => router.push("/SignUpParent")}
+              style={{
+                textAlign: "center",
+                marginTop: 10,
+              }}
+            >
+              Já tem uma conta? Entre
+            </Text>
+          </FadeInView>
         </View>
       </ImageBackground>
     </SafeAreaView>

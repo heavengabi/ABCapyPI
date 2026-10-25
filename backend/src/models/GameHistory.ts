@@ -6,13 +6,11 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from "typeorm";
-
 import { Children } from "./Children";
 import { Game } from "./Games";
 
 @Entity("game_history")
 export class GameHistory {
-
   @PrimaryGeneratedColumn()
   id: number;
 

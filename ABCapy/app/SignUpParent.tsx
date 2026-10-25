@@ -1,163 +1,195 @@
 import { Button } from "@/src/components/ui/Button";
+import { FadeInView } from "@/src/components/ui/FadeInView";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import api from "@/src/utils/api";
 import { router } from "expo-router";
-import { Lock, Mail } from "lucide-react-native";
 import React, { useState } from "react";
-import {Image} from "expo-image"
 import {
-  Alert,
   ImageBackground,
   Text,
   TextInput,
   View,
+  Alert,
   ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import api from "@/src/utils/api";
-
+import { Lock, Mail } from "lucide-react-native";
 import BackgroundImage from "../src/assets/images/bg-login.png";
-import { ReactComponent as SmallLogo } from "../src/assets/images/SmallLogo.svg";
-export default function Login() {
+import SmallLogo from "../src/assets/images/SmallLogo.svg";
+
+export default function SignUpParent() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handleLogin() {
-    if (!email.trim() || !password.trim()) {
-      Alert.alert("Atenção", "Preencha o e-mail e a senha!");
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert("Atenção", "Preencha o email e a senha.");
       return;
     }
 
     try {
       setLoading(true);
-      const response = await api.post("/login", { email, password });
-      const { token, user } = response.data;
+
+      const response = await api.post("/login", {
+        email,
+        password,
+      });
+
+      const token = response.data.token;
+
+      if (!token) {
+        throw new Error("Token não recebido.");
+      }
 
       await AsyncStorage.setItem("@ABCapy:token", token);
-      await AsyncStorage.setItem("@ABCapy:user", JSON.stringify(user));
 
-      // Verifica se o usuário já tem um perfil de criança criado
-      try {
-        const childRes = await api.get("/children/me");
-        await AsyncStorage.setItem(
-          "@ABCapy:child",
-          JSON.stringify(childRes.data),
-        );
-        router.replace("/(drawer)/homePage");
-      } catch (err: any) {
-        if (err.response && err.response.status === 404) {
-          // Não possui criança cadastrada: vai para a seleção de capivara
-          router.replace("/CharacterSelection");
-        } else {
-          router.replace("/(drawer)/homePage");
-        }
-      }
+      console.log("Login realizado!");
+      console.log("Token salvo!");
+
+      router.replace("/homePage");
     } catch (error: any) {
-      const msg =
-        error.response?.data?.message || "Erro ao conectar com o servidor.";
-      Alert.alert("Falha no Login", msg);
+      console.error(
+        "Erro no login:",
+        error.response?.data || error.message
+      );
+
+      Alert.alert(
+        "Erro",
+        error.response?.data?.message || "Email ou senha inválidos."
+      );
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ImageBackground style={{ flex: 1 }} source={BackgroundImage}>
         <View
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
         >
-          <Image 
-          source={require("@/src/assets/images/small-logo.png")}
-  style={{ width: 100, height: 100 }}
+          {/* CABEÇALHO */}
+          <FadeInView
+            style={{
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <SmallLogo width={100} height={100} />
 
-          
-          />
-          <View style={{ justifyContent: "center", alignItems: "center" }}>
-            
             <Text
               style={{
                 fontSize: 24,
                 fontWeight: "800",
                 textAlign: "center",
-                marginTop: 40,
+                marginTop: 50,
               }}
             >
               LOGIN
             </Text>
+
             <Text
-              style={{ textAlign: "center", fontSize: 12, fontWeight: "700" }}
+              style={{
+                textAlign: "center",
+                fontSize: 12,
+                fontWeight: "700",
+              }}
             >
               Entre para continuar sua jornada!
             </Text>
-          </View>
+          </FadeInView>
 
-          <View style={{ width: "85%", gap: 15, marginTop: 40 }}>
+          {/* FORMULÁRIO */}
+          <FadeInView
+            delay={200}
+            style={{
+              flexDirection: "column",
+              gap: 20,
+              marginTop: 50,
+              width: "85%",
+            }}
+          >
+            {/* EMAIL */}
             <View
               style={{
                 flexDirection: "row",
                 alignItems: "center",
-                backgroundColor: "white",
-                height: 48,
-                borderRadius: 15,
-                paddingHorizontal: 12,
-                gap: 10,
+                backgroundColor: "#fff",
+                borderRadius: 10,
+                paddingHorizontal: 15,
               }}
             >
               <Mail color="#666" size={20} />
+
               <TextInput
                 placeholder="Email"
-                autoCapitalize="none"
-                keyboardType="email-address"
                 value={email}
                 onChangeText={setEmail}
-                style={{ flex: 1 }}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                style={{
+                  flex: 1,
+                  padding: 12,
+                }}
               />
             </View>
 
+            {/* SENHA */}
             <View
               style={{
                 flexDirection: "row",
                 alignItems: "center",
-                backgroundColor: "white",
-                height: 48,
-                borderRadius: 15,
-                paddingHorizontal: 12,
-                gap: 10,
+                backgroundColor: "#fff",
+                borderRadius: 10,
+                paddingHorizontal: 15,
               }}
             >
               <Lock color="#666" size={20} />
+
               <TextInput
                 placeholder="Senha"
-                secureTextEntry
                 value={password}
                 onChangeText={setPassword}
-                style={{ flex: 1 }}
+                secureTextEntry
+                style={{
+                  flex: 1,
+                  padding: 12,
+                }}
               />
             </View>
 
-            {loading ? (
-              <ActivityIndicator
-                size="large"
-                color="#E59866"
-                style={{ marginTop: 20 }}
-              />
-            ) : (
-              <Button
-                title="Continuar"
-                onPress={handleLogin}
-                style={{ marginTop: 15, width: "100%" }}
-              />
-            )}
+            {/* BOTÃO */}
+            <Button
+              title={loading ? "Entrando..." : "Continuar"}
+              onPress={handleLogin}
+              style={{ marginTop: 20, width: "100%"}}
+            />
 
+            {loading && <ActivityIndicator />}
+
+            {/* IR PARA CADASTRO */}
             <Text
               onPress={() => router.push("/Register")}
-              style={{ textAlign: "center", marginTop: 10 }}
+              style={{
+                textAlign: "center",
+              }}
             >
               Não tem uma conta? Cadastre-se
             </Text>
-            <Text style={{ textAlign: "center" }}>Esqueci minha senha</Text>
-          </View>
+
+            <Text
+              style={{
+                textAlign: "center",
+              }}
+            >
+              Esqueci minha senha
+            </Text>
+          </FadeInView>
         </View>
       </ImageBackground>
     </SafeAreaView>

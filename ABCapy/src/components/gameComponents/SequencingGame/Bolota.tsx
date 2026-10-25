@@ -23,7 +23,9 @@ const Bolota = ({
   onPress,
 }: Props) => {
   const escala = useRef(new Animated.Value(1)).current;
+
   const brilho = useRef(new Animated.Value(0)).current;
+
   const opacidade = useRef(new Animated.Value(1)).current;
 
   const player = useAudioPlayer(require("../../../sounds/pop.mp3"));
@@ -35,12 +37,14 @@ const Bolota = ({
       fim: "#9ACD55",
       borda: "#91BE52",
     },
+
     amarela: {
       inicio: "#FFF5A8",
       meio: "#FFE56B",
       fim: "#EFC52F",
       borda: "#D8B52B",
     },
+
     vermelha: {
       inicio: "#FFB5B5",
       meio: "#FF7373",
@@ -50,6 +54,7 @@ const Bolota = ({
   };
 
   const corAtual = cores[cor];
+
   const gradienteId = `gradiente-${cor}-${top}-${left}`;
 
   useEffect(() => {
@@ -68,6 +73,7 @@ const Bolota = ({
           duration: 120,
           useNativeDriver: true,
         }),
+
         Animated.timing(opacidade, {
           toValue: 0,
           duration: 180,
@@ -80,29 +86,44 @@ const Bolota = ({
     }
   }, [explodiu]);
 
+  const escalaAcesa = brilho.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 1.12],
+  });
+
   const handlePress = () => {
     player.seekTo(0);
     player.play();
+
     onPress?.();
   };
 
   return (
     <Pressable
       onPress={handlePress}
+      // CORREÇÃO 2: Desativa a captura de toques quando a bolota estiver explodida
       pointerEvents={explodiu ? "none" : "auto"}
-      style={[styles.container, { top, left }]}
+      style={[
+        styles.container,
+        {
+          top,
+          left,
+        },
+      ]}
     >
       <Animated.View
         style={{
           opacity: opacidade,
-          transform: [{ scale: escala }],
+          transform: [{ scale: escala }, { scale: escalaAcesa }],
         }}
       >
         <Svg width={105} height={105}>
           <Defs>
             <RadialGradient id={gradienteId} cx="35%" cy="25%" r="75%">
               <Stop offset="0%" stopColor={corAtual.inicio} />
+
               <Stop offset="45%" stopColor={corAtual.meio} />
+
               <Stop offset="100%" stopColor={corAtual.fim} />
             </RadialGradient>
           </Defs>
@@ -127,7 +148,9 @@ const Bolota = ({
           />
 
           <Circle cx="34" cy="28" r="8" fill="white" opacity={0.85} />
+
           <Circle cx="27" cy="34" r="3" fill="white" opacity={0.7} />
+
           <Circle cx="76" cy="65" r="4" fill="white" opacity={0.5} />
         </Svg>
       </Animated.View>

@@ -14,32 +14,18 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
-  Palette,
-  Type,
   Volume2,
   ChevronLeft,
-  Check,
   Trash2,
   Lock,
   Eye,
   EyeOff,
+  LogOut,
 } from "lucide-react-native";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "@/src/utils/api";
-
-const colors = [
-  { color: "#8ECBFC", name: "azul" },
-  { color: "#FF8E89", name: "Rosa" },
-  { color: "#9FE178", name: "verde" },
-  { color: "#FFE14D", name: "amarelo" },
-];
-
-const fontSizes = [
-  { label: "Normal", value: 16 },
-  { label: "Grande", value: 20 },
-  { label: "Muito grande", value: 24 },
-];
+import { useTalkBack } from "@/src/context/TalkBackContext";
 
 interface DeleteAccountModalProps {
   visible: boolean;
@@ -55,17 +41,13 @@ function DeleteAccountModal({
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  React.useEffect(() => {
-    if (!visible) {
-      setPassword("");
-      setShowPassword(false);
-    }
-  }, [visible]);
+  const { speak } = useTalkBack();
 
   async function handleConfirm() {
     if (!password.trim()) {
-      Alert.alert("Atenção", "Por favor, digite sua senha para confirmar a exclusão.");
+      const msg = "Por favor, digite sua senha para confirmar a exclusão.";
+      speak(msg);
+      Alert.alert("Atenção", msg);
       return;
     }
 
@@ -74,10 +56,9 @@ function DeleteAccountModal({
       await onConfirmDelete(password);
       onClose();
     } catch (err: any) {
-      Alert.alert(
-        "Erro",
-        err.response?.data?.message || "Senha incorreta ou erro ao deletar a conta."
-      );
+      const msg = err.response?.data?.message || "Senha incorreta ou erro ao deletar a conta.";
+      speak(msg);
+      Alert.alert("Erro", msg);
     } finally {
       setLoading(false);
     }
@@ -94,17 +75,11 @@ function DeleteAccountModal({
         <View style={modalStyle.overlay}>
           <TouchableWithoutFeedback>
             <View style={modalStyle.sheetContainer}>
-              
-
-              
-
-           
               <Text style={modalStyle.title}>excluir conta</Text>
               <Text style={modalStyle.subtitle}>
                 esta ação é permanente! digite sua senha para confirmar:
               </Text>
 
-              {/* Input com ícone de cadeado e alternância de visualização */}
               <View style={modalStyle.inputShadowWrapper}>
                 <Lock size={18} color="#94A3B8" style={{ marginLeft: 12 }} />
                 <TextInput
@@ -115,9 +90,13 @@ function DeleteAccountModal({
                   placeholderTextColor="#A0AEC0"
                   secureTextEntry={!showPassword}
                   autoCapitalize="none"
+                  accessibilityLabel="Campo de senha para confirmação"
                 />
                 <TouchableOpacity
-                  onPress={() => setShowPassword(!showPassword)}
+                  onPress={() => {
+                    setShowPassword(!showPassword);
+                    speak(showPassword ? "Senha oculta" : "Senha visível");
+                  }}
                   style={{ padding: 10 }}
                   hitSlop={10}
                 >
@@ -129,11 +108,13 @@ function DeleteAccountModal({
                 </TouchableOpacity>
               </View>
 
-              {/* Botões de Ação */}
               <View style={modalStyle.actionsRow}>
                 <TouchableOpacity
                   style={[modalStyle.actionBtn, modalStyle.cancelBtn]}
-                  onPress={onClose}
+                  onPress={() => {
+                    speak("Exclusão cancelada");
+                    onClose();
+                  }}
                   disabled={loading}
                 >
                   <Text style={modalStyle.cancelBtnText}>cancelar</Text>
@@ -160,27 +141,40 @@ function DeleteAccountModal({
 }
 
 export default function ConfigPage() {
-  const [selectedColor, setSelectedColor] = useState(0);
-  const [selectedFont, setSelectedFont] = useState(0);
-  const [isVoiceEnabled, setIsVoiceEnabled] = useState(false);
+  const { enabled, toggleTalkBack, speak } = useTalkBack();
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
 
-  // Requisição de exclusão de conta
+  // Sair da conta
+  const handleLogout = async () => {
+    try {
+      speak("Saindo da conta");
+    } catch (e) {
+      // Ignora erro de fala para garantir o logout
+    }
+
+    await AsyncStorage.multiRemove([
+      "@ABCapy:token",
+      "@ABCapy:user",
+      "@ABCapy:child",
+    ]);
+    router.replace("/SignUpParent");
+  };
+
+  // Excluir conta
   const handleDeleteAccount = async (password: string) => {
-    // Rota comum para exclusão com envio de senha no corpo
     await api.delete("/users/me", {
       data: { password },
     });
 
-    // Limpa tokens e dados em cache
     await AsyncStorage.multiRemove([
       "@ABCapy:token",
       "@ABCapy:user",
       "@ABCapy:child",
     ]);
 
+    speak("Sua conta foi excluída com sucesso");
     Alert.alert("Conta Excluída", "Sua conta foi excluída com sucesso.");
-    router.replace("/"); // Redireciona para a tela inicial / login
+    router.replace("/");
   };
 
   return (
@@ -190,130 +184,70 @@ export default function ConfigPage() {
         contentContainerStyle={style.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        {/* Cabeçalho */}
         <View style={style.headerContainer}>
           <TouchableOpacity
             style={style.backButton}
-            onPress={() => router.push("/(drawer)/homePage")}
+            onPress={() => {
+              speak("Voltar");
+              router.replace("/homePage");
+            }}
+            accessibilityLabel="Botão voltar"
           >
             <ChevronLeft size={28} color="#000" />
           </TouchableOpacity>
           <View style={style.headerTitleContainer}>
             <Text style={style.title}>Configurações</Text>
-            <Text style={style.subtitleHeader}>cores de fundo</Text>
           </View>
         </View>
 
-        {/* Card: Tema de Cores */}
-        <View style={style.cardContainer}>
-          <View style={style.cardHeader}>
-            <View style={style.iconBadge}>
-              <Palette size={18} color="#2B7BB9" />
-            </View>
-            <View>
-              <Text style={style.cardTitle}>Tema de cores</Text>
-              <Text style={style.cardSubtitle}>customize sua experiência</Text>
-            </View>
-          </View>
-
-          <View style={style.gridColors}>
-            {colors.map((item, index) => {
-              const isSelected = selectedColor === index;
-              return (
-                <TouchableOpacity
-                  key={index}
-                  style={style.cardColor}
-                  onPress={() => setSelectedColor(index)}
-                  activeOpacity={0.8}
-                >
-                  <View style={[style.colorCircle, { backgroundColor: item.color }]} />
-                  <Text style={style.colorText}>{item.name}</Text>
-
-                  {isSelected && (
-                    <View style={style.checkBadge}>
-                      <Check size={12} color="#000" />
-                    </View>
-                  )}
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </View>
-
-        {/* Card: Tamanho da Fonte */}
-        <View style={style.cardContainer}>
-          <View style={style.cardHeader}>
-            <View style={style.iconBadge}>
-              <Type size={18} color="#2B7BB9" />
-            </View>
-            <View>
-              <Text style={style.cardTitle}>Tamanho da Fonte</Text>
-              <Text style={style.cardSubtitle}>ajuste o tamanho do texto</Text>
-            </View>
-          </View>
-
-          <View style={{ gap: 10, width: "100%", marginTop: 10 }}>
-            {fontSizes.map((item, index) => {
-              const isSelected = selectedFont === index;
-              return (
-                <TouchableOpacity
-                  key={index}
-                  style={[
-                    style.fontOptionButton,
-                    isSelected && style.fontOptionSelected,
-                  ]}
-                  onPress={() => setSelectedFont(index)}
-                >
-                  <Text style={style.fontOptionText}>{item.label}</Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </View>
-
-        {/* Card: Narração de Voz */}
+        {/* Card: TalkBack / Leitor de Tela */}
         <View style={style.cardContainer}>
           <View style={style.cardHeader}>
             <View style={style.iconBadge}>
               <Volume2 size={18} color="#2B7BB9" />
             </View>
             <View>
-              <Text style={style.cardTitle}>Narração de voz</Text>
-              <Text style={style.cardSubtitle}>Ouvir o que está na tela</Text>
+              <Text style={style.cardTitle}>TalkBack (Leitor de Tela)</Text>
+              <Text style={style.cardSubtitle}>Ouvir elementos ao tocar na tela</Text>
             </View>
           </View>
 
           <View style={style.switchRow}>
             <Text style={style.switchText}>
-              {isVoiceEnabled ? "Ativado" : "Desativado"}
+              {enabled ? "Ativado" : "Desativado"}
             </Text>
             <Switch
-              value={isVoiceEnabled}
-              onValueChange={setIsVoiceEnabled}
+              value={enabled}
+              onValueChange={(val) => {
+                toggleTalkBack(val);
+                if (val) {
+                  speak("TalkBack ativado");
+                }
+              }}
               trackColor={{ false: "#B2DBFC", true: "#0284C7" }}
               thumbColor="#FFFFFF"
+              accessibilityLabel="Ativar ou desativar TalkBack"
             />
           </View>
         </View>
 
-        {/* Card: Prévia */}
-        <View style={style.cardContainer}>
-          <Text style={[style.cardTitle, { textAlign: "center", marginBottom: 12 }]}>
-            prévia do texto
-          </Text>
-          <Text style={style.previewText}>
-            Olha! esse texto é um exemplo para ver as mudanças.
-          </Text>
-        </View>
-
-        {/* Botão Sair da Conta */}
-        <TouchableOpacity style={style.logoutButton}>
+        <TouchableOpacity
+          style={style.logoutButton}
+          onPress={handleLogout}
+          activeOpacity={0.8}
+        >
+          <LogOut size={18} color="#0284C7" style={{ marginRight: 8 }} />
           <Text style={style.logoutText}>sair da conta</Text>
         </TouchableOpacity>
 
         {/* Botão Deletar Conta */}
         <TouchableOpacity
           style={style.deleteAccountButton}
-          onPress={() => setIsDeleteModalVisible(true)}
+          onPress={() => {
+            speak("Excluir conta");
+            setIsDeleteModalVisible(true);
+          }}
           activeOpacity={0.8}
         >
           <Trash2 size={18} color="#EF4444" style={{ marginRight: 8 }} />
@@ -321,7 +255,7 @@ export default function ConfigPage() {
         </TouchableOpacity>
       </ScrollView>
 
-      {/* Modal Deslizante de Confirmação */}
+      {/* Modal de Confirmação */}
       <DeleteAccountModal
         visible={isDeleteModalVisible}
         onClose={() => setIsDeleteModalVisible(false)}
@@ -345,7 +279,6 @@ const style = StyleSheet.create({
     alignItems: "center",
     gap: 16,
   },
-
   headerContainer: {
     width: "100%",
     flexDirection: "row",
@@ -372,12 +305,6 @@ const style = StyleSheet.create({
     fontFamily: "Poppins_700Bold",
     color: "#000000",
   },
-  subtitleHeader: {
-    fontSize: 14,
-    color: "#8AA2B8",
-    fontFamily: "Poppins_600SemiBold",
-  },
-
   cardContainer: {
     width: "100%",
     maxWidth: 340,
@@ -414,60 +341,6 @@ const style = StyleSheet.create({
     color: "#6B859E",
     fontFamily: "Poppins_400Regular",
   },
-
-  gridColors: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    gap: 12,
-  },
-  cardColor: {
-    backgroundColor: "#FFFFFF",
-    width: "47%",
-    height: 90,
-    borderRadius: 20,
-    justifyContent: "center",
-    alignItems: "center",
-    position: "relative",
-  },
-  colorCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    marginBottom: 6,
-  },
-  colorText: {
-    fontSize: 13,
-    color: "#333",
-    fontWeight: "500",
-  },
-  checkBadge: {
-    position: "absolute",
-    right: 8,
-    bottom: 8,
-    backgroundColor: "#A3E635",
-    borderRadius: 10,
-    padding: 3,
-  },
-
-  fontOptionButton: {
-    backgroundColor: "#BCDFFF",
-    height: 48,
-    borderRadius: 16,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  fontOptionSelected: {
-    backgroundColor: "#A3D3FF",
-    borderWidth: 1,
-    borderColor: "#0284C7",
-  },
-  fontOptionText: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#1E293B",
-  },
-
   switchRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -482,22 +355,13 @@ const style = StyleSheet.create({
     fontWeight: "500",
     color: "#1E293B",
   },
-
-  previewText: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#0284C7",
-    textAlign: "center",
-    lineHeight: 22,
-    paddingHorizontal: 10,
-  },
-
   logoutButton: {
     width: "100%",
     maxWidth: 340,
     height: 52,
     backgroundColor: "#FFFFFF",
     borderRadius: 16,
+    flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
     marginTop: 10,
@@ -512,7 +376,6 @@ const style = StyleSheet.create({
     fontWeight: "bold",
     color: "#0284C7",
   },
-
   deleteAccountButton: {
     width: "100%",
     maxWidth: 340,
@@ -548,24 +411,11 @@ const modalStyle = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 36,
     borderTopRightRadius: 36,
-    
-  
     paddingHorizontal: 24,
     paddingTop: 26,
     paddingBottom: 40,
     alignItems: "center",
     position: "relative",
-  },
-  iconBadge: {
-    position: "absolute",
-    left: 20,
-    top: 20,
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "#FEE2E2",
-    justifyContent: "center",
-    alignItems: "center",
   },
   title: {
     fontSize: 20,
