@@ -1,0 +1,130 @@
+import { userRepository } from "../repositories/UserRepository";
+import bcrypt from "bcrypt";
+import { ommitPassword } from "../utils/ommitPassword";
+import { User } from "../models/User";
+import { UnauthorizedError } from "../errors/AppError";
+import jwt from "jsonwebtoken";
+export class NotFoundError extends Error { }
+export class BadRequestError extends Error { }
+const JWT_SECRET = process.env.JWT_SECRET || "chave_secreta_abcapy";
+export const UserService = {
+ async create(data: {
+  nameUser: string;
+  email: string;
+  password: string;
+}) {
+  if (!data.nameUser || !data.email || !data.password) {
+    throw new BadRequestError("Os campos são obrigatórios!");
+  }
+
+  const emailExists = await userRepository.findByEmail(data.email);
+
+  if (emailExists) {
+    throw new BadRequestError("E-mail já cadastrado!");
+  }
+
+  const hash = await bcrypt.hash(data.password, 10);
+
+  const user = await userRepository.create({
+    nameUser: data.nameUser,
+    email: data.email,
+    password: hash,
+  });
+
+  const token = jwt.sign(
+    {
+      id: user.id,
+      email: user.email,
+    },
+    JWT_SECRET,
+    {
+      expiresIn: "1d",
+    }
+  );
+
+  return {
+    user: ommitPassword(user),
+    token,
+  };
+},
+  async delete(id: number, passwordConfirm?: string) {
+    if (!passwordConfirm) {
+      throw new BadRequestError("A senha é obrigatória para confirmar a exclusão!");
+    }
+
+    const user = await userRepository.findByIdWithPassword(id);
+    if (!user) {
+      throw new NotFoundError("Usuário não encontrado!");
+    }
+
+    const isValidPassword = await bcrypt.compare(passwordConfirm, user.password);
+    if (!isValidPassword) {
+      throw new UnauthorizedError("Senha incorreta!");
+    }
+
+    // Com o onDelete: "CASCADE" na entidade, o TypeORM remove o vínculo automaticamente
+    const result = await userRepository.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundError("Usuário não existe!");
+    }
+  },
+  async listAll() {
+    const users = await userRepository.findAll();
+    return users.map(user => ommitPassword(user));
+  },
+
+  async getById(id: number) {
+    const user = await userRepository.findById(id);
+    if (!user) {
+      throw new NotFoundError("Usuário não encontrado!");
+    }
+    return ommitPassword(user);
+  },
+
+  async login(data: { email: string; password: string }) {
+    const user = await userRepository.findByEmailWithPassword(data.email);
+
+    if (!user) {
+      throw new UnauthorizedError("E-mail ou senha inválidos!");
+    }
+
+    const isValidPassword = await bcrypt.compare(
+      data.password,
+      user.password
+    );
+
+    if (!isValidPassword) {
+      throw new UnauthorizedError("E-mail ou senha inválidos!");
+    }
+
+    const token = jwt.sign(
+      { id: user.id, email: user.email },
+      JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    return {
+      user: ommitPassword(user),
+      token,
+    };
+  },
+
+  async update(id: number, data: { nameUser?: string; email?: string; password?: string }) {
+    const user = await userRepository.findById(id);
+    if (!user) {
+      throw new NotFoundError("Usuário não encontrado!");
+    }
+
+    const updateData: Partial<User> = {};
+    if (data.nameUser) updateData.nameUser = data.nameUser;
+    if (data.email) updateData.email = data.email;
+    if (data.password) updateData.password = await bcrypt.hash(data.password, 10);
+
+    const updatedUser = await userRepository.update(id, updateData);
+    if (!updatedUser) {
+      throw new BadRequestError("Falha ao atualizar o usuário!");
+    }
+
+    return ommitPassword(updatedUser);
+  }
+};
